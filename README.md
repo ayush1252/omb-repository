@@ -9,3 +9,5 @@ This repository houses user-friendly, cloud-ready benchmarking suites for the fo
 * [NATS Streaming](https://nats.io/)
 
 > More details could be found at the [official documentation](http://openmessaging.cloud/docs/benchmarks/).
+
+Azure Event Hubs support
