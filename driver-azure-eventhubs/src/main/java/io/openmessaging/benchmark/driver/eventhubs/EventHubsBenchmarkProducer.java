@@ -35,12 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class EventHubsBenchmarkProducer implements BenchmarkProducer {
 
-    //    private final EventHubProducerAsyncClient asyncProducer;
     private final EventHubClient eventHubClient;
-
-//    public EventHubsBenchmarkProducer(EventHubProducerAsyncClient asyncProducer) {
-//        this.asyncProducer = asyncProducer;
-//    }
 
     public EventHubsBenchmarkProducer(EventHubClient eventHubClient) {
         this.eventHubClient = eventHubClient;
@@ -48,67 +43,9 @@ public class EventHubsBenchmarkProducer implements BenchmarkProducer {
 
     @Override
     public CompletableFuture<Void> sendAsync(Optional<String> key, byte[] payload) {
-//        CompletableFuture<Void> future = new CompletableFuture<>();
-//        EventDataBatch eventDataBatch = producer.createBatch();
-//
-//        if (eventDataBatch.tryAdd(new EventData(payload))) {
-//            producer.send(eventDataBatch);
-//        } else {
-//            Exception e = new IllegalArgumentException("Event is too large for an empty batch. Max size: "
-//                    + eventDataBatch.getMaxSizeInBytes());
-//            //
-//            future.completeExceptionally(e);
-//        }
-//
-//        future.complete(null);
-//        return future;
-
-
-//        CompletableFuture<Void> future = new CompletableFuture<>();
         com.microsoft.azure.eventhubs.EventData event = EventData.create(payload);
 
         return eventHubClient.send(event).thenApply( unused -> null);
-
-
-//        CompletableFuture<Void> future = new CompletableFuture<>();
-//        Flux<EventData> events = Flux.just(
-//                new EventData(payload));
-//
-//        final CreateBatchOptions options = new CreateBatchOptions();
-//        final AtomicReference<EventDataBatch> currentBatch = new AtomicReference<>(
-//                asyncProducer.createBatch(options).block());
-//
-//        events.flatMap(event -> {
-//            final EventDataBatch batch = currentBatch.get();
-//            if (batch.tryAdd(event)) {
-//                return Mono.empty();
-//            }
-//            return Mono.when(
-//                    asyncProducer.send(batch),
-//                    asyncProducer.createBatch(options).map(newBatch -> {
-//                        currentBatch.set(newBatch);
-//
-//                        // Add that event that we couldn't before.
-//                        if (!newBatch.tryAdd(event)) {
-//                            throw Exceptions.propagate(new IllegalArgumentException(String.format(
-//                                    "Event is too large for an empty batch. Max size: %s. Event: %s",
-//                                    newBatch.getMaxSizeInBytes(), event.getBodyAsString())));
-//                        }
-//
-//                        return newBatch;
-//                    }));
-//        }).then()
-//                .doFinally(signal -> {
-//                    final EventDataBatch batch = currentBatch.getAndSet(null);
-//                    if (batch != null) {
-//                        asyncProducer.send(batch).block();
-//                    }
-//                })
-//                .subscribe(unused -> System.out.println("Complete ...................."),
-//                        future::completeExceptionally,
-//                        () -> future.complete(null));
-//
-//        return future;
     }
 
     @Override

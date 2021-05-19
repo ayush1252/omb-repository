@@ -162,13 +162,6 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
 
     @Override
     public CompletableFuture<BenchmarkProducer> createProducer(String topic) {
-//        EventHubProducerClient eventhubProducer = new EventHubClientBuilder()
-//                .connectionString(connectionString, topic)
-//                .buildProducerClient();
-
-//        EventHubProducerAsyncClient asyncProducer = new EventHubClientBuilder()
-//                .connectionString(connectionString, topic).buildAsyncProducerClient();
-
         final ConnectionStringBuilder connStr = new ConnectionStringBuilder()
                 .setNamespaceName(namespace)
                 .setEventHubName(topic)
@@ -188,31 +181,6 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
             future.completeExceptionally(e);
             return future;
         }
-
-
-        //        try {
-//            producers.add(benchmarkProducer);
-//            return CompletableFuture.completedFuture(benchmarkProducer);
-//        } catch (Throwable t) {
-//            asyncProducer.close();
-//            CompletableFuture<BenchmarkProducer> future = new CompletableFuture<>();
-//            future.completeExceptionally(t);
-//            return future;
-//        }
-
-//
-//        BenchmarkProducer benchmarkProducer = new EventHubsBenchmarkProducer(asyncProducer);
-//        try {
-//            producers.add(benchmarkProducer);
-//            return CompletableFuture.completedFuture(benchmarkProducer);
-//        } catch (Throwable t) {
-//            asyncProducer.close();
-//            CompletableFuture<BenchmarkProducer> future = new CompletableFuture<>();
-//            future.completeExceptionally(t);
-//            return future;
-//        }
-
-
     }
 
     @Override
