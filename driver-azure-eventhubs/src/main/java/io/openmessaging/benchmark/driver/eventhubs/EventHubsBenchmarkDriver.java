@@ -31,6 +31,7 @@ import com.azure.storage.blob.BlobContainerClientBuilder;
 import com.microsoft.azure.eventhubs.ConnectionStringBuilder;
 import com.microsoft.azure.eventhubs.EventData;
 import com.microsoft.azure.eventhubs.EventHubClient;
+import com.azure.resourcemanager.eventhubs.models.EventHub;
 
 import com.microsoft.azure.eventhubs.EventHubException;
 import io.openmessaging.benchmark.driver.BenchmarkConsumer;
@@ -64,7 +65,7 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
     private String namespaceResourceId;
     private String sasKeyName;
     private String sasKey;
-
+    private String resourceGroup;
 
 
     private String topicName;
@@ -105,7 +106,7 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         clientSecret = commonProperties.getProperty("client.secret");
         tenantId = commonProperties.getProperty("tenant.id");
         subscriptionId = commonProperties.getProperty("subscription.id");
-
+        resourceGroup = commonProperties.getProperty("resource.group");
         namespace = commonProperties.getProperty("namespace");
         namespaceResourceId = commonProperties.getProperty("namespace.id");
 
@@ -114,6 +115,7 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
 
         storageConnectionString = consumerProperties.getProperty("storage.connection.string");
         storageContainerName = consumerProperties.getProperty("storage.container.name");
+
 
         topicName = topicProperties.getProperty("topic.name.prefix");
 
@@ -132,8 +134,14 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
                 .containerName(storageContainerName)
                 .buildAsyncClient();
 
-        System.out.println("Updated Patch 2==================================================");
-        // ToDo : Cleanup after each test iteration
+        System.out.println("Updated Patch : Reset ==================================================");
+
+        if (config.reset) {
+            for (EventHub eh : eventHubsManager.namespaces().eventHubs().listByNamespace(resourceGroup, namespace)) {
+                eventHubsManager.namespaces().eventHubs().deleteByName(resourceGroup, namespace, eh.name());
+            }
+        }
+
 
     }
 
@@ -175,7 +183,7 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
             producers.add(benchmarkProducer);
 
             return CompletableFuture.completedFuture(benchmarkProducer);
-        } catch (Exception e){
+        } catch (Exception e) {
             ehClient.close();
             CompletableFuture<BenchmarkProducer> future = new CompletableFuture<>();
             future.completeExceptionally(e);
@@ -193,14 +201,15 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
                 .processEvent(eventContext -> {
                     // TODO Verify time stamp
                     consumerCallback.messageReceived(eventContext.getEventData().getBody(),
-                            TimeUnit.MILLISECONDS.toNanos(
-                                    eventContext.getEventData().getEnqueuedTime().toEpochMilli()));
+                            TimeUnit.MILLISECONDS.toNanos(Long.valueOf(eventContext.getEventData().getProperties().get("producer_timestamp").toString())));
                 })
                 .processError(errorContext -> {
                     // ToDo
                 })
                 .checkpointStore(new BlobCheckpointStore(blobContainerAsyncClient));
         EventProcessorClient eventProcessorClient = eventProcessorClientBuilder.buildEventProcessorClient();
+
+
 
         try {
             BenchmarkConsumer benchmarkConsumer = new EventHubsBenchmarkConsumer(eventProcessorClient, consumerCallback);

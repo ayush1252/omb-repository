@@ -18,12 +18,14 @@
  */
 package io.openmessaging.benchmark.driver.eventhubs;
 
-import com.azure.messaging.eventhubs.EventDataBatch;
-import com.azure.messaging.eventhubs.EventHubProducerAsyncClient;
-import com.azure.messaging.eventhubs.EventHubProducerClient;
-import com.azure.messaging.eventhubs.models.CreateBatchOptions;
+//import com.azure.messaging.eventhubs.EventDataBatch;
+//import com.azure.messaging.eventhubs.EventHubProducerAsyncClient;
+//import com.azure.messaging.eventhubs.EventHubProducerClient;
+//import com.azure.messaging.eventhubs.models.CreateBatchOptions;
 import com.microsoft.azure.eventhubs.EventData;
+import com.microsoft.azure.eventhubs.EventDataBatch;
 import com.microsoft.azure.eventhubs.EventHubClient;
+import com.microsoft.azure.eventhubs.EventHubException;
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
@@ -44,7 +46,7 @@ public class EventHubsBenchmarkProducer implements BenchmarkProducer {
     @Override
     public CompletableFuture<Void> sendAsync(Optional<String> key, byte[] payload) {
         com.microsoft.azure.eventhubs.EventData event = EventData.create(payload);
-
+        event.getProperties().putIfAbsent("producer_timestamp", System.currentTimeMillis());
         return eventHubClient.send(event).thenApply( unused -> null);
     }
 
