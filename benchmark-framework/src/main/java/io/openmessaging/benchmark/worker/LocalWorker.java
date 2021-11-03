@@ -108,6 +108,8 @@ public class LocalWorker implements Worker, ConsumerCallback {
 
     private boolean producersArePaused = false;
 
+    private int batchSize = 1;
+
     public LocalWorker() {
         this(NullStatsLogger.INSTANCE);
     }
@@ -131,9 +133,11 @@ public class LocalWorker implements Worker, ConsumerCallback {
         Preconditions.checkArgument(benchmarkDriver == null);
         testCompleted = false;
 
-        DriverConfiguration driverConfiguration = mapper.readValue(driverConfigFile, DriverConfiguration.class);
 
+        DriverConfiguration driverConfiguration = mapper.readValue(driverConfigFile, DriverConfiguration.class);
         log.info("Driver: {}", writer.writeValueAsString(driverConfiguration));
+
+        batchSize = Math.max(driverConfiguration.omgProducerBatchSize, 1);
 
         try {
             benchmarkDriver = (BenchmarkDriver) Class.forName(driverConfiguration.driverClass).newInstance();
@@ -241,16 +245,19 @@ public class LocalWorker implements Worker, ConsumerCallback {
                         rateLimiter.acquire();
                         final long sendTime = System.nanoTime();
                         producer.sendAsync(Optional.ofNullable(keyDistributor.next()), payloadData).thenRun(() -> {
-                            messagesSent.increment();
-                            totalMessagesSent.increment();
-                            messagesSentCounter.inc();
-                            bytesSent.add(payloadData.length);
-                            bytesSentCounter.add(payloadData.length);
+                            for (int i = 0; i < batchSize; i++) {
+                                messagesSent.increment();
+                                totalMessagesSent.increment();
+                                messagesSentCounter.inc();
+                                bytesSent.add(payloadData.length);
+                                bytesSentCounter.add(payloadData.length);
 
-                            long microTime = TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - sendTime);
-                            publishLatencyRecorder.recordValue(microTime);
-                            cumulativePublishLatencyRecorder.recordValue(microTime);
-                            publishLatencyStats.registerSuccessfulEvent(microTime, TimeUnit.MICROSECONDS);
+                                long microTime = TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - sendTime);
+                                publishLatencyRecorder.recordValue(microTime);
+                                cumulativePublishLatencyRecorder.recordValue(microTime);
+                                publishLatencyStats.registerSuccessfulEvent(microTime, TimeUnit.MICROSECONDS);
+                            }
+
                         }).exceptionally(ex -> {
                             log.warn("Write error on message", ex);
                             return null;

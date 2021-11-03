@@ -23,4 +23,6 @@ public class DriverConfiguration {
 
     public String driverClass;
 
+    public int omgProducerBatchSize = 1;
+
 }

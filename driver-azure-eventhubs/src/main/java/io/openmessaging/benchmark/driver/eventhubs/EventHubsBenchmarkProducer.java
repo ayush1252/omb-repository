@@ -22,6 +22,7 @@ package io.openmessaging.benchmark.driver.eventhubs;
 //import com.azure.messaging.eventhubs.EventHubProducerAsyncClient;
 //import com.azure.messaging.eventhubs.EventHubProducerClient;
 //import com.azure.messaging.eventhubs.models.CreateBatchOptions;
+// import com.azure.messaging.eventhubs.EventDataBatch;
 import com.microsoft.azure.eventhubs.EventData;
 import com.microsoft.azure.eventhubs.EventDataBatch;
 import com.microsoft.azure.eventhubs.EventHubClient;
@@ -38,16 +39,37 @@ import java.util.concurrent.atomic.AtomicReference;
 public class EventHubsBenchmarkProducer implements BenchmarkProducer {
 
     private final EventHubClient eventHubClient;
+    private int producerBatchSize;
 
-    public EventHubsBenchmarkProducer(EventHubClient eventHubClient) {
+    public EventHubsBenchmarkProducer(EventHubClient eventHubClient, int producerBatchSize) {
         this.eventHubClient = eventHubClient;
+        this.producerBatchSize = producerBatchSize;
     }
 
     @Override
     public CompletableFuture<Void> sendAsync(Optional<String> key, byte[] payload) {
-        com.microsoft.azure.eventhubs.EventData event = EventData.create(payload);
-        event.getProperties().putIfAbsent("producer_timestamp", System.currentTimeMillis());
-        return eventHubClient.send(event).thenApply( unused -> null);
+
+        EventDataBatch eventDataBatch = null;
+        try {
+            if (producerBatchSize > 1) {
+                eventDataBatch = eventHubClient.createBatch();
+                for (int i = 0; i < producerBatchSize; i++) {
+                    com.microsoft.azure.eventhubs.EventData event = EventData.create(payload);
+                    event.getProperties().putIfAbsent("producer_timestamp", System.currentTimeMillis());
+                    eventDataBatch.tryAdd(event);
+                }
+            } else {
+                // When batching is disabled we can simply send one event at a time without using EventDataBatch.
+                com.microsoft.azure.eventhubs.EventData event = EventData.create(payload);
+                event.getProperties().putIfAbsent("producer_timestamp", System.currentTimeMillis());
+                return eventHubClient.send(event).thenApply( unused -> null);
+
+            }
+        } catch (Exception e) {
+            //ToDo Logging
+            e.printStackTrace();
+        }
+        return eventHubClient.send(eventDataBatch).thenApply( unused -> null);
     }
 
     @Override

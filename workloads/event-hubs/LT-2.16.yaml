@@ -17,34 +17,16 @@
 # under the License.
 #
 
-name: EventHubs
-driverClass: io.openmessaging.benchmark.driver.eventhubs.EventHubsBenchmarkDriver
+name: LT-2.16
 
-replicationFactor: 3
-reset: true
-
-topicConfig: |
-  topic.name.prefix=test-topic
-  topic.name.shared=shared-topic
-
-commonConfig: |
-  connection.string=xxx
-  client.id=xxx
-  client.secret=xxx
-  tenant.id=xxx
-  subscription.id=xxx
-  sas.key.name=xxx
-  sas.key=xxx
-  namespace=xxxx
-  namespace.id=<namespace resource id>
-
-
-
-producerConfig: |
-  unused=0
-
-
-consumerConfig: |
-  storage.connection.string=DefaultEndpointsProtocol...
-  storage.container.name=xxx
-
+topics: 1
+partitionsPerTopic: 16
+keyDistributor: "NO_KEY"
+messageSize: 1024
+payloadFile: "payload/payload-1Kb.data"
+subscriptionsPerTopic: 1
+consumerPerSubscription: 1
+producersPerTopic: 1
+producerRate: 2000
+consumerBacklogSizeGB: 0
+testDurationMinutes: 1

@@ -92,61 +92,20 @@
 			<version>1.48</version>
 		</dependency>
 
+		 <dependency>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>driver-azure-eventhubs</artifactId>
+                        <version>${project.version}</version>
+                </dependency>
+
+		 <dependency>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>driver-kafka</artifactId>
+                        <version>${project.version}</version>
+                </dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>driver-pulsar</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>driver-kafka</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>driver-azure-eventhubs</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>driver-rocketmq</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>driver-rabbitmq</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>driver-artemis</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>driver-bookkeeper</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>driver-nats</artifactId>
-	    	<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>driver-nats-streaming</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>driver-nsq</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
