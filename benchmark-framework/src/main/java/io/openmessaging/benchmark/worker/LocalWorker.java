@@ -23,16 +23,12 @@ import static java.util.stream.Collectors.toList;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.LongAdder;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -94,8 +90,8 @@ public class LocalWorker implements Worker, ConsumerCallback {
     private final LongAdder totalMessagesSent = new LongAdder();
     private final LongAdder totalMessagesReceived = new LongAdder();
 
-    private final Recorder publishLatencyRecorder = new Recorder(TimeUnit.SECONDS.toMicros(60), 5);
-    private final Recorder cumulativePublishLatencyRecorder = new Recorder(TimeUnit.SECONDS.toMicros(60), 5);
+    private final Recorder publishLatencyRecorder = new Recorder(TimeUnit.MINUTES.toMicros(5), 5);
+    private final Recorder cumulativePublishLatencyRecorder = new Recorder(TimeUnit.MINUTES.toMicros(5), 5);
     private final OpStatsLogger publishLatencyStats;
 
     private final Recorder endToEndLatencyRecorder = new Recorder(TimeUnit.HOURS.toMicros(12), 5);
@@ -107,8 +103,6 @@ public class LocalWorker implements Worker, ConsumerCallback {
     private boolean consumersArePaused = false;
 
     private boolean producersArePaused = false;
-
-    private int batchSize = 1;
 
     public LocalWorker() {
         this(NullStatsLogger.INSTANCE);
@@ -133,11 +127,9 @@ public class LocalWorker implements Worker, ConsumerCallback {
         Preconditions.checkArgument(benchmarkDriver == null);
         testCompleted = false;
 
-
         DriverConfiguration driverConfiguration = mapper.readValue(driverConfigFile, DriverConfiguration.class);
-        log.info("Driver: {}", writer.writeValueAsString(driverConfiguration));
 
-        batchSize = Math.max(driverConfiguration.omgProducerBatchSize, 1);
+        log.info("Driver: {}", writer.writeValueAsString(driverConfiguration));
 
         try {
             benchmarkDriver = (BenchmarkDriver) Class.forName(driverConfiguration.driverClass).newInstance();
@@ -245,7 +237,7 @@ public class LocalWorker implements Worker, ConsumerCallback {
                         rateLimiter.acquire();
                         final long sendTime = System.nanoTime();
                         producer.sendAsync(Optional.ofNullable(keyDistributor.next()), payloadData).thenRun(() -> {
-                            for (int i = 0; i < batchSize; i++) {
+                            if(!testCompleted){
                                 messagesSent.increment();
                                 totalMessagesSent.increment();
                                 messagesSentCounter.inc();
@@ -257,9 +249,10 @@ public class LocalWorker implements Worker, ConsumerCallback {
                                 cumulativePublishLatencyRecorder.recordValue(microTime);
                                 publishLatencyStats.registerSuccessfulEvent(microTime, TimeUnit.MICROSECONDS);
                             }
-
                         }).exceptionally(ex -> {
-                            log.warn("Write error on message", ex);
+                            if (ex.getClass() != CompletionException.class) {
+                                log.warn("Write error on message", ex);
+                            }
                             return null;
                         });
                     });
@@ -381,7 +374,6 @@ public class LocalWorker implements Worker, ConsumerCallback {
 
         try {
             Thread.sleep(100);
-
             for (BenchmarkProducer producer : producers) {
                 producer.close();
             }

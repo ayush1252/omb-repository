@@ -18,62 +18,40 @@
  */
 package io.openmessaging.benchmark.driver.eventhubs;
 
-//import com.azure.messaging.eventhubs.EventDataBatch;
-//import com.azure.messaging.eventhubs.EventHubProducerAsyncClient;
-//import com.azure.messaging.eventhubs.EventHubProducerClient;
-//import com.azure.messaging.eventhubs.models.CreateBatchOptions;
-// import com.azure.messaging.eventhubs.EventDataBatch;
-import com.microsoft.azure.eventhubs.EventData;
-import com.microsoft.azure.eventhubs.EventDataBatch;
-import com.microsoft.azure.eventhubs.EventHubClient;
-import com.microsoft.azure.eventhubs.EventHubException;
+import com.azure.messaging.eventhubs.EventData;
+import com.azure.messaging.eventhubs.EventHubProducerClient;
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
-import reactor.core.Exceptions;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.*;
 
 public class EventHubsBenchmarkProducer implements BenchmarkProducer {
+    private static final Logger log = LoggerFactory.getLogger(EventHubsBenchmarkProducer.class);
+    final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(100);
 
-    private final EventHubClient eventHubClient;
-    private int producerBatchSize;
+    private final EventHubProducerClient producerClient;
 
-    public EventHubsBenchmarkProducer(EventHubClient eventHubClient, int producerBatchSize) {
-        this.eventHubClient = eventHubClient;
-        this.producerBatchSize = producerBatchSize;
+    public EventHubsBenchmarkProducer(EventHubProducerClient producerClient) {
+        this.producerClient = producerClient;
     }
 
     @Override
     public CompletableFuture<Void> sendAsync(Optional<String> key, byte[] payload) {
-
-        EventDataBatch eventDataBatch = null;
-        try {
-            if (producerBatchSize > 1) {
-                eventDataBatch = eventHubClient.createBatch();
-                for (int i = 0; i < producerBatchSize; i++) {
-                    com.microsoft.azure.eventhubs.EventData event = EventData.create(payload);
-                    event.getProperties().putIfAbsent("producer_timestamp", System.currentTimeMillis());
-                    eventDataBatch.tryAdd(event);
-                }
-            } else {
-                // When batching is disabled we can simply send one event at a time without using EventDataBatch.
-                com.microsoft.azure.eventhubs.EventData event = EventData.create(payload);
-                event.getProperties().putIfAbsent("producer_timestamp", System.currentTimeMillis());
-                return eventHubClient.send(event).thenApply( unused -> null);
-
-            }
-        } catch (Exception e) {
-            //ToDo Logging
-            e.printStackTrace();
-        }
-        return eventHubClient.send(eventDataBatch).thenApply( unused -> null);
+        EventData event = new EventData(payload);
+        event.getProperties().putIfAbsent("producer_timestamp", System.currentTimeMillis());
+        return CompletableFuture.runAsync( ()-> producerClient.send(Collections.singleton(event)), executorService);
     }
 
     @Override
     public void close() throws Exception {
-        eventHubClient.close();
+        log.warn("Got command to close EventHubProducerClient");
+        executorService.shutdownNow();
+        if(executorService.isTerminated()){
+            log.info("Executor is in terminated state. Closing Producer");
+            producerClient.close();
+        }
     }
 }

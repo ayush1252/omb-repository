@@ -17,27 +17,18 @@
 # under the License.
 #
 
-Configuration:
-  status: INFO
-  name: messaging-benchmark
 
-  Appenders:
-    Console:
-      name: Console
-      target: SYSTEM_OUT
-      PatternLayout:
-        Pattern: "%d{HH:mm:ss.SSS} [%t] %-4level - %msg%n"
+name: 1 producer 1 consumer 1 topic 1MB/second
 
-  Loggers:
-    Logger:
-      name: com.azure
-      level: error
-      additivity: true
-      AppenderRef:
-        ref: Blah
+topics: 1
+partitionsPerTopic: 10
+messageSize: 4096
+payloadFile: "payload/payload-4Kb.data"
+subscriptionsPerTopic: 1
+producersPerTopic: 1
+consumerPerSubscription: 1
+producerRate: 250
+consumerBacklogSizeGB: 0
+testDurationMinutes: 20
 
-    Root:
-      level: info
-      additivity: false
-      AppenderRef:
-        ref: Console
+

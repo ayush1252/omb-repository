@@ -29,20 +29,6 @@
 	</parent>
 
 	<artifactId>driver-azure-eventhubs</artifactId>
-    <!-- Enable for staging repo -->
-	<!-- <repositories>
-		<repository>
-			<id>Kafka Staging Repo</id>
-			<url>https://repository.apache.org/content/groups/staging/</url>
-		</repository>
-	</repositories>  -->
-
-	<repositories>
-		<repository>
-			<id>Kafka Public Repo</id>
-			<url>https://repository.apache.org/content/groups/public/</url>
-		</repository>
-	</repositories> 
 
 	<dependencies>
 		<dependency>
@@ -50,54 +36,32 @@
 			<artifactId>driver-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>com.azure</groupId>
 			<artifactId>azure-messaging-eventhubs</artifactId>
-			<version>5.6.0</version>
+			<version>5.15.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.azure</groupId>
 			<artifactId>azure-messaging-eventhubs-checkpointstore-blob</artifactId>
-			<version>1.5.1</version>
+			<version>1.16.1</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.azure.resourcemanager</groupId>
-			<artifactId>azure-resourcemanager</artifactId>
-			<version>2.3.0</version>
+			<artifactId>azure-resourcemanager-eventhubs</artifactId>
+			<version>2.20.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.azure</groupId>
 			<artifactId>azure-identity</artifactId>
-			<version>1.2.4</version>
+			<version>1.7.1</version>
 		</dependency>
-
 		<dependency>
-			<groupId>com.azure</groupId>
-			<artifactId>azure-messaging-eventhubs</artifactId>
-			<version>5.6.0</version>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-core</artifactId>
+			<version>3.5.0</version>
 		</dependency>
 
-		<!--	Old SDK	-->
-		<dependency>
-			<groupId>com.microsoft.azure</groupId>
-			<artifactId>azure-eventhubs</artifactId>
-			<version>2.2.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.azure.resourcemanager</groupId>
-			<artifactId>azure-resourcemanager</artifactId>
-			<version>2.3.0</version>
-		</dependency>
-		<!-- Custom build -->
-		<!-- <dependency>
-			<groupId>org.apache.kafka</groupId>
-			<artifactId>kafka-clients</artifactId>
-			<version>2.7.0</version>
-			<scope>system</scope>
-			<systemPath>/Users/anikhil/offsets_patch/clients/build/libs/kafka-clients-2.7.0-SNAPSHOT.jar</systemPath>
-		</dependency> -->
-	</dependencies>
-
+    </dependencies>
 </project>

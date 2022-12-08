@@ -20,9 +20,9 @@ package io.openmessaging.benchmark;
 
 public class DriverConfiguration {
     public String name;
-
     public String driverClass;
-
-    public int omgProducerBatchSize = 1;
-
+    public String protocol;
+    public String product;
+    public String sku;
+    public String namespaceName;
 }

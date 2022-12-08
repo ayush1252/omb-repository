@@ -31,20 +31,10 @@
     <modules>
         <module>benchmark-framework</module>
         <module>driver-api</module>
-
         <module>driver-kafka</module>
         <module>driver-azure-eventhubs</module>
-
-        		<module>driver-pulsar</module>
-        <!--		<module>driver-rabbitmq</module>-->
-        <!--		<module>driver-artemis</module>-->
-        <!--		<module>driver-bookkeeper</module>-->
-        <!--		<module>driver-rocketmq</module>-->
-        <!--		<module>driver-nats</module>-->
-        <!--		<module>driver-nats-streaming</module>-->
-        <!--		<module>driver-nsq</module>-->
         <module>package</module>
-        <module>docker</module>
+        <module>kusto-adapter</module>
     </modules>
 
 
@@ -74,6 +64,14 @@
                     <showDeprecation>true</showDeprecation>
                     <showWarnings>true</showWarnings>
                     <optimize>true</optimize>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>io.openmessaging.benchmark.Benchmark</mainClass>
                 </configuration>
             </plugin>
 <!--            <plugin>-->
@@ -113,29 +111,24 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.12.1</version>
+            <version>2.14.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
-            <version>2.12.1</version>
+            <version>2.14.0</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.60.Final</version>
+            <version>4.1.85.Final</version>
         </dependency>
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>oauth2-oidc-sdk</artifactId>
-            <version>7.4</version>
+            <version>10.1</version>
         </dependency>
 
     </dependencies>

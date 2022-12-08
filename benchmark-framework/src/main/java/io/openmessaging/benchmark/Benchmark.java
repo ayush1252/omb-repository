@@ -22,11 +22,11 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
+import io.openmessaging.benchmark.kusto.adapter.KustoAdapter;
+import io.openmessaging.benchmark.output.Metadata;
+import io.openmessaging.benchmark.output.TestResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +66,20 @@ public class Benchmark {
 
         @Parameter(names = { "-o", "--output" }, description = "Output", required = false)
         public String output;
+    }
+
+    static String endpoint = "xxxx";
+    static String database = "xxxx";
+
+    static KustoAdapter adapter;
+
+    static {
+        try {
+            adapter = new KustoAdapter(endpoint, database);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
     }
 
     public static void main(String[] args) throws Exception {
@@ -142,23 +156,34 @@ public class Benchmark {
                             DriverConfiguration.class);
                     log.info("--------------- WORKLOAD : {} --- DRIVER : {}---------------", workload.name,
                             driverConfiguration.name);
-
+                    UUID uniqueRunId = UUID.randomUUID();
                     // Stop any left over workload
                     worker.stopAll();
 
                     worker.initializeDriver(new File(driverConfig));
 
-                    WorkloadGenerator generator = new WorkloadGenerator(driverConfiguration.name, workload, worker);
+                    WorkloadGenerator generator = new WorkloadGenerator(driverConfiguration.name, workload, worker, uniqueRunId);
 
                     TestResult result = generator.run();
 
-                    String fileName = arguments.output.length() > 0 ? arguments.output
-                            : String.format("%s-%s-%s.json", workloadName, driverConfiguration.name,
+                    //Enriching Metadata
+                    result.testDetails.product = driverConfiguration.product;
+                    result.testDetails.sku = driverConfiguration.sku;
+                    result.testDetails.protocol = driverConfiguration.protocol;
+
+                    Metadata testRunMetadata = new Metadata();
+                    testRunMetadata.workload = workload.name;
+                    testRunMetadata.payload = workload.payloadFile;
+                    testRunMetadata.namespaceName = driverConfiguration.namespaceName;
+                    result.testDetails.metadata = testRunMetadata;
+
+                    String fileNamePrefix = arguments.output.length() > 0 ? arguments.output
+                            : String.format("%s-%s-%s", workloadName, driverConfiguration.name,
                                     dateFormat.format(new Date()));
 
-                    log.info("Writing test result into {}", fileName);
-                    writer.writeValue(new File(fileName), result);
-
+                    WriteTestResults(fileNamePrefix, result);
+                    adapter.uploadDataToKustoCluster(fileNamePrefix);
+                    log.info("Completed Execution of Run");
                     generator.close();
                 } catch (Exception e) {
                     log.error("Failed to run the workload '{}' for driver '{}'", workload.name, driverConfig, e);
@@ -170,8 +195,15 @@ public class Benchmark {
                 }
             });
         });
-
         worker.close();
+        log.info("End of Benchmarking Run");
+        System.exit(0);
+    }
+
+    private static void WriteTestResults(String fileNamePrefix, TestResult result) throws IOException {
+        writer.writeValue(new File(fileNamePrefix + "-details.json"), result.testDetails);
+        writer.writeValue(new File(fileNamePrefix + "-snapshot.json"), result.snapshotResultList);
+        writer.writeValue(new File(fileNamePrefix + "-aggregate.json"), result.aggregateResult);
     }
 
     private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory())

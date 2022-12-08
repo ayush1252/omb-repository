@@ -17,27 +17,30 @@
 # under the License.
 #
 
-Configuration:
-  status: INFO
-  name: messaging-benchmark
+name: EventHubs AMQP
+driverClass: io.openmessaging.benchmark.driver.eventhubs.EventHubsBenchmarkDriver
+reset: true
+protocol: AMQP
+product: EventHubs
+sku: Premium
+namespaceName: xxxx
 
-  Appenders:
-    Console:
-      name: Console
-      target: SYSTEM_OUT
-      PatternLayout:
-        Pattern: "%d{HH:mm:ss.SSS} [%t] %-4level - %msg%n"
+topicConfig: |
+  topic.name.prefix=test-topic
+  topic.name.shared=shared-topic
 
-  Loggers:
-    Logger:
-      name: com.azure
-      level: error
-      additivity: true
-      AppenderRef:
-        ref: Blah
+commonConfig: |
+  connection.string=Endpoint=xxxx
+  tenant.id=xxxx
+  subscription.id=xxxx
+  namespace=xxxx
+  resource.group=xxxx
 
-    Root:
-      level: info
-      additivity: false
-      AppenderRef:
-        ref: Console
+producerConfig: |
+  unused=0
+
+
+consumerConfig: |
+  storage.connection.string=DefaultEndpointsProtocol=xxxx
+  storage.container.name=xxx
+

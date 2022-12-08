@@ -19,6 +19,7 @@
 package io.openmessaging.benchmark.driver.eventhubs;
 
 import com.azure.messaging.eventhubs.EventProcessorClient;
+import com.azure.messaging.eventhubs.models.EventContext;
 import io.openmessaging.benchmark.driver.BenchmarkConsumer;
 import io.openmessaging.benchmark.driver.ConsumerCallback;
 import org.slf4j.Logger;
@@ -27,25 +28,32 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 public class EventHubsBenchmarkConsumer implements BenchmarkConsumer {
-
     private static final Logger log = LoggerFactory.getLogger(EventHubsBenchmarkConsumer.class);
+
     private final EventProcessorClient eventProcessorClient;
     private final ExecutorService executor;
     private final Future<?> consumerTask;
 
-    public EventHubsBenchmarkConsumer(EventProcessorClient eventProcessorClient, ConsumerCallback consumerCallback) {
+    public EventHubsBenchmarkConsumer(EventProcessorClient eventProcessorClient) {
         this.eventProcessorClient = eventProcessorClient;
         this.executor = Executors.newSingleThreadExecutor();
-        this.consumerTask = this.executor.submit(() -> {
-            eventProcessorClient.start();
-        });
+        this.consumerTask = this.executor.submit(eventProcessorClient::start);
     }
 
+    public static void processEvent(EventContext eventContext, ConsumerCallback consumerCallback) {
+        consumerCallback.messageReceived(eventContext.getEventData().getBody(),
+                TimeUnit.MILLISECONDS.toNanos(Long.parseLong(eventContext.getEventData().getProperties().get("producer_timestamp").toString())));
+        if (eventContext.getEventData().getSequenceNumber() % 100 == 0) {
+            eventContext.updateCheckpoint();
+        }
+    }
 
     @Override
     public void close() throws Exception {
+        log.warn("Shutting down EventHubConsumer gracefully");
         executor.shutdown();
         consumerTask.get();
         eventProcessorClient.stop();

@@ -16,16 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.openmessaging.benchmark.driver.eventhubs;
+package io.openmessaging.benchmark.output;
 
-public class Config {
-    public boolean reset;
+import java.util.ArrayList;
+import java.util.List;
 
-    public String topicConfig;
+public class TestResult {
 
-    public String commonConfig;
-
-    public String producerConfig;
-
-    public String consumerConfig;
+    public TestDetails testDetails;
+    public List<SnapshotResult> snapshotResultList = new ArrayList<>();
+    public LatencyResult aggregateResult;
 }
