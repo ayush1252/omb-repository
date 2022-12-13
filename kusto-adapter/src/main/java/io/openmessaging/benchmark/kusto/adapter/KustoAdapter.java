@@ -80,7 +80,7 @@ public class KustoAdapter {
         ingestionProperties.setReportLevel(IngestionReportLevel.FAILURES_AND_SUCCESSES);
         ingestionProperties.setReportMethod(IngestionReportMethod.QUEUE_AND_TABLE);
 
-        System.out.println("Trying to Ingest Data " + fileName + " into table " + tableName);
+        log.info("Trying to Ingest Data " + fileName + " into table " + tableName);
         return new WorkerThread(fileSourceInfo, ingestionProperties);
     }
 
@@ -100,7 +100,7 @@ public class KustoAdapter {
             try {
                 result = ingestionClient.ingestFromFile(fileSourceInfo, ingestionProperties);
             } catch (Exception e) {
-                System.out.println("Failed to initiate ingestion: " + e.getMessage());
+               log.error("Failed to initiate ingestion: " ,e);
                 latch.countDown();
                 Thread.currentThread().interrupt();
             }
@@ -110,11 +110,11 @@ public class KustoAdapter {
                     Thread.sleep(5000);
                     status = result.getIngestionStatusCollection().get(0);
                 }
-                System.out.println("Ingestion completed for " + fileSourceInfo.getFilePath());
-                System.out.println("Final status: " + status.status);
+                log.info("Ingestion completed for " + fileSourceInfo.getFilePath());
+                log.info("Final status: " + status.status);
                 latch.countDown();
             } catch (Exception e) {
-                System.out.println("Failed to get ingestion status: " + e.getMessage());
+                log.error("Failed to get ingestion status: ", e);
                 latch.countDown();
                 Thread.currentThread().interrupt();
             }
