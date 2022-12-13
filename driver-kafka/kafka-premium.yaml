@@ -12,7 +12,7 @@
 # limitations under the License.
 #
 
-name: Kafka
+name: Kafka Premium SKU
 driverClass: io.openmessaging.benchmark.driver.kafka.KafkaBenchmarkDriver
 protocol: Kafka
 product: EventHubs
@@ -34,8 +34,7 @@ commonConfig: |
 
 producerConfig: |
   acks=all
-  linger.ms=1
-  batch.size=1048576
+  linger.ms=0
 
 consumerConfig: |
   auto.offset.reset=earliest

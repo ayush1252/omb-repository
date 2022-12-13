@@ -17,12 +17,12 @@
 # under the License.
 #
 
-name: EventHubs AMQP PremiumSKU
+name: EventHubs AMQP DedicatedV2SKU
 driverClass: io.openmessaging.benchmark.driver.eventhubs.EventHubsBenchmarkDriver
 reset: true
 protocol: AMQP
 product: EventHubs
-sku: Premium
+sku: DedicatedV2
 namespaceName: xxxx
 
 topicConfig: |
@@ -30,7 +30,7 @@ topicConfig: |
   topic.name.shared=shared-topic
 
 commonConfig: |
-  connection.string=Endpoint=xxxx
+  connection.string=xxxx
   tenant.id=xxxx
   subscription.id=xxxx
   namespace=xxxx
@@ -41,6 +41,6 @@ producerConfig: |
 
 
 consumerConfig: |
-  storage.connection.string=DefaultEndpointsProtocol=xxxx
-  storage.container.name=xxx
+  storage.connection.string=xxxx
+  storage.container.name=xxxx
 
