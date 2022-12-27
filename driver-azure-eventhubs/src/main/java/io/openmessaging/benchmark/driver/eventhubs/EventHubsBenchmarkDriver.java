@@ -18,8 +18,10 @@
  */
 package io.openmessaging.benchmark.driver.eventhubs;
 
+import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.policy.HttpLogDetailLevel;
 import com.azure.core.http.policy.HttpLogOptions;
+import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.messaging.eventhubs.*;
 import com.azure.messaging.eventhubs.checkpointstore.blob.BlobCheckpointStore;
 import com.azure.storage.blob.BlobContainerAsyncClient;
@@ -51,8 +53,9 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
 
     private static final Logger log = LoggerFactory.getLogger(EventHubsBenchmarkDriver.class);
 
-    private String connectionString;
     private String topicPrefix;
+    private String namespace;
+    private TokenCredential credential;
 
     private final List<BenchmarkProducer> producers = Collections.synchronizedList(new ArrayList<>());
     private final List<BenchmarkConsumer> consumers = Collections.synchronizedList(new ArrayList<>());
@@ -77,20 +80,21 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         Properties topicProperties = new Properties();
         topicProperties.load(new StringReader(config.topicConfig));
 
-        connectionString = commonProperties.getProperty("connection.string");
         topicPrefix = topicProperties.getProperty("topic.name.prefix");
+        namespace = commonProperties.getProperty("namespace");
 
         blobContainerAsyncClient = CreateCheckpointStore(consumerProperties);
         eventHubAdministrator = new EventHubAdministrator(commonProperties);
 
         if (config.reset) {
             String resourceGroup = commonProperties.getProperty("resource.group");
-            String namespace = commonProperties.getProperty("namespace");
 
             for (EventHub eh : eventHubAdministrator.getManager().namespaces().eventHubs().listByNamespace(resourceGroup, namespace)) {
                 eventHubAdministrator.getManager().namespaces().eventHubs().deleteByName(resourceGroup, namespace, eh.name());
             }
         }
+
+        credential = new DefaultAzureCredentialBuilder().build();
     }
 
     @Override
@@ -112,8 +116,9 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
     @Override
     public CompletableFuture<BenchmarkProducer> createProducer(String topic) {
 
+
         EventHubProducerClient ehProducerClient = new EventHubClientBuilder()
-                .connectionString(connectionString, topic)
+                .credential(namespace + ".servicebus.windows.net", topic, credential)
                 .buildProducerClient();
         BenchmarkProducer benchmarkProducer = new EventHubsBenchmarkProducer(ehProducerClient);
         try {
@@ -133,7 +138,7 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
                                                                ConsumerCallback consumerCallback) {
 
         EventProcessorClient eventProcessorClient = new EventProcessorClientBuilder()
-                .connectionString(connectionString, topic)
+                .credential(namespace + ".servicebus.windows.net", topic, credential)
                 .consumerGroup(EventHubClientBuilder.DEFAULT_CONSUMER_GROUP_NAME)
                 .processEvent(eventContext -> EventHubsBenchmarkConsumer.processEvent(eventContext, consumerCallback))
                 .processError(errorContext -> log.error("exception occur while consuming message " +  errorContext.getThrowable().getMessage()))

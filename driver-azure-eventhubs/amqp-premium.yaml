@@ -30,7 +30,6 @@ topicConfig: |
   topic.name.shared=shared-topic
 
 commonConfig: |
-  connection.string=Endpoint=xxxx
   tenant.id=xxxx
   subscription.id=xxxx
   namespace=xxxx
@@ -38,7 +37,6 @@ commonConfig: |
 
 producerConfig: |
   unused=0
-
 
 consumerConfig: |
   storage.connection.string=DefaultEndpointsProtocol=xxxx
