@@ -170,12 +170,16 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
     }
 
     private BlobContainerAsyncClient CreateCheckpointStore(Properties consumerProperties) {
-        String storageConnectionString = consumerProperties.getProperty("storage.connection.string");
+        String storageAccountName = consumerProperties.getProperty("storage.account.name");
         String storageContainerName = consumerProperties.getProperty("storage.container.name");
 
+        // Construct the blob container endpoint from the arguments.
+        String containerEndpoint = String.format("https://%s.blob.core.windows.net/%s",storageAccountName,
+                storageContainerName);
+
         return  new BlobContainerClientBuilder()
-                .connectionString(storageConnectionString)
-                .containerName(storageContainerName)
+                .endpoint(containerEndpoint)
+                .credential(new DefaultAzureCredentialBuilder().build())
                 .httpLogOptions(new HttpLogOptions().setLogLevel(HttpLogDetailLevel.NONE))
                 .buildAsyncClient();
     }

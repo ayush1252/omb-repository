@@ -39,6 +39,6 @@ producerConfig: |
   unused=0
 
 consumerConfig: |
-  storage.connection.string=DefaultEndpointsProtocol=xxxx
+  storage.account.name=xxxx
   storage.container.name=xxx
 

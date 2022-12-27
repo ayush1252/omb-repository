@@ -39,6 +39,6 @@ producerConfig: |
   unused=0
 
 consumerConfig: |
-  storage.connection.string=xxxx
+  storage.account.name=xxxx
   storage.container.name=xxxx
 
