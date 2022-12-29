@@ -5,40 +5,45 @@ import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.resourcemanager.eventhubs.EventHubsManager;
+import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
+import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
+import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
 
 import java.util.Properties;
 
+import static io.openmessaging.benchmark.appconfig.adapter.EnvironmentName.Production;
+
 public class EventHubAdministrator {
 
-    private final Properties eventHubProperties;
     TokenCredential sharedCSC;
     AzureProfile sharedAzureProfile;
-
+    NamespaceMetadata metadata;
+    static ConfigProvider provider;
     public EventHubsManager getManager() {
         return manager;
     }
 
     EventHubsManager manager;
 
-    public EventHubAdministrator(Properties eventHubProperties) {
-        this.eventHubProperties = eventHubProperties;
-        sharedCSC = createClientSecretCredential(eventHubProperties);
-        sharedAzureProfile = createAzureProfile(eventHubProperties);
+    public EventHubAdministrator(NamespaceMetadata namespaceMetadata) {
+        this.metadata = namespaceMetadata;
+        provider = ConfigProvider.getInstance(Production.toString());
+        sharedCSC = createClientSecretCredential();
+        sharedAzureProfile = createAzureProfile(namespaceMetadata);
         manager =  EventHubsManager.configure()
                 .authenticate(sharedCSC, sharedAzureProfile);
     }
 
 
-    private static AzureProfile createAzureProfile(Properties commonProperties) {
-        return new AzureProfile(commonProperties.getProperty("tenant.id"), commonProperties.getProperty("subscription.id"),
+    private static AzureProfile createAzureProfile(NamespaceMetadata metadata) {
+        return new AzureProfile(provider.getConfigurationValue(ConfigurationKey.ApplicationTenantID),
+                metadata.SubscriptionId,
                 AzureEnvironment.AZURE);
     }
 
-    private static TokenCredential createClientSecretCredential(Properties properties) {
-        String tenantId = properties.getProperty("tenant.id");
-
+    private static TokenCredential createClientSecretCredential() {
         return new DefaultAzureCredentialBuilder()
-                .tenantId(tenantId)
+                .tenantId(provider.getConfigurationValue(ConfigurationKey.ApplicationTenantID))
                 .authorityHost(AzureEnvironment.AZURE.getActiveDirectoryEndpoint())
                 .build();
     }
@@ -48,7 +53,7 @@ public class EventHubAdministrator {
         manager.namespaces()
                 .eventHubs()
                 .define(topic)
-                .withExistingNamespace(eventHubProperties.getProperty("resource.group"), eventHubProperties.getProperty("namespace"))
+                .withExistingNamespace(metadata.ResourceGroup, metadata.NamespaceName)
                 .withPartitionCount(partitions)
                 .create();
     }

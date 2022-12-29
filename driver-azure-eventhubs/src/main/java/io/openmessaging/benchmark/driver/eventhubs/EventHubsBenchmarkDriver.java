@@ -32,6 +32,7 @@ import com.azure.resourcemanager.eventhubs.models.EventHub;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
 import io.openmessaging.benchmark.appconfig.adapter.EnvironmentName;
+import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
 import io.openmessaging.benchmark.driver.BenchmarkConsumer;
 import io.openmessaging.benchmark.driver.BenchmarkDriver;
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
@@ -48,6 +49,7 @@ import java.io.StringReader;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +70,8 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
     @Override
     public void initialize(File configurationFile, org.apache.bookkeeper.stats.StatsLogger statsLogger) throws IOException {
         configProvider = ConfigProvider.getInstance(EnvironmentName.Production.toString());
+        NamespaceMetadata metadata = configProvider
+                .getNamespaceMetaData(StringUtils.split(configurationFile.getName(), '.')[0]);
         Config config = mapper.readValue(configurationFile, Config.class);
 
         Properties commonProperties = new Properties();
@@ -85,13 +89,13 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         topicProperties.load(new StringReader(config.topicConfig));
 
         topicPrefix = topicProperties.getProperty("topic.name.prefix");
-        namespace = commonProperties.getProperty("namespace");
+        namespace = metadata.NamespaceName;
 
         blobContainerAsyncClient = CreateCheckpointStore(consumerProperties);
-        eventHubAdministrator = new EventHubAdministrator(commonProperties);
+        eventHubAdministrator = new EventHubAdministrator(metadata);
 
         if (config.reset) {
-            String resourceGroup = commonProperties.getProperty("resource.group");
+            String resourceGroup = metadata.ResourceGroup;
 
             for (EventHub eh : eventHubAdministrator.getManager().namespaces().eventHubs().listByNamespace(resourceGroup, namespace)) {
                 eventHubAdministrator.getManager().namespaces().eventHubs().deleteByName(resourceGroup, namespace, eh.name());
@@ -122,7 +126,7 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
 
 
         EventHubProducerClient ehProducerClient = new EventHubClientBuilder()
-                .credential(namespace + ".servicebus.windows.net", topic, credential)
+                .credential(namespace + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix), topic, credential)
                 .buildProducerClient();
         BenchmarkProducer benchmarkProducer = new EventHubsBenchmarkProducer(ehProducerClient);
         try {
@@ -142,7 +146,7 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
                                                                ConsumerCallback consumerCallback) {
 
         EventProcessorClient eventProcessorClient = new EventProcessorClientBuilder()
-                .credential(namespace + ".servicebus.windows.net", topic, credential)
+                .credential(namespace + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix), topic, credential)
                 .consumerGroup(EventHubClientBuilder.DEFAULT_CONSUMER_GROUP_NAME)
                 .processEvent(eventContext -> EventHubsBenchmarkConsumer.processEvent(eventContext, consumerCallback))
                 .processError(errorContext -> log.error("exception occur while consuming message " +  errorContext.getThrowable().getMessage()))
@@ -174,12 +178,10 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
     }
 
     private BlobContainerAsyncClient CreateCheckpointStore(Properties consumerProperties) {
-        String storageAccountName = configProvider.getConfigurationValue(ConfigurationKey.StorageAccountName);
-        String storageContainerName = configProvider.getConfigurationValue(ConfigurationKey.StorageContainerName);
-
         // Construct the blob container endpoint from the arguments.
-        String containerEndpoint = String.format("https://%s.blob.core.windows.net/%s",storageAccountName,
-                storageContainerName);
+        String containerEndpoint = String.format("https://%s.blob.core.windows.net/%s",
+                configProvider.getConfigurationValue(ConfigurationKey.StorageAccountName),
+                configProvider.getConfigurationValue(ConfigurationKey.StorageContainerName));
 
         return  new BlobContainerClientBuilder()
                 .endpoint(containerEndpoint)

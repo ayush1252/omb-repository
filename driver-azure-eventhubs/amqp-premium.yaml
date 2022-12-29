@@ -23,17 +23,13 @@ reset: true
 protocol: AMQP
 product: EventHubs
 sku: Premium
-namespaceName: xxxx
 
 topicConfig: |
   topic.name.prefix=test-topic-amqp
   topic.name.shared=shared-topic-amqp
 
 commonConfig: |
-  tenant.id=xxxx
-  subscription.id=xxxx
-  namespace=xxxx
-  resource.group=xxxx
+  unused=0
 
 producerConfig: |
   unused=0

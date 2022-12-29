@@ -14,7 +14,9 @@ import com.microsoft.azure.kusto.ingest.result.IngestionResult;
 import com.microsoft.azure.kusto.ingest.result.IngestionStatus;
 import com.microsoft.azure.kusto.ingest.result.OperationStatus;
 import com.microsoft.azure.kusto.ingest.source.FileSourceInfo;
-import io.openmessaging.benchmark.appconfig.adapter.*;
+import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
+import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
+import io.openmessaging.benchmark.appconfig.adapter.EnvironmentName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

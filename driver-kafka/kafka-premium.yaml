@@ -17,7 +17,6 @@ driverClass: io.openmessaging.benchmark.driver.kafka.KafkaBenchmarkDriver
 protocol: Kafka
 product: EventHubs
 sku: Premium
-namespaceName: xxxx
 
 # Kafka client-specific configuration
 replicationFactor: 3
@@ -27,7 +26,6 @@ topicConfig: |
   min.insync.replicas=2
 
 commonConfig: |
-  bootstrap.servers=xxxx
   security.protocol=SASL_SSL
   sasl.mechanism=OAUTHBEARER
   sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;

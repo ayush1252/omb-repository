@@ -25,7 +25,12 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
+import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
+import io.openmessaging.benchmark.appconfig.adapter.EnvironmentName;
+import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
 import org.apache.bookkeeper.stats.StatsLogger;
+import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.DeleteTopicsResult;
 import org.apache.kafka.clients.admin.ListTopicsResult;
@@ -51,7 +56,7 @@ import io.openmessaging.benchmark.driver.ConsumerCallback;
 public class KafkaBenchmarkDriver implements BenchmarkDriver {
 
     private Config config;
-
+    private ConfigProvider configProvider;
     private List<BenchmarkProducer> producers = Collections.synchronizedList(new ArrayList<>());
     private List<BenchmarkConsumer> consumers = Collections.synchronizedList(new ArrayList<>());
 
@@ -64,9 +69,15 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
     @Override
     public void initialize(File configurationFile, StatsLogger statsLogger) throws IOException {
         config = mapper.readValue(configurationFile, Config.class);
+        configProvider = ConfigProvider.getInstance(EnvironmentName.Production.toString());
+        NamespaceMetadata metadata = configProvider
+                .getNamespaceMetaData(StringUtils.split(configurationFile.getName(), '.')[0]);
 
         Properties commonProperties = new Properties();
         commonProperties.load(new StringReader(config.commonConfig));
+        //manually creating bootstrap server from namespace name for Kafka
+        commonProperties.put("bootstrap.servers",
+                metadata.NamespaceName + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix) + ":9093");
 
         producerProperties = new Properties();
         commonProperties.forEach((key, value) -> producerProperties.put(key, value));

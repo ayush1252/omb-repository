@@ -2,6 +2,9 @@ package io.openmessaging.benchmark.appconfig.adapter;
 
 import com.azure.data.appconfiguration.ConfigurationClient;
 import com.azure.data.appconfiguration.ConfigurationClientBuilder;
+import com.azure.data.appconfiguration.models.ConfigurationSetting;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Objects;
 
@@ -36,5 +39,10 @@ public class ConfigProvider {
 
     public String getConfigurationValue(ConfigurationKey configKey){
         return configurationClient.getConfigurationSetting(configKey.toString(), labelName).getValue();
+    }
+
+    public NamespaceMetadata getNamespaceMetaData(String configName) throws JsonProcessingException {
+        return new ObjectMapper().readValue(configurationClient.getConfigurationSetting(configName, labelName).getValue(),
+                NamespaceMetadata.class);
     }
 }

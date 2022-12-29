@@ -27,9 +27,11 @@ import java.util.*;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
 import io.openmessaging.benchmark.appconfig.adapter.EnvironmentName;
+import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
 import io.openmessaging.benchmark.kusto.adapter.KustoAdapter;
 import io.openmessaging.benchmark.output.Metadata;
 import io.openmessaging.benchmark.output.TestResult;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -159,6 +161,11 @@ public class Benchmark {
                     File driverConfigFile = new File(driverConfig);
                     DriverConfiguration driverConfiguration = mapper.readValue(driverConfigFile,
                             DriverConfiguration.class);
+
+                    NamespaceMetadata metadata = provider
+                            .getNamespaceMetaData(StringUtils.substringBetween(driverConfig, "/", "."));
+                    driverConfiguration.namespaceName = metadata.NamespaceName;
+
                     log.info("--------------- WORKLOAD : {} --- DRIVER : {}---------------", workload.name,
                             driverConfiguration.name);
                     UUID uniqueRunId = UUID.randomUUID();
