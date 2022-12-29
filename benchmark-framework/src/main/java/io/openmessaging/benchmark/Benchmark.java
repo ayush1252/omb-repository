@@ -24,6 +24,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
+import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
+import io.openmessaging.benchmark.appconfig.adapter.EnvironmentName;
 import io.openmessaging.benchmark.kusto.adapter.KustoAdapter;
 import io.openmessaging.benchmark.output.Metadata;
 import io.openmessaging.benchmark.output.TestResult;
@@ -68,14 +71,15 @@ public class Benchmark {
         public String output;
     }
 
-    static String endpoint = "xxxx";
-    static String database = "xxxx";
-
+    static ConfigProvider provider;
     static KustoAdapter adapter;
 
     static {
         try {
-            adapter = new KustoAdapter(endpoint, database);
+            provider = new ConfigProvider(System.getenv("AppConfigConnectionString"), EnvironmentName.Production.toString());
+            adapter = new KustoAdapter(provider.getConfigurationValue(ConfigurationKey.KustoEndpoint),
+                    provider.getConfigurationValue(ConfigurationKey.KustoDatabaseName));
+
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);

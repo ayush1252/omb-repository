@@ -35,6 +35,7 @@
         <module>driver-azure-eventhubs</module>
         <module>package</module>
         <module>kusto-adapter</module>
+        <module>appconfig-adapter</module>
     </modules>
 
 
