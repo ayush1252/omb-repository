@@ -14,6 +14,7 @@ import com.microsoft.azure.kusto.ingest.result.IngestionResult;
 import com.microsoft.azure.kusto.ingest.result.IngestionStatus;
 import com.microsoft.azure.kusto.ingest.result.OperationStatus;
 import com.microsoft.azure.kusto.ingest.source.FileSourceInfo;
+import io.openmessaging.benchmark.appconfig.adapter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,12 +25,9 @@ public class KustoAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(KustoAdapter.class);
 
-    static String tenantID = "xxxx";
-    static String clientID = "xxxx";
-    static String clientSecret = "xxxx";
-
     static ExecutorService service = Executors.newFixedThreadPool(3);
     static CountDownLatch latch = new CountDownLatch(3);
+    private final ConfigProvider configProvider;
 
     public String endpoint;
     public String database;
@@ -38,13 +36,16 @@ public class KustoAdapter {
     public KustoAdapter(String endpoint, String database) throws Exception {
         this.endpoint = endpoint;
         this.database = database;
+        configProvider = ConfigProvider.getInstance(EnvironmentName.Production.toString());
         ingestionClient = getIngestionClient(endpoint);
     }
 
     private IngestClient getIngestionClient(String endpoint) throws Exception {
         String ingestionEndpoint = "https://ingest-" + URI.create(endpoint).getHost();
         ConnectionStringBuilder csb = ConnectionStringBuilder.createWithAadApplicationCredentials(ingestionEndpoint,
-                clientID, clientSecret, tenantID);
+                configProvider.getConfigurationValue(ConfigurationKey.KustoClientID),
+                configProvider.getConfigurationValue(ConfigurationKey.KustoClientSecret),
+                configProvider.getConfigurationValue(ConfigurationKey.ApplicationTenantID));
 
         return IngestClientFactory.createClient(csb);
     }

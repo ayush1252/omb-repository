@@ -26,8 +26,8 @@ sku: DedicatedV2
 namespaceName: xxxx
 
 topicConfig: |
-  topic.name.prefix=test-topic
-  topic.name.shared=shared-topic
+  topic.name.prefix=test-topic-amqp
+  topic.name.shared=shared-topic-amqp
 
 commonConfig: |
   tenant.id=xxxx
@@ -39,6 +39,5 @@ producerConfig: |
   unused=0
 
 consumerConfig: |
-  storage.account.name=xxxx
-  storage.container.name=xxxx
+  unused=0
 

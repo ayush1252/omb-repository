@@ -29,6 +29,9 @@ import com.azure.storage.blob.BlobContainerClientBuilder;
 
 import com.azure.resourcemanager.eventhubs.models.EventHub;
 
+import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
+import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
+import io.openmessaging.benchmark.appconfig.adapter.EnvironmentName;
 import io.openmessaging.benchmark.driver.BenchmarkConsumer;
 import io.openmessaging.benchmark.driver.BenchmarkDriver;
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
@@ -44,7 +47,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,9 +63,11 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
     private final List<BenchmarkConsumer> consumers = Collections.synchronizedList(new ArrayList<>());
     private BlobContainerAsyncClient blobContainerAsyncClient;
     private EventHubAdministrator eventHubAdministrator;
+    private ConfigProvider configProvider;
 
     @Override
     public void initialize(File configurationFile, org.apache.bookkeeper.stats.StatsLogger statsLogger) throws IOException {
+        configProvider = ConfigProvider.getInstance(EnvironmentName.Production.toString());
         Config config = mapper.readValue(configurationFile, Config.class);
 
         Properties commonProperties = new Properties();
@@ -170,8 +174,8 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
     }
 
     private BlobContainerAsyncClient CreateCheckpointStore(Properties consumerProperties) {
-        String storageAccountName = consumerProperties.getProperty("storage.account.name");
-        String storageContainerName = consumerProperties.getProperty("storage.container.name");
+        String storageAccountName = configProvider.getConfigurationValue(ConfigurationKey.StorageAccountName);
+        String storageContainerName = configProvider.getConfigurationValue(ConfigurationKey.StorageContainerName);
 
         // Construct the blob container endpoint from the arguments.
         String containerEndpoint = String.format("https://%s.blob.core.windows.net/%s",storageAccountName,

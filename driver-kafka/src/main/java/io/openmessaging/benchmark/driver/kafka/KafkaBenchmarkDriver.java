@@ -102,7 +102,7 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
 
     @Override
     public String getTopicNamePrefix() {
-        return "test-topic";
+        return "test-topic-kafka";
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
