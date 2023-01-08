@@ -29,6 +29,6 @@ producersPerTopic: 1
 consumerPerSubscription: 1
 producerRate: 2.5
 consumerBacklogSizeGB: 0
-testDurationMinutes: 20
+testDurationMinutes: 10
 
 
