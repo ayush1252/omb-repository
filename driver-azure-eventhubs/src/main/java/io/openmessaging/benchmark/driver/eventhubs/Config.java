@@ -21,6 +21,8 @@ package io.openmessaging.benchmark.driver.eventhubs;
 public class Config {
     public boolean reset;
 
+    public int batchSize;
+
     public String topicConfig;
 
     public String commonConfig;

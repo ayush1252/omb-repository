@@ -37,16 +37,16 @@ public class KafkaBenchmarkProducer implements BenchmarkProducer {
     }
 
     @Override
-    public CompletableFuture<Void> sendAsync(Optional<String> key, byte[] payload) {
+    public CompletableFuture<Integer> sendAsync(Optional<String> key, byte[] payload) {
         ProducerRecord<String, byte[]> record = new ProducerRecord<>(topic, key.orElse(null), payload);
 
-        CompletableFuture<Void> future = new CompletableFuture<>();
+        CompletableFuture<Integer> future = new CompletableFuture<>();
 
         producer.send(record, (metadata, exception) -> {
             if (exception != null) {
                 future.completeExceptionally(exception);
             } else {
-                future.complete(null);
+                future.complete(1);
             }
         });
 

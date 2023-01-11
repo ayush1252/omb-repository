@@ -19,39 +19,60 @@
 package io.openmessaging.benchmark.driver.eventhubs;
 
 import com.azure.messaging.eventhubs.EventData;
+import com.azure.messaging.eventhubs.EventDataBatch;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.*;
 
 public class EventHubsBenchmarkProducer implements BenchmarkProducer {
     private static final Logger log = LoggerFactory.getLogger(EventHubsBenchmarkProducer.class);
-    final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(100);
 
     private final EventHubProducerClient producerClient;
-
-    public EventHubsBenchmarkProducer(EventHubProducerClient producerClient) {
+    private final int batchSize;
+    private EventDataBatch eventDataBatch;
+    public EventHubsBenchmarkProducer(EventHubProducerClient producerClient, int batchSize) {
         this.producerClient = producerClient;
+        this.batchSize = batchSize;
+        eventDataBatch = producerClient.createBatch();
     }
 
     @Override
-    public CompletableFuture<Void> sendAsync(Optional<String> key, byte[] payload) {
+    public CompletableFuture<Integer> sendAsync(Optional<String> key, byte[] payload) {
         EventData event = new EventData(payload);
         event.getProperties().putIfAbsent("producer_timestamp", System.currentTimeMillis());
-        return CompletableFuture.runAsync( ()-> producerClient.send(Collections.singleton(event)), executorService);
+        boolean addSuccessful = eventDataBatch.tryAdd(event);
+        CompletableFuture<Integer> future = new CompletableFuture<>();
+        if(!addSuccessful){
+            final int messagesToBeSent = eventDataBatch.getCount();
+            //EventDataBatch is full. Send the existing batch and then add the current data.
+            // This will block the producer thread instead of sending it asynchronously like the non batched approach.
+            producerClient.send(eventDataBatch);
+            eventDataBatch = producerClient.createBatch();
+            eventDataBatch.tryAdd(event);
+            future.complete(messagesToBeSent);
+        } else{
+            if(eventDataBatch.getCount() >= batchSize){
+                producerClient.send(eventDataBatch);
+                eventDataBatch = producerClient.createBatch();
+                future.complete(batchSize);
+            } else{
+                future.complete(0);
+            }
+        }
+
+        return future;
     }
 
     @Override
     public void close() throws Exception {
         log.warn("Got command to close EventHubProducerClient");
-        executorService.shutdownNow();
-        if(executorService.isTerminated()){
-            log.info("Executor is in terminated state. Closing Producer");
-            producerClient.close();
+        if (eventDataBatch.getCount() > 0) {
+            producerClient.send(eventDataBatch);
         }
+        producerClient.close();
     }
 }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -236,25 +236,26 @@ public class LocalWorker implements Worker, ConsumerCallback {
                     producers.forEach(producer -> {
                         rateLimiter.acquire();
                         final long sendTime = System.nanoTime();
-                        producer.sendAsync(Optional.ofNullable(keyDistributor.next()), payloadData).thenRun(() -> {
-                            if(!testCompleted){
-                                messagesSent.increment();
-                                totalMessagesSent.increment();
-                                messagesSentCounter.inc();
-                                bytesSent.add(payloadData.length);
-                                bytesSentCounter.add(payloadData.length);
+                        producer.sendAsync(Optional.ofNullable(keyDistributor.next()), payloadData)
+                                .thenAccept(messageSent -> {
+                                    if (messageSent > 0 && !testCompleted) {
+                                        messagesSent.add(messageSent);
+                                        totalMessagesSent.add(messageSent);
+                                        messagesSentCounter.add(messageSent);
+                                        bytesSent.add((long) payloadData.length * messageSent);
+                                        bytesSentCounter.add((long) payloadData.length * messageSent);
 
-                                long microTime = TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - sendTime);
-                                publishLatencyRecorder.recordValue(microTime);
-                                cumulativePublishLatencyRecorder.recordValue(microTime);
-                                publishLatencyStats.registerSuccessfulEvent(microTime, TimeUnit.MICROSECONDS);
-                            }
-                        }).exceptionally(ex -> {
-                            if (ex.getClass() != CompletionException.class) {
-                                log.warn("Write error on message", ex);
-                            }
-                            return null;
-                        });
+                                        long microTime = TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - sendTime);
+                                        publishLatencyRecorder.recordValue(microTime);
+                                        cumulativePublishLatencyRecorder.recordValue(microTime);
+                                        publishLatencyStats.registerSuccessfulEvent(microTime, TimeUnit.MICROSECONDS);
+                                    }
+                                }).exceptionally(ex -> {
+                                    if (ex.getClass() != CompletionException.class) {
+                                        log.warn("Write error on message", ex);
+                                    }
+                                    return null;
+                                });
                     });
                 }
             } catch (Throwable t) {

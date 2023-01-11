@@ -59,6 +59,7 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
 
     private String topicPrefix;
     private String namespace;
+    private int batchSize;
     private TokenCredential credential;
 
     private final List<BenchmarkProducer> producers = Collections.synchronizedList(new ArrayList<>());
@@ -90,6 +91,7 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
 
         topicPrefix = topicProperties.getProperty("topic.name.prefix");
         namespace = metadata.NamespaceName;
+        batchSize = config.batchSize;
 
         blobContainerAsyncClient = CreateCheckpointStore(consumerProperties);
         eventHubAdministrator = new EventHubAdministrator(metadata);
@@ -128,7 +130,7 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         EventHubProducerClient ehProducerClient = new EventHubClientBuilder()
                 .credential(namespace + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix), topic, credential)
                 .buildProducerClient();
-        BenchmarkProducer benchmarkProducer = new EventHubsBenchmarkProducer(ehProducerClient);
+        BenchmarkProducer benchmarkProducer = new EventHubsBenchmarkProducer(ehProducerClient, batchSize);
         try {
             producers.add(benchmarkProducer);
             return CompletableFuture.completedFuture(benchmarkProducer);

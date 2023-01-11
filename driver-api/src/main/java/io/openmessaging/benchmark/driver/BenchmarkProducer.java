@@ -32,6 +32,6 @@ public interface BenchmarkProducer extends AutoCloseable {
      *            the message payload
      * @return a future that will be triggered when the message is successfully published
      */
-    CompletableFuture<Void> sendAsync(Optional<String> key, byte[] payload);
+    CompletableFuture<Integer> sendAsync(Optional<String> key, byte[] payload);
 
 }
