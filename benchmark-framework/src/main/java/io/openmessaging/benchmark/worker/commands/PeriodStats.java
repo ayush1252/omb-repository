@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class PeriodStats {
     public long messagesSent = 0;
     public long bytesSent = 0;
+    public long requestsSent = 0;
 
     public long messagesReceived = 0;
     public long bytesReceived = 0;

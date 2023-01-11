@@ -77,6 +77,7 @@ public class LocalWorker implements Worker, ConsumerCallback {
 
     private final StatsLogger statsLogger;
 
+    private final LongAdder requestsSent = new LongAdder();
     private final LongAdder messagesSent = new LongAdder();
     private final LongAdder bytesSent = new LongAdder();
     private final Counter messagesSentCounter;
@@ -240,6 +241,7 @@ public class LocalWorker implements Worker, ConsumerCallback {
                                 .thenAccept(messageSent -> {
                                     if (messageSent > 0 && !testCompleted) {
                                         messagesSent.add(messageSent);
+                                        requestsSent.increment();
                                         totalMessagesSent.add(messageSent);
                                         messagesSentCounter.add(messageSent);
                                         bytesSent.add((long) payloadData.length * messageSent);
@@ -278,6 +280,7 @@ public class LocalWorker implements Worker, ConsumerCallback {
         PeriodStats stats = new PeriodStats();
 
         stats.messagesSent = messagesSent.sumThenReset();
+        stats.requestsSent = requestsSent.sumThenReset();
         stats.bytesSent = bytesSent.sumThenReset();
 
         stats.messagesReceived = messagesReceived.sumThenReset();
@@ -367,6 +370,7 @@ public class LocalWorker implements Worker, ConsumerCallback {
         endToEndCumulativeLatencyRecorder.reset();
 
         messagesSent.reset();
+        requestsSent.reset();
         bytesSent.reset();
         messagesReceived.reset();
         bytesReceived.reset();
