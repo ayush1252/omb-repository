@@ -18,7 +18,7 @@
 #
 
 #Workload Specific for ICM Debugging @yogeshgrg
-name: 1 producer 1 consumer 1 partition 50KB Payload
+name: 1 producer 1 consumer 1 partition 50KB Payload 1Mbps
 
 topics: 1
 partitionsPerTopic: 1
@@ -27,7 +27,7 @@ payloadFile: "payload/payload-50Kb.data"
 subscriptionsPerTopic: 1
 producersPerTopic: 1
 consumerPerSubscription: 1
-producerRate: 1
+producerRate: 20
 consumerBacklogSizeGB: 0
 testDurationMinutes: 10
 

@@ -26,17 +26,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
 
 public class EventHubsBenchmarkProducer implements BenchmarkProducer {
     private static final Logger log = LoggerFactory.getLogger(EventHubsBenchmarkProducer.class);
 
     private final EventHubProducerClient producerClient;
-    private final int batchSize;
+    private final int batchCount;
     private EventDataBatch eventDataBatch;
-    public EventHubsBenchmarkProducer(EventHubProducerClient producerClient, int batchSize) {
+    private boolean isProducerClosed = false;
+
+    public EventHubsBenchmarkProducer(EventHubProducerClient producerClient, int batchCount) {
         this.producerClient = producerClient;
-        this.batchSize = batchSize;
+        this.batchCount = batchCount;
         eventDataBatch = producerClient.createBatch();
     }
 
@@ -55,10 +57,10 @@ public class EventHubsBenchmarkProducer implements BenchmarkProducer {
             eventDataBatch.tryAdd(event);
             future.complete(messagesToBeSent);
         } else{
-            if(eventDataBatch.getCount() >= batchSize){
+            if(eventDataBatch.getCount() >= batchCount){
                 producerClient.send(eventDataBatch);
                 eventDataBatch = producerClient.createBatch();
-                future.complete(batchSize);
+                future.complete(batchCount);
             } else{
                 future.complete(0);
             }
@@ -70,9 +72,14 @@ public class EventHubsBenchmarkProducer implements BenchmarkProducer {
     @Override
     public void close() throws Exception {
         log.warn("Got command to close EventHubProducerClient");
-        if (eventDataBatch.getCount() > 0) {
-            producerClient.send(eventDataBatch);
+        if (!isProducerClosed) {
+            if (eventDataBatch.getCount() > 0) {
+                producerClient.send(eventDataBatch);
+                eventDataBatch = producerClient.createBatch();
+            }
+            producerClient.close();
+            isProducerClosed = true;
+            log.info("Successfully closed EH Producer");
         }
-        producerClient.close();
     }
 }

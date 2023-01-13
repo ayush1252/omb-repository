@@ -183,10 +183,19 @@ public class Benchmark {
                     result.testDetails.sku = driverConfiguration.sku;
                     result.testDetails.protocol = driverConfiguration.protocol;
 
-                    Metadata testRunMetadata = new Metadata();
-                    testRunMetadata.workload = workload.name;
-                    testRunMetadata.payload = workload.payloadFile;
-                    testRunMetadata.namespaceName = driverConfiguration.namespaceName;
+                    Metadata testRunMetadata = Metadata.builder()
+                            .workload(workload.name)
+                            .payload(workload.payloadFile)
+                            .namespaceName(driverConfiguration.namespaceName)
+                            .topics(workload.topics)
+                            .partitions(workload.partitionsPerTopic)
+                            .consumerCount(workload.subscriptionsPerTopic)
+                            .producerCount(workload.producersPerTopic)
+                            .consumerGroups(workload.consumerPerSubscription)
+                            .batchCount(driverConfiguration.batchCount)
+                            .build();
+
+                    testRunMetadata.partitions = workload.partitionsPerTopic;
                     result.testDetails.metadata = testRunMetadata;
 
                     String fileNamePrefix = arguments.output.length() > 0 ? arguments.output

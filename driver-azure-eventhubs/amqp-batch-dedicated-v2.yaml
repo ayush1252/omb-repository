@@ -23,7 +23,7 @@ protocol: AMQP
 product: EventHubs
 sku: DedicatedV2
 
-batchSize: 7
+batchCount: 15
 reset: true
 
 topicConfig: |
