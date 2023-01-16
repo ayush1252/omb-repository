@@ -8,12 +8,15 @@ import com.azure.resourcemanager.eventhubs.EventHubsManager;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
 import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
 import static io.openmessaging.benchmark.appconfig.adapter.EnvironmentName.Production;
 
 public class EventHubAdministrator {
+    private static final Logger log = LoggerFactory.getLogger(EventHubAdministrator.class);
 
     TokenCredential sharedCSC;
     AzureProfile sharedAzureProfile;
@@ -49,7 +52,7 @@ public class EventHubAdministrator {
     }
 
     public void createTopic(String topic, int partitions) {
-        System.out.println(" Topic Req: " + topic);
+        log.info(" Topic Name: " + topic);
         manager.namespaces()
                 .eventHubs()
                 .define(topic)

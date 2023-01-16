@@ -47,7 +47,8 @@ public class EventHubsBenchmarkConsumer implements BenchmarkConsumer {
         consumerCallback.messageReceived(eventContext.getEventData().getBody(),
                 TimeUnit.MILLISECONDS.toNanos(Long.parseLong(eventContext.getEventData().getProperties().get("producer_timestamp").toString())));
         if (eventContext.getEventData().getSequenceNumber() % 100 == 0) {
-            eventContext.updateCheckpoint();
+            eventContext.updateCheckpointAsync()
+                    .doOnError(throwable -> log.error("Got error while updating checkpoint.", throwable));
         }
     }
 

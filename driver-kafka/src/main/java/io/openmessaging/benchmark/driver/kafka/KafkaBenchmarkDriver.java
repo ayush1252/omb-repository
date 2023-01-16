@@ -52,8 +52,11 @@ import io.openmessaging.benchmark.driver.BenchmarkConsumer;
 import io.openmessaging.benchmark.driver.BenchmarkDriver;
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
 import io.openmessaging.benchmark.driver.ConsumerCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KafkaBenchmarkDriver implements BenchmarkDriver {
+    private static final Logger log = LoggerFactory.getLogger(KafkaBenchmarkDriver.class);
 
     private Config config;
     private ConfigProvider configProvider;
@@ -124,6 +127,7 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
                 NewTopic newTopic = new NewTopic(topic, partitions, config.replicationFactor);
                 newTopic.configs(new HashMap<>((Map) topicProperties));
                 admin.createTopics(Arrays.asList(newTopic)).all().get();
+                log.info(" Topic Name: " + topic);
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);
             }

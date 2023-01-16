@@ -44,10 +44,15 @@ public class EventHubsBenchmarkProducer implements BenchmarkProducer {
 
     @Override
     public CompletableFuture<Integer> sendAsync(Optional<String> key, byte[] payload) {
+
         EventData event = new EventData(payload);
         event.getProperties().putIfAbsent("producer_timestamp", System.currentTimeMillis());
         boolean addSuccessful = eventDataBatch.tryAdd(event);
         CompletableFuture<Integer> future = new CompletableFuture<>();
+        if(isProducerClosed){
+            future.completeExceptionally(new RuntimeException("Producer Client is closed. Failing the send call"));
+            return future;
+        }
         if(!addSuccessful){
             final int messagesToBeSent = eventDataBatch.getCount();
             //EventDataBatch is full. Send the existing batch and then add the current data.
