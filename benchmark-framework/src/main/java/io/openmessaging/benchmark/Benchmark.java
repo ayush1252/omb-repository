@@ -189,8 +189,8 @@ public class Benchmark {
                     producerProperties.load(new StringReader(driverConfiguration.producerConfig));
 
                     String batchSize = Optional.ofNullable(producerProperties.getProperty("batch.size"))
-                            .orElse("16000");
-                    batchSize = (Integer.parseInt(batchSize) / 1000) + "KB";
+                            .orElse("1048576");
+                    batchSize = (Integer.parseInt(batchSize) / 1024) + "KB";
                     int batchCount = Integer.parseInt(
                             Optional.ofNullable(producerProperties.getProperty("batch.count"))
                                     .orElse("1"));

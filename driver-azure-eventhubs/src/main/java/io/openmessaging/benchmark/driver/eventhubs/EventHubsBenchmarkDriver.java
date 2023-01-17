@@ -81,7 +81,7 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         producerProperties = new Properties();
         producerProperties.putAll(commonProperties);
         producerProperties.load(new StringReader(config.producerConfig));
-        producerProperties.putIfAbsent("batch.size", "16000");
+        producerProperties.putIfAbsent("batch.size", "1048576");
         producerProperties.putIfAbsent("batch.count", "1");
 
         Properties consumerProperties = new Properties();
