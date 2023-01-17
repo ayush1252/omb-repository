@@ -35,6 +35,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.math3.util.Precision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -438,8 +439,8 @@ public class WorkloadGenerator implements AutoCloseable {
             snapshotResult.timestamp = Instant.now().truncatedTo(ChronoUnit.SECONDS).toString().replaceAll("[TZ]", " ");
             snapshotResult.timeSinceTestStartInSeconds = TimeUnit.NANOSECONDS.toSeconds(now - startTime);
 
-            snapshotResult.publishRate = publishRate;
-            snapshotResult.consumeRate = consumeRate;
+            snapshotResult.publishRate = Precision.round(publishRate,2);
+            snapshotResult.consumeRate = Precision.round(consumeRate,2);
             snapshotResult.backlog = currentBacklog;
 
             snapshotResult.populatePublishLatency(stats.publishLatency);

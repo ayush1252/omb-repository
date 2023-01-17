@@ -1,6 +1,7 @@
 package io.openmessaging.benchmark.output;
 
 import org.HdrHistogram.Histogram;
+import org.apache.commons.math3.util.Precision;
 
 public class LatencyResult {
 
@@ -41,6 +42,6 @@ public class LatencyResult {
     }
 
     public static double microsToMillis(double microTime) {
-        return microTime / (1000);
+        return Precision.round(microTime / (1000),2);
     }
 }
