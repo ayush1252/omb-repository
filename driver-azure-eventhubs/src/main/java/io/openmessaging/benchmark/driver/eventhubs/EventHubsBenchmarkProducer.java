@@ -21,11 +21,13 @@ package io.openmessaging.benchmark.driver.eventhubs;
 import com.azure.messaging.eventhubs.EventData;
 import com.azure.messaging.eventhubs.EventDataBatch;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
+import com.azure.messaging.eventhubs.models.CreateBatchOptions;
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
 public class EventHubsBenchmarkProducer implements BenchmarkProducer {
@@ -33,13 +35,15 @@ public class EventHubsBenchmarkProducer implements BenchmarkProducer {
 
     private final EventHubProducerClient producerClient;
     private final int batchCount;
+    private final int batchSize;
     private EventDataBatch eventDataBatch;
     private boolean isProducerClosed = false;
 
-    public EventHubsBenchmarkProducer(EventHubProducerClient producerClient, int batchCount) {
+    public EventHubsBenchmarkProducer(EventHubProducerClient producerClient, Properties producerProperties) {
         this.producerClient = producerClient;
-        this.batchCount = batchCount;
-        eventDataBatch = producerClient.createBatch();
+        this.batchCount = Integer.parseInt(producerProperties.getProperty("batch.count"));
+        this.batchSize = Integer.parseInt(producerProperties.getProperty("batch.size"));
+        eventDataBatch = producerClient.createBatch(new CreateBatchOptions().setMaximumSizeInBytes(batchSize));
     }
 
     @Override
@@ -58,13 +62,13 @@ public class EventHubsBenchmarkProducer implements BenchmarkProducer {
             //EventDataBatch is full. Send the existing batch and then add the current data.
             // This will block the producer thread instead of sending it asynchronously like the non batched approach.
             producerClient.send(eventDataBatch);
-            eventDataBatch = producerClient.createBatch();
+            eventDataBatch = producerClient.createBatch(new CreateBatchOptions().setMaximumSizeInBytes(batchSize));
             eventDataBatch.tryAdd(event);
             future.complete(messagesToBeSent);
         } else{
             if(eventDataBatch.getCount() >= batchCount){
                 producerClient.send(eventDataBatch);
-                eventDataBatch = producerClient.createBatch();
+                eventDataBatch = producerClient.createBatch(new CreateBatchOptions().setMaximumSizeInBytes(batchSize));
                 future.complete(batchCount);
             } else{
                 future.complete(0);

@@ -11,12 +11,15 @@ public class Metadata {
     public String workload;
 
     public int topics;
-    public int partitions;
 
+    //These details are at a topic level.
+    public int partitions;
     public int producerCount;
     public int consumerCount;
     public int consumerGroups;
+
     public int batchCount;
+    public String batchSize;
 
     public String payload;
     public String namespaceName;

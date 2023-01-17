@@ -22,8 +22,6 @@ driverClass: io.openmessaging.benchmark.driver.eventhubs.EventHubsBenchmarkDrive
 protocol: AMQP
 product: EventHubs
 sku: DedicatedV2
-
-batchCount: 15
 reset: true
 
 topicConfig: |
@@ -34,7 +32,7 @@ commonConfig: |
   unused=0
 
 producerConfig: |
-  unused=0
+  batch.count=10
 
 consumerConfig: |
   unused=0

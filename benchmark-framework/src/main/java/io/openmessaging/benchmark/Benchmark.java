@@ -20,6 +20,7 @@ package io.openmessaging.benchmark;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -183,20 +184,29 @@ public class Benchmark {
                     result.testDetails.sku = driverConfiguration.sku;
                     result.testDetails.protocol = driverConfiguration.protocol;
 
-                    Metadata testRunMetadata = Metadata.builder()
+                    //Fetch BatchSize in KB and BatchCount
+                    Properties producerProperties = new Properties();
+                    producerProperties.load(new StringReader(driverConfiguration.producerConfig));
+
+                    String batchSize = Optional.ofNullable(producerProperties.getProperty("batch.size"))
+                            .orElse("16000");
+                    batchSize = (Integer.parseInt(batchSize) / 1000) + "KB";
+                    int batchCount = Integer.parseInt(
+                            Optional.ofNullable(producerProperties.getProperty("batch.count"))
+                                    .orElse("1"));
+
+                    result.testDetails.metadata = Metadata.builder()
                             .workload(workload.name)
                             .payload(workload.payloadFile)
                             .namespaceName(driverConfiguration.namespaceName)
                             .topics(workload.topics)
                             .partitions(workload.partitionsPerTopic)
-                            .consumerCount(workload.subscriptionsPerTopic)
                             .producerCount(workload.producersPerTopic)
-                            .consumerGroups(workload.consumerPerSubscription)
-                            .batchCount(driverConfiguration.batchCount)
+                            .consumerGroups(workload.subscriptionsPerTopic)
+                            .consumerCount(workload.consumerPerSubscription * workload.subscriptionsPerTopic)
+                            .batchCount(batchCount)
+                            .batchSize(batchSize)
                             .build();
-
-                    testRunMetadata.partitions = workload.partitionsPerTopic;
-                    result.testDetails.metadata = testRunMetadata;
 
                     String fileNamePrefix = arguments.output.length() > 0 ? arguments.output
                             : String.format("%s-%s-%s", workloadName, driverConfiguration.name,

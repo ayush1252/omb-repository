@@ -59,8 +59,8 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
 
     private String topicPrefix;
     private String namespace;
-    private int batchCount;
     private TokenCredential credential;
+    Properties producerProperties;
 
     private final List<BenchmarkProducer> producers = Collections.synchronizedList(new ArrayList<>());
     private final List<BenchmarkConsumer> consumers = Collections.synchronizedList(new ArrayList<>());
@@ -78,9 +78,11 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         Properties commonProperties = new Properties();
         commonProperties.load(new StringReader(config.commonConfig));
 
-        Properties producerProperties = new Properties();
+        producerProperties = new Properties();
         producerProperties.putAll(commonProperties);
         producerProperties.load(new StringReader(config.producerConfig));
+        producerProperties.putIfAbsent("batch.size", "16000");
+        producerProperties.putIfAbsent("batch.count", "1");
 
         Properties consumerProperties = new Properties();
         consumerProperties.putAll(commonProperties);
@@ -91,7 +93,6 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
 
         topicPrefix = topicProperties.getProperty("topic.name.prefix");
         namespace = metadata.NamespaceName;
-        batchCount = config.batchCount;
 
         blobContainerAsyncClient = CreateCheckpointStore(consumerProperties);
         eventHubAdministrator = new EventHubAdministrator(metadata);
@@ -130,7 +131,7 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         EventHubProducerClient ehProducerClient = new EventHubClientBuilder()
                 .credential(namespace + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix), topic, credential)
                 .buildProducerClient();
-        BenchmarkProducer benchmarkProducer = new EventHubsBenchmarkProducer(ehProducerClient, batchCount);
+        BenchmarkProducer benchmarkProducer = new EventHubsBenchmarkProducer(ehProducerClient, producerProperties);
         try {
             producers.add(benchmarkProducer);
             return CompletableFuture.completedFuture(benchmarkProducer);

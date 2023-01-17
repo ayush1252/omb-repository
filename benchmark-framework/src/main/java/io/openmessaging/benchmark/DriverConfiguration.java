@@ -25,5 +25,6 @@ public class DriverConfiguration {
     public String product;
     public String sku;
     public String namespaceName;
-    public int batchCount = 1;
+
+    public String producerConfig;
 }
