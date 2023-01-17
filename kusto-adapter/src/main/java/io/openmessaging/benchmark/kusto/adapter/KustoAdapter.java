@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
  */
 public class KustoAdapter {
 
+    private static final String MAPPING_SUFFIX = "_mapping";
+    private static final String V1_SUFFIX = "_V1";
     private static final Logger log = LoggerFactory.getLogger(KustoAdapter.class);
 
     static ExecutorService service = Executors.newFixedThreadPool(3);
@@ -53,9 +55,9 @@ public class KustoAdapter {
     }
 
     public void uploadDataToKustoCluster(String fileNamePrefix) throws InterruptedException {
-        service.execute(ingestFile(database, fileNamePrefix + "-details.json", "PerformanceRunDetails"));
-        service.execute(ingestFile(database, fileNamePrefix + "-snapshot.json", "PerformanceRunIndividualSnapshots"));
-        service.execute(ingestFile(database, fileNamePrefix + "-aggregate.json", "PerformanceRunAggregates"));
+        service.execute(ingestFile(database, fileNamePrefix + "-details.json", "PerformanceRunDetails", MAPPING_SUFFIX + V1_SUFFIX));
+        service.execute(ingestFile(database, fileNamePrefix + "-snapshot.json", "PerformanceRunIndividualSnapshots", MAPPING_SUFFIX));
+        service.execute(ingestFile(database, fileNamePrefix + "-aggregate.json", "PerformanceRunAggregates", MAPPING_SUFFIX));
 
         try{
             latch.await(10, TimeUnit.MINUTES);
@@ -74,16 +76,16 @@ public class KustoAdapter {
      * @throws InterruptedException
      * @return
      */
-    private Runnable ingestFile(String database, String fileName, String tableName) throws InterruptedException {
+    private Runnable ingestFile(String database, String fileName, String tableName, String mappingSuffix) throws InterruptedException {
         FileSourceInfo fileSourceInfo = new FileSourceInfo(fileName,1000000);
 
         IngestionProperties ingestionProperties = new IngestionProperties(database, tableName);
         ingestionProperties.setDataFormat(IngestionProperties.DataFormat.MULTIJSON);
-        ingestionProperties.setIngestionMapping(tableName + "_mapping", IngestionMappingKind.JSON);
+        ingestionProperties.setIngestionMapping(tableName + mappingSuffix, IngestionMappingKind.JSON);
         ingestionProperties.setReportLevel(IngestionReportLevel.FAILURES_AND_SUCCESSES);
         ingestionProperties.setReportMethod(IngestionReportMethod.QUEUE_AND_TABLE);
 
-        log.info("Trying to Ingest Data " + fileName + " into table " + tableName);
+        log.info("Trying to Ingest Data " + fileName + " into table " + tableName + " with schema " + ingestionProperties.getIngestionMapping().getIngestionMappingReference());
         return new WorkerThread(fileSourceInfo, ingestionProperties);
     }
 
