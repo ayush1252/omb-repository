@@ -24,6 +24,7 @@ import java.io.StringReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
@@ -33,6 +34,7 @@ import io.openmessaging.benchmark.kusto.adapter.KustoAdapter;
 import io.openmessaging.benchmark.output.Metadata;
 import io.openmessaging.benchmark.output.TestResult;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.CaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +74,9 @@ public class Benchmark {
 
         @Parameter(names = { "-o", "--output" }, description = "Output", required = false)
         public String output;
+
+        @Parameter(names = {"-t", "--tags"}, description = "Tags associated with the run")
+        public List<String> tags;
     }
 
     static ConfigProvider provider;
@@ -206,6 +211,10 @@ public class Benchmark {
                             .consumerCount(workload.consumerPerSubscription * workload.subscriptionsPerTopic)
                             .batchCount(batchCount)
                             .batchSize(batchSize)
+                            .tags(Optional.ofNullable(arguments.tags).orElse(new ArrayList<>())
+                                    .stream()
+                                    .map(s-> CaseUtils.toCamelCase(s, true))
+                                    .collect(Collectors.toList()))
                             .build();
 
                     String fileNamePrefix = arguments.output.length() > 0 ? arguments.output
