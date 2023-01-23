@@ -23,6 +23,6 @@ bin/benchmark --drivers driver-kafka/kafka-dedicated-v2.yaml workloads/1producer
 bin/benchmark --drivers driver-kafka/kafka-dedicated-v2.yaml workloads/4producer-4consumer-1Mbps.yaml -o kafkadedicatedv2-4producer-4consumer-1MBPS -t Benchmarking,Regression,Latency
 bin/benchmark --drivers driver-kafka/kafka-dedicated-v2.yaml workloads/1producer-1consumer-1Mbps-400KB.yaml -o kafkadedicatedv2-1producer-1consumer-400Kb -t Benchmarking,Latency
 bin/benchmark --drivers driver-kafka/kafka-dedicated-v2.yaml workloads/1producer-1consumer-1Mbps-100KB.yaml -o kafkadedicatedv2-1producer-1consumer-100Kb -t Benchmarking,Latency
-bin/benchmark --drivers driver-azure-eventhubs/kafka-batch-dedicated-v2.yaml workloads/1producer-1consumer-1Mbps.yaml -o kafkadedicatedv2-1producer-1consumer-1MBPS-batch -t Benchmarking,Latency,Batch
+bin/benchmark --drivers driver-kafka/kafka-batch-dedicated-v2.yaml workloads/1producer-1consumer-1Mbps.yaml -o kafkadedicatedv2-1producer-1consumer-1MBPS-batch -t Benchmarking,Latency,Batch
 
 echo "Completed Execution of Benchmarking Tests"
