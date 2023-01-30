@@ -45,10 +45,10 @@ public class BenchmarkWorker {
         boolean help;
 
         @Parameter(names = { "-p", "--port" }, description = "HTTP port to listen on")
-        public int httpPort = 8080;
+        public int httpPort = 8082;
 
         @Parameter(names = { "-sp", "--stats-port" }, description = "Stats port to listen on")
-        public int statsPort = 8081;
+        public int statsPort = 8083;
     }
 
     public static void main(String[] args) throws Exception {

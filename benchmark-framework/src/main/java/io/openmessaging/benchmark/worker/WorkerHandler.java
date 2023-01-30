@@ -66,11 +66,16 @@ public class WorkerHandler {
         app.get("/cumulative-latencies", this::handleCumulativeLatencies);
         app.get("/counters-stats", this::handleCountersStats);
         app.post("/reset-stats", this::handleResetStats);
+        app.get("/health-check", this::healthCheck);
 
         app.exception(RuntimeException.class, (e, ctx) -> {
             log.error("Request handler: {} - Exception: {}", ctx.path(), e.getMessage());
             ctx.status(HttpURLConnection.HTTP_INTERNAL_ERROR);
         });
+    }
+
+    private void healthCheck(Context ctx) throws Exception{
+        ctx.result(writer.writeValueAsString("Service Healthy"));
     }
 
     private void handleInitializeDriver(Context ctx) throws Exception {
