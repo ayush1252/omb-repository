@@ -17,6 +17,7 @@
 # under the License.
 #
 
+identifier: amqp-premium
 name: EventHubs AMQP PremiumSKU
 driverClass: io.openmessaging.benchmark.driver.eventhubs.EventHubsBenchmarkDriver
 reset: true

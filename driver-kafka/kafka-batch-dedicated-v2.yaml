@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+identifier: kafka-batch-dedicated-v2
 name: Kafka DedicatedV2 SKU BatchSend
 driverClass: io.openmessaging.benchmark.driver.kafka.KafkaBenchmarkDriver
 protocol: Kafka

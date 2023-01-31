@@ -17,6 +17,7 @@
 # under the License.
 #
 
+identifier: amqp-standard
 name: EventHubs AMQP StandardSKU
 driverClass: io.openmessaging.benchmark.driver.eventhubs.EventHubsBenchmarkDriver
 reset: true

@@ -19,6 +19,8 @@
 package io.openmessaging.benchmark.driver.eventhubs;
 
 public class Config {
+    public String identifier;
+
     public boolean reset;
 
     public String topicConfig;

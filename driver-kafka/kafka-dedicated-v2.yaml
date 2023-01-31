@@ -12,6 +12,7 @@
 # limitations under the License.
 #
 
+identifier: kafka-dedicated-v2
 name: Kafka DedicatedV2 SKU
 driverClass: io.openmessaging.benchmark.driver.kafka.KafkaBenchmarkDriver
 protocol: Kafka

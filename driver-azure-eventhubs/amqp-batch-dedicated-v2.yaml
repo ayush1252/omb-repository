@@ -17,6 +17,7 @@
 # under the License.
 #
 
+identifier: amqp-batch-dedicated-v2
 name: EventHubs AMQP DedicatedV2SKU BatchSend
 driverClass: io.openmessaging.benchmark.driver.eventhubs.EventHubsBenchmarkDriver
 protocol: AMQP

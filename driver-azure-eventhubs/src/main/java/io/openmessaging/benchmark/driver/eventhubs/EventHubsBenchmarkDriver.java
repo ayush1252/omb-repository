@@ -71,9 +71,9 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
     @Override
     public void initialize(File configurationFile, org.apache.bookkeeper.stats.StatsLogger statsLogger) throws IOException {
         configProvider = ConfigProvider.getInstance(EnvironmentName.Production.toString());
-        NamespaceMetadata metadata = configProvider
-                .getNamespaceMetaData(StringUtils.split(configurationFile.getName(), '.')[0]);
+
         Config config = mapper.readValue(configurationFile, Config.class);
+        NamespaceMetadata metadata = configProvider.getNamespaceMetaData(config.identifier);
 
         Properties commonProperties = new Properties();
         commonProperties.load(new StringReader(config.commonConfig));
