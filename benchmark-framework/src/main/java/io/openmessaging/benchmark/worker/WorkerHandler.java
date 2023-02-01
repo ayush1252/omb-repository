@@ -84,7 +84,9 @@ public class WorkerHandler {
         Files.write(ctx.bodyAsBytes(), tempFile);
 
         localWorker.initializeDriver(tempFile);
-        tempFile.delete();
+        log.info("Completed Init of LocalDriver");
+        if(tempFile.exists())
+            tempFile.delete();
     }
 
     private void handleCreateTopics(Context ctx) throws Exception {
