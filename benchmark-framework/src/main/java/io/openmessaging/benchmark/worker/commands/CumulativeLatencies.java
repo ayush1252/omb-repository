@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class CumulativeLatencies {
 
     @JsonIgnore
-    public Histogram publishLatency = new Histogram(TimeUnit.SECONDS.toMicros(60), 5);
+    public Histogram publishLatency = new Histogram(TimeUnit.SECONDS.toMicros(600), 5);
     public byte[] publishLatencyBytes;
 
     @JsonIgnore
