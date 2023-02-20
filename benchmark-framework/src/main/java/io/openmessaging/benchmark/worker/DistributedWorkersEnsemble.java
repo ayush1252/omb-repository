@@ -231,7 +231,7 @@ public class DistributedWorkersEnsemble implements Worker {
 
             try {
                 stats.publishLatency.add(Histogram.decodeFromCompressedByteBuffer(
-                        ByteBuffer.wrap(is.publishLatencyBytes), TimeUnit.SECONDS.toMicros(30)));
+                        ByteBuffer.wrap(is.publishLatencyBytes), TimeUnit.SECONDS.toMicros(60)));
 
                 stats.endToEndLatency.add(Histogram.decodeFromCompressedByteBuffer(
                         ByteBuffer.wrap(is.endToEndLatencyBytes), TimeUnit.HOURS.toMicros(12)));
@@ -251,7 +251,7 @@ public class DistributedWorkersEnsemble implements Worker {
         individualStats.forEach(is -> {
             try {
                 stats.publishLatency.add(Histogram.decodeFromCompressedByteBuffer(
-                        ByteBuffer.wrap(is.publishLatencyBytes), TimeUnit.SECONDS.toMicros(30)));
+                        ByteBuffer.wrap(is.publishLatencyBytes), TimeUnit.SECONDS.toMicros(60)));
             } catch (Exception e) {
                 log.error("Failed to decode publish latency");
                 throw new RuntimeException(e);
@@ -331,6 +331,7 @@ public class DistributedWorkersEnsemble implements Worker {
                 Preconditions.checkArgument(response.getStatusCode() == 200);
                 return mapper.readValue(response.getResponseBody(), clazz);
             } catch (IOException e) {
+                log.error("Found Error while calling {} for host {}", path, host);
                 throw new RuntimeException(e);
             }
         });
@@ -346,6 +347,7 @@ public class DistributedWorkersEnsemble implements Worker {
                 Preconditions.checkArgument(response.getStatusCode() == 200);
                 return mapper.readValue(response.getResponseBody(), type);
             } catch (IOException e) {
+                log.error("Found Error while calling {} for host {}", path, host);
                 throw new RuntimeException(e);
             }
         });

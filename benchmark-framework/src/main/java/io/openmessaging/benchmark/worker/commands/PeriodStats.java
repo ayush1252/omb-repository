@@ -20,10 +20,11 @@ package io.openmessaging.benchmark.worker.commands;
 
 import java.util.concurrent.TimeUnit;
 
+import lombok.ToString;
 import org.HdrHistogram.Histogram;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
+@ToString
 public class PeriodStats {
     public long messagesSent = 0;
     public long bytesSent = 0;
