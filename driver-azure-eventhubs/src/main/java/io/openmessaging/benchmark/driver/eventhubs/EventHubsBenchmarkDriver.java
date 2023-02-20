@@ -72,7 +72,9 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         configProvider = ConfigProvider.getInstance(EnvironmentName.Production.toString());
 
         Config config = mapper.readValue(configurationFile, Config.class);
+        log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  config.identifier);
         NamespaceMetadata metadata = configProvider.getNamespaceMetaData(config.identifier);
+        log.info("Using Namespace for this test run- " + metadata.NamespaceName);
 
         Properties commonProperties = new Properties();
         commonProperties.load(new StringReader(config.commonConfig));
@@ -98,9 +100,15 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
 
         if (config.reset) {
             String resourceGroup = metadata.ResourceGroup;
-
+            log.info("Deleting existing entities");
             for (EventHub eh : eventHubAdministrator.getManager().namespaces().eventHubs().listByNamespace(resourceGroup, namespace)) {
-                eventHubAdministrator.getManager().namespaces().eventHubs().deleteByName(resourceGroup, namespace, eh.name());
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        eventHubAdministrator.getManager().namespaces().eventHubs().deleteByName(resourceGroup, namespace, eh.name());
+                        log.info("Successfully deleted entity "+ eh.name());
+                    }
+                }).start();
             }
         }
 
