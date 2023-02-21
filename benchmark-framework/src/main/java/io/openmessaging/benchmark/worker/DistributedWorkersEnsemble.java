@@ -76,7 +76,7 @@ public class DistributedWorkersEnsemble implements Worker {
 
         this.workers = workers;
         this.producerWorkers = workers.stream().limit(numberOfUsedProducerWorkers).collect(toList());
-        this.consumerWorkers = workers.stream().filter(p -> !workers.contains(p)).collect(toList());
+        this.consumerWorkers = workers.stream().filter(p -> !producerWorkers.contains(p)).collect(toList());
 
         log.info("Workers list - producers: {}", producerWorkers);
         log.info("Workers list - consumers: {}", consumerWorkers);
