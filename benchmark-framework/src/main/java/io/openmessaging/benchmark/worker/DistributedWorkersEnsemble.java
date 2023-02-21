@@ -46,7 +46,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -72,13 +71,12 @@ public class DistributedWorkersEnsemble implements Worker {
 
     private int numberOfUsedProducerWorkers;
 
-    public DistributedWorkersEnsemble(List<String> workers) {
+    public DistributedWorkersEnsemble(List<String> workers, int numberOfUsedProducerWorkers) {
         Preconditions.checkArgument(workers.size() > 1);
 
         this.workers = workers;
-        List<List<String>> partitions = Lists.partition(workers, workers.size() / 2);
-        this.producerWorkers = partitions.get(0);
-        this.consumerWorkers = partitions.get(1);
+        this.producerWorkers = workers.stream().limit(numberOfUsedProducerWorkers).collect(toList());
+        this.consumerWorkers = workers.stream().filter(p -> !workers.contains(p)).collect(toList());
 
         log.info("Workers list - producers: {}", producerWorkers);
         log.info("Workers list - consumers: {}", consumerWorkers);
@@ -228,6 +226,7 @@ public class DistributedWorkersEnsemble implements Worker {
             stats.bytesReceived += is.bytesReceived;
             stats.totalMessagesSent += is.totalMessagesSent;
             stats.totalMessagesReceived += is.totalMessagesReceived;
+            stats.requestsSent += is.requestsSent;
 
             try {
                 stats.publishLatency.add(Histogram.decodeFromCompressedByteBuffer(

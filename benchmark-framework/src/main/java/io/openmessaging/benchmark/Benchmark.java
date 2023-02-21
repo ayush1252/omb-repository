@@ -77,6 +77,9 @@ public class Benchmark {
 
         @Parameter(names = {"-t", "--tags"}, description = "Tags associated with the run")
         public List<String> tags;
+
+        @Parameter(names = {"-p"}, description = "Number of producer nodes out of the remote workers specified")
+        public int producerWorkers;
     }
 
     static ConfigProvider provider;
@@ -147,7 +150,7 @@ public class Benchmark {
         Worker worker;
 
         if (arguments.workers != null && !arguments.workers.isEmpty()) {
-            worker = new DistributedWorkersEnsemble(arguments.workers);
+            worker = new DistributedWorkersEnsemble(arguments.workers, arguments.producerWorkers);
         } else {
             // Use local worker implementation
             worker = new LocalWorker();
