@@ -49,7 +49,6 @@ import java.io.StringReader;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,9 +135,9 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
     public CompletableFuture<BenchmarkProducer> createProducer(String topic) {
 
 
-        EventHubProducerClient ehProducerClient = new EventHubClientBuilder()
+        EventHubProducerAsyncClient ehProducerClient = new EventHubClientBuilder()
                 .credential(namespace + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix), topic, credential)
-                .buildProducerClient();
+                .buildAsyncProducerClient();
         BenchmarkProducer benchmarkProducer = new EventHubsBenchmarkProducer(ehProducerClient, producerProperties);
         try {
             producers.add(benchmarkProducer);
