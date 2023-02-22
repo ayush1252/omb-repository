@@ -154,6 +154,7 @@ public class WorkerHandler {
     private void handleStopAll(Context ctx) throws Exception {
         log.info("Stop All");
         localWorker.stopAll();
+        System.gc();
     }
 
     private void handlePeriodStats(Context ctx) throws Exception {
