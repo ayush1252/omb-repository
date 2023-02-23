@@ -88,7 +88,8 @@ public class Benchmark {
     static {
         try {
             //Ensure that you have set EnvironmentVariable AppConfigConnectionString before calling this
-            provider = ConfigProvider.getInstance(EnvironmentName.Production.toString());
+            provider = ConfigProvider.getInstance(Optional.ofNullable(System.getenv("PerfBenchmarkEnvironmentName"))
+                    .orElse(EnvironmentName.Production.toString()));
             adapter = new KustoAdapter(provider.getConfigurationValue(ConfigurationKey.KustoEndpoint),
                     provider.getConfigurationValue(ConfigurationKey.KustoDatabaseName));
 
