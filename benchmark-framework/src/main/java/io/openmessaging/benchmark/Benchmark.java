@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
-import io.openmessaging.benchmark.appconfig.adapter.EnvironmentName;
 import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
 import io.openmessaging.benchmark.kusto.adapter.KustoAdapter;
 import io.openmessaging.benchmark.output.Metadata;
@@ -80,6 +79,9 @@ public class Benchmark {
 
         @Parameter(names = {"-p"}, description = "Number of producer nodes out of the remote workers specified")
         public int producerWorkers;
+
+        @Parameter(names = {"-v", "--visualize"}, arity = 1, description = "To control whether to use ADX DataSink or not")
+        public boolean visualizeUsingKusto = true;
     }
 
     static ConfigProvider provider;
@@ -89,9 +91,6 @@ public class Benchmark {
         try {
             //Ensure that you have set EnvironmentVariable AppConfigConnectionString before calling this
             provider = ConfigProvider.getInstance(System.getenv("PerfBenchmarkEnvironmentName"));
-            adapter = new KustoAdapter(provider.getConfigurationValue(ConfigurationKey.KustoEndpoint),
-                    provider.getConfigurationValue(ConfigurationKey.KustoDatabaseName));
-
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);
@@ -225,7 +224,11 @@ public class Benchmark {
                                     dateFormat.format(new Date()));
 
                     WriteTestResults(fileNamePrefix, result);
-                    adapter.uploadDataToKustoCluster(fileNamePrefix);
+                    if(arguments.visualizeUsingKusto){
+                        adapter = new KustoAdapter(provider.getConfigurationValue(ConfigurationKey.KustoEndpoint),
+                                provider.getConfigurationValue(ConfigurationKey.KustoDatabaseName));
+                        adapter.uploadDataToKustoCluster(fileNamePrefix);
+                    }
                     log.info("Completed Execution of Run");
                     generator.close();
                 } catch (Exception e) {
