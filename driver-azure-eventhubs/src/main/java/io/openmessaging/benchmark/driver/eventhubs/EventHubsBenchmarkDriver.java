@@ -69,7 +69,7 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
 
     @Override
     public void initialize(File configurationFile, org.apache.bookkeeper.stats.StatsLogger statsLogger) throws IOException {
-        configProvider = ConfigProvider.getInstance(EnvironmentName.Production.toString());
+        configProvider = ConfigProvider.getInstance(System.getenv("PerfBenchmarkEnvironmentName"));
 
         Config config = mapper.readValue(configurationFile, Config.class);
         log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  config.identifier);

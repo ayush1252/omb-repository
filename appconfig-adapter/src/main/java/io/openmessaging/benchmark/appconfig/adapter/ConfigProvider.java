@@ -1,5 +1,6 @@
 package io.openmessaging.benchmark.appconfig.adapter;
 
+import com.azure.core.exception.ResourceNotFoundException;
 import com.azure.data.appconfiguration.ConfigurationClient;
 import com.azure.data.appconfiguration.ConfigurationClientBuilder;
 import com.azure.data.appconfiguration.models.ConfigurationSetting;
@@ -9,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Adapter class over Azure AppConfig to provide Configuration for running tests.
@@ -29,6 +31,10 @@ public class ConfigProvider {
     }
 
     public static ConfigProvider getInstance(String environmentName) {
+        //Defaulting to a production environment unless specified otherwise.
+        if(environmentName == null)
+            environmentName = EnvironmentName.Production.toString();
+
         if (provider == null) {
             synchronized (lockObject){
                 if(provider == null){
@@ -44,8 +50,17 @@ public class ConfigProvider {
         return provider;
     }
 
+    public String getConfigurationValue(ConfigurationKey configurationKey, String defaultValue){
+        return Optional.ofNullable(this.getConfigurationValue(configurationKey)).orElse(defaultValue);
+    }
+
     public String getConfigurationValue(ConfigurationKey configKey){
-        return configurationClient.getConfigurationSetting(configKey.toString(), labelName).getValue();
+        try{
+            return configurationClient.getConfigurationSetting(configKey.toString(), labelName).getValue();
+        } catch (ResourceNotFoundException e){
+            log.error("Could not find configuration with key "+ configKey + " and label " + labelName);
+            return null;
+        }
     }
 
     public NamespaceMetadata getNamespaceMetaData(String configName) throws JsonProcessingException {

@@ -40,7 +40,7 @@ public class KustoAdapter {
     public KustoAdapter(String endpoint, String database) throws Exception {
         this.endpoint = endpoint;
         this.database = database;
-        configProvider = ConfigProvider.getInstance(EnvironmentName.Production.toString());
+        configProvider = ConfigProvider.getInstance(System.getenv("PerfBenchmarkEnvironmentName"));
         ingestionClient = getIngestionClient(endpoint);
     }
 

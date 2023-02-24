@@ -11,10 +11,6 @@ import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Properties;
-
-import static io.openmessaging.benchmark.appconfig.adapter.EnvironmentName.Production;
-
 public class EventHubAdministrator {
     private static final Logger log = LoggerFactory.getLogger(EventHubAdministrator.class);
 
@@ -30,7 +26,7 @@ public class EventHubAdministrator {
 
     public EventHubAdministrator(NamespaceMetadata namespaceMetadata) {
         this.metadata = namespaceMetadata;
-        provider = ConfigProvider.getInstance(Production.toString());
+        provider = ConfigProvider.getInstance(System.getenv("PerfBenchmarkEnvironmentName"));
         sharedCSC = createClientSecretCredential();
         sharedAzureProfile = createAzureProfile(namespaceMetadata);
         manager =  EventHubsManager.configure()
@@ -45,9 +41,10 @@ public class EventHubAdministrator {
     }
 
     private static TokenCredential createClientSecretCredential() {
+
         return new DefaultAzureCredentialBuilder()
                 .tenantId(provider.getConfigurationValue(ConfigurationKey.ApplicationTenantID))
-                .authorityHost(AzureEnvironment.AZURE.getActiveDirectoryEndpoint())
+                .authorityHost(provider.getConfigurationValue(ConfigurationKey.AuthorityHost, AzureEnvironment.AZURE.getActiveDirectoryEndpoint()))
                 .build();
     }
 
