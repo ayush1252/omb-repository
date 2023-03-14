@@ -57,15 +57,15 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
     private static final Logger log = LoggerFactory.getLogger(EventHubsBenchmarkDriver.class);
 
     private String topicPrefix;
-    private String namespace;
-    private TokenCredential credential;
-    Properties producerProperties;
+    protected String namespace;
+    protected TokenCredential credential;
+    protected Properties producerProperties;
 
-    private final List<BenchmarkProducer> producers = Collections.synchronizedList(new ArrayList<>());
+    protected final List<BenchmarkProducer> producers = Collections.synchronizedList(new ArrayList<>());
     private final List<BenchmarkConsumer> consumers = Collections.synchronizedList(new ArrayList<>());
     private BlobContainerAsyncClient blobContainerAsyncClient;
     private EventHubAdministrator eventHubAdministrator;
-    private ConfigProvider configProvider;
+    protected ConfigProvider configProvider;
 
     @Override
     public void initialize(File configurationFile, org.apache.bookkeeper.stats.StatsLogger statsLogger) throws IOException {
@@ -133,8 +133,6 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
 
     @Override
     public CompletableFuture<BenchmarkProducer> createProducer(String topic) {
-
-
         EventHubProducerAsyncClient ehProducerClient = new EventHubClientBuilder()
                 .credential(namespace + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix), topic, credential)
                 .buildAsyncProducerClient();
