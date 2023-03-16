@@ -18,16 +18,16 @@
 #
 
 
-name: 1 producer 1 consumer 1 topic 1MB/second
+name: 1 producer 1 consumer 1 topic 4KB payload
 
 topics: 1
-partitionsPerTopic: 10
+partitionsPerTopic: 1
 messageSize: 4096
 payloadFile: "payload/payload-4Kb.data"
 subscriptionsPerTopic: 1
 producersPerTopic: 1
-consumerPerSubscription: 1
-producerRate: 250
+consumerPerSubscription: 4
+producerRate: 100
 consumerBacklogSizeGB: 0
 testDurationMinutes: 10
 

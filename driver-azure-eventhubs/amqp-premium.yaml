@@ -19,7 +19,7 @@
 
 identifier: amqp-premium
 name: EventHubs AMQP PremiumSKU
-driverClass: io.openmessaging.benchmark.driver.eventhubs.EventHubsBenchmarkDriver
+driverClass: io.openmessaging.benchmark.driver.eventhubs.syncproducer.EventHubsBenchmarkSyncProducerDriver
 reset: true
 protocol: AMQP
 product: EventHubs

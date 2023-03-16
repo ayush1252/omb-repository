@@ -19,7 +19,7 @@
 
 identifier: amqp-dedicated-v2
 name: EventHubs AMQP DedicatedV2SKU
-driverClass: io.openmessaging.benchmark.driver.eventhubs.EventHubsBenchmarkDriver
+driverClass: io.openmessaging.benchmark.driver.eventhubs.syncproducer.EventHubsBenchmarkSyncProducerDriver
 reset: true
 protocol: AMQP
 product: EventHubs

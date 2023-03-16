@@ -21,14 +21,14 @@
 name: 1 producer 1 consumer 1 topic 1MB/second
 
 topics: 1
-partitionsPerTopic: 10
-messageSize: 4096
-payloadFile: "payload/payload-4Kb.data"
+partitionsPerTopic: 1
+messageSize: 51200
+payloadFile: "payload/payload-50Kb.data"
 subscriptionsPerTopic: 1
 producersPerTopic: 1
 consumerPerSubscription: 1
-producerRate: 250
+producerRate: 20
 consumerBacklogSizeGB: 0
-testDurationMinutes: 1
+testDurationMinutes: 10
 
 

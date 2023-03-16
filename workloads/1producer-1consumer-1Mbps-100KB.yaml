@@ -21,7 +21,7 @@
 name: 1 producer 1 consumer 100KB Payload 1MBPs
 
 topics: 1
-partitionsPerTopic: 10
+partitionsPerTopic: 1
 messageSize: 102400
 payloadFile: "payload/payload-100Kb.data"
 subscriptionsPerTopic: 1

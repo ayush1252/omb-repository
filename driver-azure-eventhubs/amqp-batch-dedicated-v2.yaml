@@ -19,7 +19,7 @@
 
 identifier: amqp-batch-dedicated-v2
 name: EventHubs AMQP DedicatedV2SKU BatchSend
-driverClass: io.openmessaging.benchmark.driver.eventhubs.EventHubsBenchmarkDriver
+driverClass: io.openmessaging.benchmark.driver.eventhubs.syncproducer.EventHubsBenchmarkSyncProducerDriver
 protocol: AMQP
 product: EventHubs
 sku: DedicatedV2
