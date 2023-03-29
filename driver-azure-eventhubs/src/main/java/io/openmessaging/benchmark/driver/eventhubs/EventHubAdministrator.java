@@ -5,6 +5,7 @@ import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.resourcemanager.eventhubs.EventHubsManager;
+import com.azure.resourcemanager.eventhubs.models.EventHub;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
 import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
@@ -49,12 +50,17 @@ public class EventHubAdministrator {
     }
 
     public void createTopic(String topic, int partitions) {
-        log.info(" Topic Name: " + topic);
-        manager.namespaces()
-                .eventHubs()
-                .define(topic)
-                .withExistingNamespace(metadata.ResourceGroup, metadata.NamespaceName)
-                .withPartitionCount(partitions)
-                .create();
+        try{
+            final EventHub eventHub = manager.namespaces().eventHubs().getByName(metadata.ResourceGroup, metadata.NamespaceName, topic);
+            log.info("Reusing the existing topic as it exists - " + eventHub.name() + " with partition counts " + (long) eventHub.partitionIds().size());
+        } catch (Exception e){
+            log.info(" Creating new topic with Topic Name: " + topic);
+            manager.namespaces()
+                    .eventHubs()
+                    .define(topic)
+                    .withExistingNamespace(metadata.ResourceGroup, metadata.NamespaceName)
+                    .withPartitionCount(partitions)
+                    .create();
+        }
     }
 }

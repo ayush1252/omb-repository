@@ -24,13 +24,12 @@ import java.io.StringReader;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
-import io.openmessaging.benchmark.appconfig.adapter.EnvironmentName;
 import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
 import org.apache.bookkeeper.stats.StatsLogger;
-import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.DeleteTopicsResult;
 import org.apache.kafka.clients.admin.ListTopicsResult;
@@ -123,10 +122,16 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
     public CompletableFuture<Void> createTopic(String topic, int partitions) {
         return CompletableFuture.runAsync(() -> {
             try {
-                NewTopic newTopic = new NewTopic(topic, partitions, config.replicationFactor);
-                newTopic.configs(new HashMap<>((Map) topicProperties));
-                admin.createTopics(Arrays.asList(newTopic)).all().get();
-                log.info(" Topic Name: " + topic);
+                final List<String> existingTopics = admin.listTopics().names().get()
+                        .stream().map(s -> s.toLowerCase(Locale.ROOT)).collect(Collectors.toList());
+                if (!existingTopics.contains(topic.toLowerCase(Locale.ROOT))) {
+                    NewTopic newTopic = new NewTopic(topic, partitions, config.replicationFactor);
+                    newTopic.configs(new HashMap<>((Map) topicProperties));
+                    admin.createTopics(Arrays.asList(newTopic)).all().get();
+                    log.info(" Topic Name: " + topic);
+                } else {
+                    log.info("Reusing Topic " + topic + "as it already exists");
+                }
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);
             }

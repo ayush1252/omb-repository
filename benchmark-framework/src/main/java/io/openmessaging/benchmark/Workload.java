@@ -29,6 +29,9 @@ public class Workload {
     /** Number of partitions each topic will contain */
     public int partitionsPerTopic;
 
+    /** Set this field if you want to re-use an existing topic */
+    public String topicName;
+
     public KeyDistributorType keyDistributor = KeyDistributorType.NO_KEY;
 
     public int messageSize;

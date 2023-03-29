@@ -43,6 +43,7 @@ import org.apache.bookkeeper.stats.Counter;
 import org.apache.bookkeeper.stats.NullStatsLogger;
 import org.apache.bookkeeper.stats.OpStatsLogger;
 import org.apache.bookkeeper.stats.StatsLogger;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,13 +146,15 @@ public class LocalWorker implements Worker, ConsumerCallback {
         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
         Timer timer = new Timer();
-
-        String topicPrefix = benchmarkDriver.getTopicNamePrefix();
-
+        Preconditions.checkArgument(topicsInfo.numberOfTopics > 0, "Number of Topics have to be non zero");
+        if (StringUtils.isNotEmpty(topicsInfo.topicName)) {
+            Preconditions.checkArgument(topicsInfo.numberOfTopics == 1, "Can't specify multiple topics when specifying topic name");
+        }
         List<Topic> topics = new ArrayList<>();
         for (int i = 0; i < topicsInfo.numberOfTopics; i++) {
-            Topic topic = new Topic(String.format("%s-%s-%04d", topicPrefix, RandomGenerator.getRandomString(), i),
-                    topicsInfo.numberOfPartitionsPerTopic);
+            String topicName = Optional.ofNullable(topicsInfo.topicName)
+                    .orElse(String.format("%s-%s-%04d", benchmarkDriver.getTopicNamePrefix(), RandomGenerator.getRandomString(), i));
+            Topic topic = new Topic(topicName,topicsInfo.numberOfPartitionsPerTopic);
             topics.add(topic);
             futures.add(benchmarkDriver.createTopic(topic.name, topic.partitions));
         }

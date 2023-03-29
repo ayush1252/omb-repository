@@ -21,12 +21,14 @@ package io.openmessaging.benchmark.worker.commands;
 public class TopicsInfo {
     public int numberOfTopics;
     public int numberOfPartitionsPerTopic;
+    public String topicName;
 
     public TopicsInfo() {
     }
 
-    public TopicsInfo(int numberOfTopics, int numberOfPartitionsPerTopic) {
+    public TopicsInfo(int numberOfTopics, int numberOfPartitionsPerTopic, String topicName) {
         this.numberOfTopics = numberOfTopics;
         this.numberOfPartitionsPerTopic = numberOfPartitionsPerTopic;
+        this.topicName = topicName;
     }
 }
