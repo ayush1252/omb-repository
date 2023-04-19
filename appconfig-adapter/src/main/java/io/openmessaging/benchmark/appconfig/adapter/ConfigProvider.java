@@ -19,7 +19,7 @@ public class ConfigProvider {
     private static final Logger log = LoggerFactory.getLogger(ConfigProvider.class);
 
     private static volatile ConfigProvider provider = null;
-    private static String labelName = null;
+    private static String environmentStage = null;
     private static final Object lockObject = new Object();
     private final ConfigurationClient configurationClient;
 
@@ -38,13 +38,13 @@ public class ConfigProvider {
         if (provider == null) {
             synchronized (lockObject){
                 if(provider == null){
-                    labelName = environmentName;
+                    environmentStage = environmentName;
                     provider = new ConfigProvider();
                 }
             }
         }
 
-        if(!Objects.equals(labelName, environmentName))
+        if(!Objects.equals(environmentStage, environmentName))
             throw new RuntimeException("Environment Mismatch detected");
 
         return provider;
@@ -56,21 +56,25 @@ public class ConfigProvider {
 
     public String getConfigurationValue(ConfigurationKey configKey){
         try{
-            return configurationClient.getConfigurationSetting(configKey.toString(), labelName).getValue();
+            return configurationClient.getConfigurationSetting(configKey.toString(), environmentStage).getValue();
         } catch (ResourceNotFoundException e){
-            log.error("Could not find configuration with key "+ configKey + " and label " + labelName);
+            log.error("Could not find configuration with key "+ configKey + " and label " + environmentStage);
             return null;
         }
     }
 
     public NamespaceMetadata getNamespaceMetaData(String configName) throws JsonProcessingException {
         try{
-            final ConfigurationSetting configurationSetting = configurationClient.getConfigurationSetting(configName, labelName);
+            final ConfigurationSetting configurationSetting = configurationClient.getConfigurationSetting(configName, environmentStage);
             return new ObjectMapper().readValue(configurationSetting.getValue(),
                     NamespaceMetadata.class);
         } catch(Exception e){
             log.error(String.valueOf(e));
             throw e;
         }
+    }
+
+    public String getEnvironmentStage(){
+        return environmentStage;
     }
 }

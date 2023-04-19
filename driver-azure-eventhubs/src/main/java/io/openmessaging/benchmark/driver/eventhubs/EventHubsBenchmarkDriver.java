@@ -24,6 +24,7 @@ import com.azure.core.http.policy.HttpLogOptions;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.messaging.eventhubs.*;
 import com.azure.messaging.eventhubs.checkpointstore.blob.BlobCheckpointStore;
+import com.azure.messaging.eventhubs.implementation.EventHubSharedKeyCredential;
 import com.azure.storage.blob.BlobContainerAsyncClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 
@@ -31,8 +32,8 @@ import com.azure.resourcemanager.eventhubs.models.EventHub;
 
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
-import io.openmessaging.benchmark.appconfig.adapter.EnvironmentName;
 import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
+import io.openmessaging.benchmark.credential.adapter.CredentialProvider;
 import io.openmessaging.benchmark.driver.BenchmarkConsumer;
 import io.openmessaging.benchmark.driver.BenchmarkDriver;
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
@@ -66,10 +67,12 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
     private BlobContainerAsyncClient blobContainerAsyncClient;
     private EventHubAdministrator eventHubAdministrator;
     protected ConfigProvider configProvider;
+    private CredentialProvider credentialProvider;
 
     @Override
     public void initialize(File configurationFile, org.apache.bookkeeper.stats.StatsLogger statsLogger) throws IOException {
         configProvider = ConfigProvider.getInstance(System.getenv("PerfBenchmarkEnvironmentName"));
+        credentialProvider = CredentialProvider.getInstance();
 
         Config config = mapper.readValue(configurationFile, Config.class);
         log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  config.identifier);
@@ -112,7 +115,8 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
             }
         }
 
-        credential = new DefaultAzureCredentialBuilder().build();
+        credential =  new EventHubSharedKeyCredential("RootManageSharedAccessKey",
+                credentialProvider.getCredential(metadata.NamespaceName+"-SASKey"));
     }
 
     @Override

@@ -3,22 +3,29 @@ package io.openmessaging.benchmark.driver.eventhubs;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.profile.AzureProfile;
-import com.azure.identity.DefaultAzureCredentialBuilder;
+import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.resourcemanager.eventhubs.EventHubsManager;
 import com.azure.resourcemanager.eventhubs.models.EventHub;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
 import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
+import io.openmessaging.benchmark.credential.adapter.CredentialProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+
+import static io.openmessaging.benchmark.appconfig.adapter.EnvironmentName.Production;
 
 public class EventHubAdministrator {
     private static final Logger log = LoggerFactory.getLogger(EventHubAdministrator.class);
 
     TokenCredential sharedCSC;
     AzureProfile sharedAzureProfile;
-    NamespaceMetadata metadata;
-    static ConfigProvider provider;
+    static NamespaceMetadata metadata;
+    static ConfigProvider configProvider;
+    static CredentialProvider credentialProvider;
+    static AzureEnvironment azureEnvironment;
     public EventHubsManager getManager() {
         return manager;
     }
@@ -26,8 +33,21 @@ public class EventHubAdministrator {
     EventHubsManager manager;
 
     public EventHubAdministrator(NamespaceMetadata namespaceMetadata) {
-        this.metadata = namespaceMetadata;
-        provider = ConfigProvider.getInstance(System.getenv("PerfBenchmarkEnvironmentName"));
+        credentialProvider = CredentialProvider.getInstance();
+        metadata = namespaceMetadata;
+        configProvider = ConfigProvider.getInstance(System.getenv("PerfBenchmarkEnvironmentName"));
+
+        if (configProvider.getEnvironmentStage().equalsIgnoreCase(Production.name())) {
+            azureEnvironment = AzureEnvironment.AZURE;
+        } else {
+            //Configuring DF endpoints for Development setup.
+            azureEnvironment = new AzureEnvironment(new HashMap<String, String>() {{
+                put("managementEndpointUrl", "https://management.core.windows.net/");
+                put("resourceManagerEndpointUrl", "https://api-dogfood.resources.windows-int.net");
+                put("activeDirectoryEndpointUrl", "https://login.windows-ppe.net/");
+            }});
+        }
+
         sharedCSC = createClientSecretCredential();
         sharedAzureProfile = createAzureProfile(namespaceMetadata);
         manager =  EventHubsManager.configure()
@@ -36,16 +56,16 @@ public class EventHubAdministrator {
 
 
     private static AzureProfile createAzureProfile(NamespaceMetadata metadata) {
-        return new AzureProfile(provider.getConfigurationValue(ConfigurationKey.ApplicationTenantID),
-                metadata.SubscriptionId,
-                AzureEnvironment.AZURE);
+        return new AzureProfile(configProvider.getConfigurationValue(ConfigurationKey.ApplicationTenantID),
+                metadata.SubscriptionId, azureEnvironment);
     }
 
     private static TokenCredential createClientSecretCredential() {
-
-        return new DefaultAzureCredentialBuilder()
-                .tenantId(provider.getConfigurationValue(ConfigurationKey.ApplicationTenantID))
-                .authorityHost(provider.getConfigurationValue(ConfigurationKey.AuthorityHost, AzureEnvironment.AZURE.getActiveDirectoryEndpoint()))
+        return new ClientSecretCredentialBuilder()
+                .clientSecret(credentialProvider.getCredential(configProvider.getEnvironmentStage() + "AAD" + "ClientSecret"))
+                .clientId(credentialProvider.getCredential(configProvider.getEnvironmentStage() + "AAD" + "ClientId"))
+                .tenantId(configProvider.getConfigurationValue(ConfigurationKey.ApplicationTenantID))
+                .authorityHost(configProvider.getConfigurationValue(ConfigurationKey.AuthorityHost))
                 .build();
     }
 

@@ -36,6 +36,7 @@
         <module>package</module>
         <module>kusto-adapter</module>
         <module>appconfig-adapter</module>
+        <module>credential-adapter</module>
     </modules>
 
 
