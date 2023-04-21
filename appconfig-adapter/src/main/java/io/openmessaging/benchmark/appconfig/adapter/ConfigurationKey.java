@@ -2,6 +2,7 @@ package io.openmessaging.benchmark.appconfig.adapter;
 
 public enum ConfigurationKey {
     AuthorityHost,
+    ResourceManagementURL,
     ApplicationTenantID, //Tenant ID for the resources
     FQDNSuffix,
 

@@ -40,11 +40,10 @@ public class EventHubAdministrator {
         if (configProvider.getEnvironmentStage().equalsIgnoreCase(Production.name())) {
             azureEnvironment = AzureEnvironment.AZURE;
         } else {
-            //Configuring DF endpoints for Development setup.
+            //Configure non Azure Prod Endpoint in Azure Config.
             azureEnvironment = new AzureEnvironment(new HashMap<String, String>() {{
-                put("managementEndpointUrl", "https://management.core.windows.net/");
-                put("resourceManagerEndpointUrl", "https://api-dogfood.resources.windows-int.net");
-                put("activeDirectoryEndpointUrl", "https://login.windows-ppe.net/");
+                put("resourceManagerEndpointUrl", configProvider.getConfigurationValue(ConfigurationKey.ResourceManagementURL));
+                put("activeDirectoryEndpointUrl", configProvider.getConfigurationValue(ConfigurationKey.AuthorityHost));
             }});
         }
 
