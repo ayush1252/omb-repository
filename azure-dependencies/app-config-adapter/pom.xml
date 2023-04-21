@@ -28,24 +28,13 @@
         <relativePath>..</relativePath>
     </parent>
 
-    <artifactId>kusto-adapter</artifactId>
+    <artifactId>app-config-adapter</artifactId>
 
     <dependencies>
-
         <dependency>
-            <groupId>com.microsoft.azure.kusto</groupId>
-            <artifactId>kusto-ingest</artifactId>
-            <version>3.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.azure.kusto</groupId>
-            <artifactId>kusto-data</artifactId>
-            <version>3.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>appconfig-adapter</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-data-appconfiguration</artifactId>
+            <version>1.4.1</version>
         </dependency>
     </dependencies>
 </project>

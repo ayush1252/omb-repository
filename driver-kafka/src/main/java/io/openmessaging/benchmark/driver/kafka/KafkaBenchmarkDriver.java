@@ -71,7 +71,7 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
     @Override
     public void initialize(File configurationFile, StatsLogger statsLogger) throws IOException {
         config = mapper.readValue(configurationFile, Config.class);
-        configProvider = ConfigProvider.getInstance(System.getenv("PerfBenchmarkEnvironmentName"));
+        configProvider = ConfigProvider.getInstance();
         NamespaceMetadata metadata = configProvider.getNamespaceMetaData(config.identifier);
 
         Properties commonProperties = new Properties();

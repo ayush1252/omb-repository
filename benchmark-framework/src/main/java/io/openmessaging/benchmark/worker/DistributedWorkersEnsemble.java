@@ -25,11 +25,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.zip.DataFormatException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -100,7 +102,7 @@ public class DistributedWorkersEnsemble implements Worker {
 
     @Override
     public void notifyTopicCreation(List<Topic> topics) throws IOException {
-        List<CompletableFuture<Void>> futures = workers.stream().map(worker -> {
+        final Collection<CompletableFuture<Void>> futures = workers.stream().map(worker -> {
             try {
                 return sendPost(worker, "/notify-topic-creation", writer.writeValueAsBytes(topics));
             } catch (JsonProcessingException e) {
@@ -141,7 +143,7 @@ public class DistributedWorkersEnsemble implements Worker {
 
         log.info("Number of producers configured for the topic: " + numberOfUsedProducerWorkers);
 
-        List<CompletableFuture<Void>> futures = topicsPerProducerMap.keySet().stream().map(producer -> {
+        final Collection<CompletableFuture<Void>> futures = topicsPerProducerMap.keySet().stream().map(producer -> {
             try {
                 return sendPost(producer, "/create-producers",
                         writer.writeValueAsBytes(topicsPerProducerMap.get(producer)));
@@ -201,7 +203,7 @@ public class DistributedWorkersEnsemble implements Worker {
             topicsPerWorkerMap.put(consumerWorkers.get(i++), individualAssignement);
         }
 
-        List<CompletableFuture<Void>> futures = topicsPerWorkerMap.keySet().stream().map(consumer -> {
+        final Collection<CompletableFuture<Void>> futures = topicsPerWorkerMap.keySet().stream().map(consumer -> {
             try {
                 return sendPost(consumer, "/create-consumers",
                         writer.writeValueAsBytes(topicsPerWorkerMap.get(consumer)));

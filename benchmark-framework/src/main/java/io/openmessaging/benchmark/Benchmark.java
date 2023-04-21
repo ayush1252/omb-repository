@@ -56,7 +56,7 @@ public class Benchmark {
     static {
         try {
             //Ensure that you have set EnvironmentVariable AppConfigConnectionString before calling this
-            provider = ConfigProvider.getInstance(System.getenv("PerfBenchmarkEnvironmentName"));
+            provider = ConfigProvider.getInstance();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);

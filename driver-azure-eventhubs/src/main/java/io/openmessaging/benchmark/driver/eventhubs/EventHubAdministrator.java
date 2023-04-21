@@ -35,13 +35,14 @@ public class EventHubAdministrator {
     public EventHubAdministrator(NamespaceMetadata namespaceMetadata) {
         credentialProvider = CredentialProvider.getInstance();
         metadata = namespaceMetadata;
-        configProvider = ConfigProvider.getInstance(System.getenv("PerfBenchmarkEnvironmentName"));
+        configProvider = ConfigProvider.getInstance();
 
         if (configProvider.getEnvironmentStage().equalsIgnoreCase(Production.name())) {
             azureEnvironment = AzureEnvironment.AZURE;
         } else {
             //Configure non Azure Prod Endpoint in Azure Config.
             azureEnvironment = new AzureEnvironment(new HashMap<String, String>() {{
+                put("managementEndpointUrl", "https://management.core.windows.net/");
                 put("resourceManagerEndpointUrl", configProvider.getConfigurationValue(ConfigurationKey.ResourceManagementURL));
                 put("activeDirectoryEndpointUrl", configProvider.getConfigurationValue(ConfigurationKey.AuthorityHost));
             }});

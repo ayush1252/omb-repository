@@ -35,9 +35,10 @@
         <module>driver-kafka</module>
         <module>driver-azure-eventhubs</module>
         <module>package</module>
-        <module>kusto-adapter</module>
-        <module>appconfig-adapter</module>
-        <module>credential-adapter</module>
+        <module>azure-dependencies/kusto-adapter</module>
+        <module>azure-dependencies/app-config-adapter</module>
+        <module>azure-dependencies/credential-adapter</module>
+        <module>azure-dependencies/storage-adapter</module>
     </modules>
 
 

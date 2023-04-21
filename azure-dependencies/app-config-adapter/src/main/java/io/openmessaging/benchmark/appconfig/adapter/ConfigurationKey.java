@@ -14,5 +14,6 @@ public enum ConfigurationKey {
 
     //Storage Configuration
     StorageAccountName,
-    StorageContainerName
+    StorageContainerName,
+    WorkersContainerName
 }

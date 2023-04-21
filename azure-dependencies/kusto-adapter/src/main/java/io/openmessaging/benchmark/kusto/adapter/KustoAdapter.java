@@ -16,7 +16,6 @@ import com.microsoft.azure.kusto.ingest.result.OperationStatus;
 import com.microsoft.azure.kusto.ingest.source.FileSourceInfo;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
-import io.openmessaging.benchmark.appconfig.adapter.EnvironmentName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +39,7 @@ public class KustoAdapter {
     public KustoAdapter(String endpoint, String database) throws Exception {
         this.endpoint = endpoint;
         this.database = database;
-        configProvider = ConfigProvider.getInstance(System.getenv("PerfBenchmarkEnvironmentName"));
+        configProvider = ConfigProvider.getInstance();
         ingestionClient = getIngestionClient(endpoint);
     }
 

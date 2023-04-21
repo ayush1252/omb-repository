@@ -19,14 +19,10 @@
 package io.openmessaging.benchmark.driver.eventhubs;
 
 import com.azure.core.credential.TokenCredential;
-import com.azure.core.http.policy.HttpLogDetailLevel;
-import com.azure.core.http.policy.HttpLogOptions;
-import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.messaging.eventhubs.*;
 import com.azure.messaging.eventhubs.checkpointstore.blob.BlobCheckpointStore;
 import com.azure.messaging.eventhubs.implementation.EventHubSharedKeyCredential;
 import com.azure.storage.blob.BlobContainerAsyncClient;
-import com.azure.storage.blob.BlobContainerClientBuilder;
 
 import com.azure.resourcemanager.eventhubs.models.EventHub;
 
@@ -50,6 +46,7 @@ import java.io.StringReader;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+import io.openmessaging.benchmark.storage.adapter.StorageAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,12 +64,11 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
     private BlobContainerAsyncClient blobContainerAsyncClient;
     private EventHubAdministrator eventHubAdministrator;
     protected ConfigProvider configProvider;
-    private CredentialProvider credentialProvider;
 
     @Override
     public void initialize(File configurationFile, org.apache.bookkeeper.stats.StatsLogger statsLogger) throws IOException {
-        configProvider = ConfigProvider.getInstance(System.getenv("PerfBenchmarkEnvironmentName"));
-        credentialProvider = CredentialProvider.getInstance();
+        configProvider = ConfigProvider.getInstance();
+        CredentialProvider credentialProvider = CredentialProvider.getInstance();
 
         Config config = mapper.readValue(configurationFile, Config.class);
         log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  config.identifier);
@@ -88,17 +84,14 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         producerProperties.putIfAbsent("batch.size", "1048576");
         producerProperties.putIfAbsent("batch.count", "1");
 
-        Properties consumerProperties = new Properties();
-        consumerProperties.putAll(commonProperties);
-        consumerProperties.load(new StringReader(config.consumerConfig));
-
         Properties topicProperties = new Properties();
         topicProperties.load(new StringReader(config.topicConfig));
 
         topicPrefix = topicProperties.getProperty("topic.name.prefix");
         namespace = metadata.NamespaceName;
 
-        blobContainerAsyncClient = CreateCheckpointStore(consumerProperties);
+        blobContainerAsyncClient = StorageAdapter.GetAsyncStorageClient(configProvider.getConfigurationValue(ConfigurationKey.StorageAccountName),
+                configProvider.getConfigurationValue(ConfigurationKey.StorageContainerName));
         eventHubAdministrator = new EventHubAdministrator(metadata);
 
         if (config.reset) {
@@ -187,19 +180,6 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         for (BenchmarkConsumer consumer : consumers) {
             consumer.close();
         }
-    }
-
-    private BlobContainerAsyncClient CreateCheckpointStore(Properties consumerProperties) {
-        // Construct the blob container endpoint from the arguments.
-        String containerEndpoint = String.format("https://%s.blob.core.windows.net/%s",
-                configProvider.getConfigurationValue(ConfigurationKey.StorageAccountName),
-                configProvider.getConfigurationValue(ConfigurationKey.StorageContainerName));
-
-        return  new BlobContainerClientBuilder()
-                .endpoint(containerEndpoint)
-                .credential(new DefaultAzureCredentialBuilder().build())
-                .httpLogOptions(new HttpLogOptions().setLogLevel(HttpLogDetailLevel.NONE))
-                .buildAsyncClient();
     }
 
     private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory())

@@ -10,6 +10,8 @@ public class AMQPRegressionTests extends EventHubTestBase {
 
     public static void main(String[] args) {
 
+        testSuiteName = "AMQPRegressionTests";
+
         //Add a list of tests here
         configuredTestList.add(XLPayloadTest());
         configuredTestList.add(SmallPayloadTest());

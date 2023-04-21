@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -30,28 +29,17 @@ public class ConfigProvider {
                 .buildClient();
     }
 
-    public static ConfigProvider getInstance(String environmentName) {
-        //Defaulting to a production environment unless specified otherwise.
-        if(environmentName == null)
-            environmentName = EnvironmentName.Production.toString();
-
+    public static ConfigProvider getInstance() {
         if (provider == null) {
             synchronized (lockObject){
                 if(provider == null){
-                    environmentStage = environmentName;
+                    environmentStage = System.getenv("PerfBenchmarkEnvironmentName");
                     provider = new ConfigProvider();
                 }
             }
         }
 
-        if(!Objects.equals(environmentStage, environmentName))
-            throw new RuntimeException("Environment Mismatch detected");
-
         return provider;
-    }
-
-    public String getConfigurationValue(ConfigurationKey configurationKey, String defaultValue){
-        return Optional.ofNullable(this.getConfigurationValue(configurationKey)).orElse(defaultValue);
     }
 
     public String getConfigurationValue(ConfigurationKey configKey){

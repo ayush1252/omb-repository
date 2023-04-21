@@ -2,6 +2,10 @@ package io.openmessaging.benchmark.perftestsuite;
 
 import io.openmessaging.benchmark.Benchmark;
 import io.openmessaging.benchmark.Arguments;
+import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
+import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
+import io.openmessaging.benchmark.storage.adapter.StorageAdapter;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,19 +14,34 @@ import java.util.List;
 
 public abstract class EventHubTestBase {
     private static final Logger log = LoggerFactory.getLogger(EventHubTestBase.class);
+
+    static String testSuiteName;
     static Arguments arguments = new Arguments();
     static List<Runnable> configuredTestList = new ArrayList<>();
-
+    static ConfigProvider configProvider;
     public static void runPerformanceTests(){
         configuredTestList.stream().forEach(individualTest -> {
+            configProvider = ConfigProvider.getInstance();
             log.info("Running Test: " + individualTest.toString());
             individualTest.run();
+
+            //Specifying worker roles if configured
+            arguments.workers = getWorkersIfConfigured(testSuiteName);
+            arguments.producerWorkers = arguments.workers == null ? 0: arguments.workers.size() /2;
+
             try {
                 Benchmark.executeBenchmarkingRun(arguments);
             } catch (Exception e) {
-                log.error("Failed Execution of Test: " + individualTest.toString(), e);
+                log.error("Failed Execution of Test: " + individualTest, e);
             }
         });
+    }
+
+    static List<String> getWorkersIfConfigured(String testSuiteName){
+        return StorageAdapter
+                .readBlobFromStorage(configProvider.getConfigurationValue(ConfigurationKey.StorageAccountName),
+                        configProvider.getConfigurationValue(ConfigurationKey.WorkersContainerName),
+                        StringUtils.toRootLowerCase(testSuiteName) + "-workerfile", ".txt");
     }
 
 }

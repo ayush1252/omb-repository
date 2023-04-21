@@ -38,7 +38,12 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>appconfig-adapter</artifactId>
+			<artifactId>app-config-adapter</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>storage-adapter</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -67,11 +72,9 @@
 			<version>3.5.0</version>
 		</dependency>
 		<dependency>
-			<groupId>io.openmessaging.benchmark</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>credential-adapter</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>compile</scope>
+			<version>${project.version}</version>
 		</dependency>
-
 	</dependencies>
 </project>
