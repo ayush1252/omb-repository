@@ -17,18 +17,26 @@
 # under the License.
 #
 
+identifier: amqp-batch-dedicated-v2
+name: EventHubs AMQP DedicatedV2SKU BatchSend
+driverClass: io.openmessaging.benchmark.driver.eventhubs.EventHubsBenchmarkDriver
+protocol: AMQP
+product: EventHubs
+sku: DedicatedV2
+reset: true
 
-name: 1 producer 1 consumer 1 topic 1MB payload 10MB/s
+topicConfig: |
+  topic.name.prefix=test-topic-amqp
+  topic.name.shared=shared-topic-amqp
 
-topics: 1
-partitionsPerTopic: 1
-messageSize: 1024000
-payloadFile: "payload/payload-1Mb.data"
-subscriptionsPerTopic: 1
-producersPerTopic: 1
-consumerPerSubscription: 1
-producerRate: 10
-consumerBacklogSizeGB: 0
-testDurationMinutes: 10
+commonConfig: |
+  unused=0
+
+producerConfig: |
+  batch.count=250
+
+consumerConfig: |
+  unused=0
+
 
 

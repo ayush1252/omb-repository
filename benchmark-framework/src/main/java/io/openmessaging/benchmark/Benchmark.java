@@ -38,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,39 +49,6 @@ import io.openmessaging.benchmark.worker.LocalWorker;
 import io.openmessaging.benchmark.worker.Worker;
 
 public class Benchmark {
-
-    static class Arguments {
-
-        @Parameter(names = { "-h", "--help" }, description = "Help message", help = true)
-        boolean help;
-
-        @Parameter(names = { "-d",
-                "--drivers" }, description = "Drivers list. eg.: pulsar/pulsar.yaml,kafka/kafka.yaml", required = true)
-        public List<String> drivers;
-
-        @Parameter(names = { "-w",
-                "--workers" }, description = "List of worker nodes. eg: http://1.2.3.4:8080,http://4.5.6.7:8080")
-        public List<String> workers;
-
-        @Parameter(names = { "-wf",
-                "--workers-file" }, description = "Path to a YAML file containing the list of workers addresses")
-        public File workersFile;
-
-        @Parameter(description = "Workloads", required = true)
-        public List<String> workloads;
-
-        @Parameter(names = { "-o", "--output" }, description = "Output", required = false)
-        public String output;
-
-        @Parameter(names = {"-t", "--tags"}, description = "Tags associated with the run")
-        public List<String> tags;
-
-        @Parameter(names = {"-p"}, description = "Number of producer nodes out of the remote workers specified")
-        public int producerWorkers;
-
-        @Parameter(names = {"-v", "--visualize"}, arity = 1, description = "To control whether to use ADX DataSink or not")
-        public boolean visualizeUsingKusto = true;
-    }
 
     static ConfigProvider provider;
     static KustoAdapter adapter;
@@ -115,6 +81,10 @@ public class Benchmark {
             System.exit(-1);
         }
 
+       executeBenchmarkingRun(arguments);
+    }
+
+    public static void executeBenchmarkingRun(Arguments arguments) throws Exception {
         if (arguments.workers != null && arguments.workersFile != null) {
             System.err.println("Only one between --workers and --workers-file can be specified");
             System.exit(-1);
@@ -221,7 +191,7 @@ public class Benchmark {
 
                     String fileNamePrefix = arguments.output.length() > 0 ? arguments.output
                             : String.format("%s-%s-%s", workloadName, driverConfiguration.name,
-                                    dateFormat.format(new Date()));
+                            dateFormat.format(new Date()));
 
                     WriteTestResults(fileNamePrefix, result);
                     if(arguments.visualizeUsingKusto){
@@ -245,6 +215,7 @@ public class Benchmark {
         log.info("End of Benchmarking Run");
         System.exit(0);
     }
+
 
     private static void WriteTestResults(String fileNamePrefix, TestResult result) throws IOException {
         writer.writeValue(new File(fileNamePrefix + "-details.json"), result.testDetails);

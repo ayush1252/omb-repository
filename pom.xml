@@ -29,6 +29,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>perftestsuite</module>
         <module>benchmark-framework</module>
         <module>driver-api</module>
         <module>driver-kafka</module>
