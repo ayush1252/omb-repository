@@ -25,7 +25,7 @@
         <groupId>io.openmessaging.benchmark</groupId>
         <artifactId>messaging-benchmark</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath>..</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>credential-adapter</artifactId>
