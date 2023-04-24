@@ -54,7 +54,7 @@ public class StorageAdapter {
                 }
             }
         } catch (Exception e){
-            log.error("Could not fetch blob for {}-{}-{}", storageAccountName, storageContainerName, blobName, e);
+            log.warn("Could not fetch blob for {}-{}-{}. Exception - {}", storageAccountName, storageContainerName, blobName, e.getLocalizedMessage());
             blobData = null;
         }
         return blobData;
