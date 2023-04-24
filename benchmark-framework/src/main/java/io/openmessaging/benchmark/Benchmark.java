@@ -81,13 +81,14 @@ public class Benchmark {
             System.exit(-1);
         }
 
-       executeBenchmarkingRun(arguments);
+        executeBenchmarkingRun(arguments);
+        System.exit(0);
     }
 
     public static void executeBenchmarkingRun(Arguments arguments) throws Exception {
         if (arguments.workers != null && arguments.workersFile != null) {
             System.err.println("Only one between --workers and --workers-file can be specified");
-            System.exit(-1);
+            throw new RuntimeException("Conflict between worker roles");
         }
 
         if (arguments.workers == null && arguments.workersFile == null) {
@@ -131,7 +132,7 @@ public class Benchmark {
                 workload.validate();
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
-                System.exit(-1);
+                throw e;
             }
 
             arguments.drivers.forEach(driverConfig -> {
@@ -206,14 +207,13 @@ public class Benchmark {
                 } finally {
                     try {
                         worker.stopAll();
-                    } catch (IOException e) {
+                    } catch (IOException ignored) {
                     }
                 }
             });
         });
         worker.close();
         log.info("End of Benchmarking Run");
-        System.exit(0);
     }
 
 

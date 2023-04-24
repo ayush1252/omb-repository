@@ -21,7 +21,7 @@ public abstract class EventHubTestBase {
 
     static ConfigProvider configProvider;
     public static void runPerformanceTests(){
-        configuredTestList.stream().forEach(individualTest -> {
+        configuredTestList.forEach(individualTest -> {
             configProvider = ConfigProvider.getInstance();
             log.info("Running Test: " + individualTest.toString());
             individualTest.run();
