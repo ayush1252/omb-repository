@@ -15,9 +15,10 @@ import java.util.List;
 public abstract class EventHubTestBase {
     private static final Logger log = LoggerFactory.getLogger(EventHubTestBase.class);
 
-    static String testSuiteName;
+    static String testSuiteName = "EventHubTestBase";
     static Arguments arguments = new Arguments();
     static List<Runnable> configuredTestList = new ArrayList<>();
+
     static ConfigProvider configProvider;
     public static void runPerformanceTests(){
         configuredTestList.stream().forEach(individualTest -> {
@@ -43,5 +44,4 @@ public abstract class EventHubTestBase {
                         configProvider.getConfigurationValue(ConfigurationKey.WorkersContainerName),
                         StringUtils.toRootLowerCase(testSuiteName) + "-workerfile", ".txt");
     }
-
 }

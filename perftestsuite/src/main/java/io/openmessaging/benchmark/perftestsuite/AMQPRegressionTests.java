@@ -2,6 +2,7 @@ package io.openmessaging.benchmark.perftestsuite;
 
 import io.openmessaging.benchmark.Arguments;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -9,7 +10,7 @@ import java.util.Collections;
 public class AMQPRegressionTests extends EventHubTestBase {
 
     public static void main(String[] args) {
-
+        configuredTestList = new ArrayList<>();
         testSuiteName = "AMQPRegressionTests";
 
         //Add a list of tests here
