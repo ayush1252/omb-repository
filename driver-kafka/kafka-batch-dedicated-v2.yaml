@@ -20,7 +20,7 @@ sku: DedicatedV2
 
 # Kafka client-specific configuration
 replicationFactor: 3
-reset: true
+reset: false
 
 topicConfig: |
   min.insync.replicas=2

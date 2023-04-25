@@ -95,17 +95,21 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
         topicProperties = new Properties();
         topicProperties.load(new StringReader(config.topicConfig));
 
-        admin = AdminClient.create(commonProperties);
+        try{
+            admin = AdminClient.create(commonProperties);
+        }catch (Exception e){
+            log.error("Failed to create Kafka Admin Client" , e);
+            throw e;
+        }
 
         if (config.reset) {
-            // List existing topics
-            ListTopicsResult result = admin.listTopics();
-            try {
+            try { // List existing topics
+                ListTopicsResult result = admin.listTopics();
                 Set<String> topics = result.names().get();
                 // Delete all existing topics
                 DeleteTopicsResult deletes = admin.deleteTopics(topics);
                 deletes.all().get();
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 throw new IOException(e);
             }

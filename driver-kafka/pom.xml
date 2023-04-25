@@ -28,14 +28,6 @@
 	</parent>
 	<artifactId>driver-kafka</artifactId>
 
-    <!-- Enable for staging repo -->
-	<!-- <repositories>
-		<repository>
-			<id>Kafka Staging Repo</id>
-			<url>https://repository.apache.org/content/groups/staging/</url>
-		</repository>
-	</repositories>  -->
-
 	<repositories>
 		<repository>
 			<id>Kafka Public Repo</id>
@@ -66,7 +58,11 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>app-config-adapter</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-	</dependencies>
-
+        </dependency>
+        <dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>credential-adapter</artifactId>
+			<version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>
