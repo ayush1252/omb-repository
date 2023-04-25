@@ -64,5 +64,10 @@
 			<artifactId>credential-adapter</artifactId>
 			<version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>azure-eventhubs</artifactId>
+            <version>2.2.0</version>
+        </dependency>
     </dependencies>
 </project>

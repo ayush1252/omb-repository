@@ -26,11 +26,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import com.microsoft.azure.eventhubs.ConnectionStringBuilder;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
 import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
 import io.openmessaging.benchmark.credential.adapter.CredentialProvider;
 import org.apache.bookkeeper.stats.StatsLogger;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.DeleteTopicsResult;
 import org.apache.kafka.clients.admin.ListTopicsResult;
@@ -87,7 +89,10 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
         //creating sasl config string from connection string
         final String jaasConfig = commonProperties.getProperty("sasl.jaas.config");
         commonProperties.put("sasl.jaas.config", jaasConfig + "\""
-                + credentialProvider.getCredential(metadata.NamespaceName+"-ConnectionString")+ "\";");
+                + createEventHubConnectionString(metadata.NamespaceName,
+                    configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix),
+                    credentialProvider.getCredential(metadata.NamespaceName + "-SASKey"))
+                + "\";");
 
         producerProperties = new Properties();
         producerProperties.putAll(commonProperties);
@@ -212,4 +217,12 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
 
     private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+    private String createEventHubConnectionString(String namespaceName, String domainName, String sasKey){
+        return new ConnectionStringBuilder()
+                .setEndpoint(namespaceName, StringUtils.stripStart(domainName, "."))
+                .setSasKeyName("RootManageSharedAccessKey")
+                .setSasKey(sasKey)
+                .toString();
+    }
 }

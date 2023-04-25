@@ -28,7 +28,6 @@ public class KafkaRegressionTests  extends EventHubTestBase{
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-1MBMessage.yaml");
                 arguments.output = "KafkaDedicated-XLPayload";
                 arguments.tags = Arrays.asList("Benchmarking", "Regression", "Latency");
-                arguments.visualizeUsingKusto = false;
             }
 
             @Override

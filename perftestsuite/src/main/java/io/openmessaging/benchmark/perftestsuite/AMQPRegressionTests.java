@@ -31,7 +31,6 @@ public class AMQPRegressionTests extends EventHubTestBase {
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-1MBMessage.yaml");
                 arguments.output = "AMQPDedicated-XLPayload";
                 arguments.tags = Arrays.asList("Benchmarking", "Regression", "Latency");
-                arguments.visualizeUsingKusto = true;
             }
 
             @Override
@@ -50,7 +49,6 @@ public class AMQPRegressionTests extends EventHubTestBase {
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-4KB.yaml");
                 arguments.output = "AMQPDedicated-SmallPayload";
                 arguments.tags = Arrays.asList("Benchmarking", "Regression", "Latency");
-                arguments.visualizeUsingKusto = true;
             }
 
             @Override
@@ -69,7 +67,6 @@ public class AMQPRegressionTests extends EventHubTestBase {
                 arguments.workloads = Collections.singletonList("workloads/40producer-40consumer-1MBMessage-HighThroughput.yaml");
                 arguments.output = "AMQPDedicated-HighThroughput";
                 arguments.tags = Arrays.asList("Benchmarking", "Regression", "Latency");
-                arguments.visualizeUsingKusto = true;
             }
 
             @Override
