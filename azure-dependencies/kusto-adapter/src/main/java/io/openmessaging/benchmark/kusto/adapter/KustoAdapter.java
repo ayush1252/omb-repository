@@ -19,6 +19,8 @@ import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.openmessaging.benchmark.appconfig.adapter.EnvironmentName.Production;
+
 /**
  * Class to publish data in Kusto Cluster
  */
@@ -46,9 +48,9 @@ public class KustoAdapter {
     private IngestClient getIngestionClient(String endpoint) throws Exception {
         String ingestionEndpoint = "https://ingest-" + URI.create(endpoint).getHost();
         ConnectionStringBuilder csb = ConnectionStringBuilder.createWithAadApplicationCredentials(ingestionEndpoint,
-                configProvider.getConfigurationValue(ConfigurationKey.KustoClientID),
-                configProvider.getConfigurationValue(ConfigurationKey.KustoClientSecret),
-                configProvider.getConfigurationValue(ConfigurationKey.ApplicationTenantID));
+                configProvider.getConfigurationValue(ConfigurationKey.KustoClientID, Production.toString()),
+                configProvider.getConfigurationValue(ConfigurationKey.KustoClientSecret, Production.toString()),
+                configProvider.getConfigurationValue(ConfigurationKey.ApplicationTenantID, Production.toString()));
 
         return IngestClientFactory.createClient(csb);
     }

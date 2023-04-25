@@ -43,6 +43,10 @@ public class ConfigProvider {
     }
 
     public String getConfigurationValue(ConfigurationKey configKey){
+        return getConfigurationValue(configKey, environmentStage);
+    }
+
+    public String getConfigurationValue(ConfigurationKey configKey, String environmentStage) {
         try{
             return configurationClient.getConfigurationSetting(configKey.toString(), environmentStage).getValue();
         } catch (ResourceNotFoundException e){
@@ -65,4 +69,6 @@ public class ConfigProvider {
     public String getEnvironmentStage(){
         return environmentStage;
     }
+
+
 }

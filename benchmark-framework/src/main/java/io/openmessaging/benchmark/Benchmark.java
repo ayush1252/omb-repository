@@ -200,6 +200,7 @@ public class Benchmark {
                             adapter = new KustoAdapter(provider.getConfigurationValue(ConfigurationKey.KustoEndpoint),
                                     provider.getConfigurationValue(ConfigurationKey.KustoDatabaseName));
                         }
+                        assert adapter != null && adapter.ingestionClient != null;
                         adapter.uploadDataToKustoCluster(fileNamePrefix);
                     }
                     log.info("Completed Execution of Run");
