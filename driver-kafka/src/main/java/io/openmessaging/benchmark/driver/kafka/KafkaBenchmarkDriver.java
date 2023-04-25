@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
 import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
+import io.openmessaging.benchmark.credential.adapter.CredentialProvider;
 import org.apache.bookkeeper.stats.StatsLogger;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.DeleteTopicsResult;
@@ -58,9 +59,8 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
     private static final Logger log = LoggerFactory.getLogger(KafkaBenchmarkDriver.class);
 
     private Config config;
-    private ConfigProvider configProvider;
-    private List<BenchmarkProducer> producers = Collections.synchronizedList(new ArrayList<>());
-    private List<BenchmarkConsumer> consumers = Collections.synchronizedList(new ArrayList<>());
+    private final List<BenchmarkProducer> producers = Collections.synchronizedList(new ArrayList<>());
+    private final List<BenchmarkConsumer> consumers = Collections.synchronizedList(new ArrayList<>());
 
     private Properties topicProperties;
     private Properties producerProperties;
@@ -70,24 +70,33 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
 
     @Override
     public void initialize(File configurationFile, StatsLogger statsLogger) throws IOException {
+        ConfigProvider configProvider = ConfigProvider.getInstance();
+        CredentialProvider credentialProvider = CredentialProvider.getInstance();
+
         config = mapper.readValue(configurationFile, Config.class);
-        configProvider = ConfigProvider.getInstance();
         NamespaceMetadata metadata = configProvider.getNamespaceMetaData(config.identifier);
+        log.info("Using Namespace for this test run- " + metadata.NamespaceName);
 
         Properties commonProperties = new Properties();
         commonProperties.load(new StringReader(config.commonConfig));
+
         //manually creating bootstrap server from namespace name for Kafka
         commonProperties.put("bootstrap.servers",
                 metadata.NamespaceName + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix) + ":9093");
 
+        //creating sasl config string from connection string
+        final String jaasConfig = commonProperties.getProperty("sasl.jaas.config");
+        commonProperties.put("sasl.jaas.config", jaasConfig + "\""
+                + credentialProvider.getCredential(metadata.NamespaceName+"-ConnectionString")+ "\";");
+
         producerProperties = new Properties();
-        commonProperties.forEach((key, value) -> producerProperties.put(key, value));
+        producerProperties.putAll(commonProperties);
         producerProperties.load(new StringReader(config.producerConfig));
         producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
 
         consumerProperties = new Properties();
-        commonProperties.forEach((key, value) -> consumerProperties.put(key, value));
+        consumerProperties.putAll(commonProperties);
         consumerProperties.load(new StringReader(config.consumerConfig));
         consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
@@ -132,7 +141,7 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
                     NewTopic newTopic = new NewTopic(topic, partitions, config.replicationFactor);
                     newTopic.configs(new HashMap<>((Map) topicProperties));
                     admin.createTopics(Arrays.asList(newTopic)).all().get();
-                    log.info(" Topic Name: " + topic);
+                    log.info(" Creating Topic Name: " + topic);
                 } else {
                     log.info("Reusing Topic " + topic + "as it already exists");
                 }

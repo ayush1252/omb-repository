@@ -28,9 +28,8 @@ topicConfig: |
 
 commonConfig: |
   security.protocol=SASL_SSL
-  sasl.mechanism=OAUTHBEARER
-  sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
-  sasl.login.callback.handler.class=io.openmessaging.benchmark.driver.kafka.CustomAuthenticateCallbackHandler
+  sasl.mechanism=PLAIN
+  sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password=
 
 producerConfig: |
   acks=all
