@@ -13,6 +13,10 @@
 # limitations under the License.
 #
 
+echo "Azure Event Hubs - Performance Regression Suite"
+TIMESTAMP=`date +%Y-%m-%d_%H-%M-%S`
+echo $TIMESTAMP
+
 if [ -d "./lib" ]; then
         CLASSPATH=$CLASSPATH:lib/*
 else
