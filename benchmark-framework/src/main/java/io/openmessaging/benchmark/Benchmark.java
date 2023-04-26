@@ -196,11 +196,10 @@ public class Benchmark {
 
                     WriteTestResults(fileNamePrefix, result);
                     if(arguments.visualizeUsingKusto){
-                        if(adapter != null){
+                        if(adapter == null){
                             adapter = new KustoAdapter(provider.getConfigurationValue(ConfigurationKey.KustoEndpoint),
                                     provider.getConfigurationValue(ConfigurationKey.KustoDatabaseName));
                         }
-                        assert adapter != null && adapter.ingestionClient != null;
                         adapter.uploadDataToKustoCluster(fileNamePrefix);
                     }
                     log.info("Completed Execution of Run");

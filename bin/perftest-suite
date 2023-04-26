@@ -31,4 +31,10 @@ fi
 JVM_MEM="${HEAP_OPTS} -XX:+UseG1GC"
 JVM_GC_LOG=" -XX:+PrintGCDetails -XX:+PrintGCApplicationStoppedTime  -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=5 -XX:GCLogFileSize=64m  -Xloggc:/dev/shm/benchmark-client-gc_%p.log"
 
-exec java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.AMQPRegressionTests $*
+echo "Starting AMQP Regression Tests"
+java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.AMQPRegressionTests $*
+
+echo "Starting KAFKA Regression Tests"
+java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.KafkaRegressionTests $*
+
+exit 0
