@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.System.exit;
+
 public abstract class EventHubTestBase {
     private static final Logger log = LoggerFactory.getLogger(EventHubTestBase.class);
 
@@ -37,6 +39,8 @@ public abstract class EventHubTestBase {
                 log.error("Failed Execution of Test: " + individualTest, e);
             }
         });
+        log.info("Completed Execution of Test - " + testSuiteName);
+        exit(0);
     }
 
     static List<String> getWorkersIfConfigured(String testSuiteName){

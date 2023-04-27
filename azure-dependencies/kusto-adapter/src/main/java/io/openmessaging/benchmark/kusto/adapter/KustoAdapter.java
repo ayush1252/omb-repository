@@ -30,8 +30,8 @@ public class KustoAdapter {
     private static final String V1_SUFFIX = "_V1";
     private static final Logger log = LoggerFactory.getLogger(KustoAdapter.class);
 
-    static ExecutorService service = Executors.newFixedThreadPool(3);
-    static CountDownLatch latch = new CountDownLatch(3);
+    static ExecutorService service;
+    static CountDownLatch latch;
     private final ConfigProvider configProvider;
 
     public String endpoint;
@@ -56,13 +56,17 @@ public class KustoAdapter {
     }
 
     public void uploadDataToKustoCluster(String fileNamePrefix) throws InterruptedException {
+        //Reinitialising the kusto ingestion executor.
+        latch = new CountDownLatch(3);
+        service = Executors.newFixedThreadPool(3);
+
         service.execute(ingestFile(database, fileNamePrefix + "-details.json", "PerformanceRunDetails", MAPPING_SUFFIX + V1_SUFFIX));
         service.execute(ingestFile(database, fileNamePrefix + "-snapshot.json", "PerformanceRunIndividualSnapshots", MAPPING_SUFFIX));
         service.execute(ingestFile(database, fileNamePrefix + "-aggregate.json", "PerformanceRunAggregates", MAPPING_SUFFIX));
 
         try{
-            latch.await(10, TimeUnit.MINUTES);
-        } catch (InterruptedException e){
+            latch.await(5, TimeUnit.MINUTES);
+        } catch (Exception e){
            log.error("Caught Interrupted Exception while awaiting ingestion completion. Check Kusto Logs for more details" + e.getMessage());
         }
     }
@@ -118,11 +122,11 @@ public class KustoAdapter {
                 }
                 log.info("Ingestion completed for " + fileSourceInfo.getFilePath());
                 log.info("Final status: " + status.status);
-                latch.countDown();
             } catch (Exception e) {
                 log.error("Failed to get ingestion status: ", e);
-                latch.countDown();
                 Thread.currentThread().interrupt();
+            }finally {
+                latch.countDown();
             }
         }
     }
