@@ -108,13 +108,13 @@ public class KafkaRegressionTests  extends EventHubTestBase{
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-kafka/kafka-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/40producer-40consumer-1MBMessage-HighThroughput.yaml");
-                arguments.output = "KafkaDedicated-HighThroughput";
+                arguments.output = "HighThroughput-KafkaDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString());
             }
 
             @Override
             public String toString() {
-                return "KafkaDedicated-HighThroughput";
+                return "HighThroughput-KafkaDedicated";
             }
         };
     }
