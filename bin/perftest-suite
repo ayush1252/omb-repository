@@ -35,3 +35,6 @@ java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.Ka
 
 echo "Starting AMQP Regression Tests"
 java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.AMQPRegressionTests $*
+
+echo "Starting Multi Topic Tests"
+java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.MultiTopicRegressionTests $*

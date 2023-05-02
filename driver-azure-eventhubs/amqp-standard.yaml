@@ -19,7 +19,7 @@
 
 identifier: amqp-standard
 name: EventHubs AMQP StandardSKU
-driverClass: io.openmessaging.benchmark.driver.eventhubs.syncproducer.EventHubsBenchmarkSyncProducerDriver
+driverClass: io.openmessaging.benchmark.driver.eventhubs.EventHubsBenchmarkDriver
 reset: true
 protocol: AMQP
 product: EventHubs
