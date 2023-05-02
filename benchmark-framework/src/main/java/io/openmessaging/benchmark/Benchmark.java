@@ -174,7 +174,7 @@ public class Benchmark {
                                     .orElse("1"));
 
                     result.testDetails.metadata = Metadata.builder()
-                            .workload(workload.name)
+                            .workload(arguments.output.split("-")[0]) //Replacing workload name with test name
                             .payload(workload.payloadFile)
                             .namespaceName(driverConfiguration.namespaceName)
                             .topics(workload.topics)

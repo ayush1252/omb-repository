@@ -17,9 +17,9 @@ public class AMQPRegressionTests extends EventHubTestBase {
 
         //Add a list of tests here
         configuredTestList.add(XLPayloadTest());
-        configuredTestList.add(XLPayloadTestNonBatched());
+        configuredTestList.add(XLPayloadNonBatchTest());
         configuredTestList.add(SmallPayloadTest());
-        configuredTestList.add(SmallPayloadTestNonBatched());
+        configuredTestList.add(SmallPayloadNonBatchTest());
 
         //Throughput Tests
         configuredTestList.add(LowThroughputTest());
@@ -37,13 +37,13 @@ public class AMQPRegressionTests extends EventHubTestBase {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-1MBMessage.yaml");
-                arguments.output = "AMQPDedicated-XLPayload";
+                arguments.output = "XLPayload-AMQPDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Latency.toString(), Batch.toString());
             }
 
             @Override
             public String toString() {
-                return "XLPayloadTest";
+                return "XLPayload-AMQPDedicated";
             }
         };
     }
@@ -55,50 +55,50 @@ public class AMQPRegressionTests extends EventHubTestBase {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-4KB.yaml");
-                arguments.output = "AMQPDedicated-SmallPayload";
+                arguments.output = "SmallPayload-AMQPDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Latency.toString(), Batch.toString());
             }
 
             @Override
             public String toString() {
-                return "SmallPayloadTest";
+                return "SmallPayload-AMQPDedicated";
             }
         };
     }
 
 
-    public static Runnable SmallPayloadTestNonBatched() {
+    public static Runnable SmallPayloadNonBatchTest() {
         return new Runnable() {
             @Override
             public void run() {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-4KB.yaml");
-                arguments.output = "AMQPDedicated-SmallPayloadNonBatch";
+                arguments.output = "SmallPayloadNonBatch-AMQPDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Latency.toString());
             }
 
             @Override
             public String toString() {
-                return "SmallPayloadTestNonBatch";
+                return "SmallPayloadNonBatch-AMQPDedicated";
             }
         };
     }
 
-    public static Runnable XLPayloadTestNonBatched() {
+    public static Runnable XLPayloadNonBatchTest() {
         return new Runnable() {
             @Override
             public void run() {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-4KB.yaml");
-                arguments.output = "AMQPDedicated-SmallPayloadNonBatch";
+                arguments.output = "XLPayloadNonBatch-AMQPDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Latency.toString());
             }
 
             @Override
             public String toString() {
-                return "SmallPayloadTestNonBatch";
+                return "XLPayloadNonBatch-AMQPDedicated";
             }
         };
     }
@@ -110,13 +110,13 @@ public class AMQPRegressionTests extends EventHubTestBase {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/40producer-40consumer-1MBMessage-HighThroughput.yaml");
-                arguments.output = "AMQPDedicated-HighThroughput";
+                arguments.output = "HighThroughput-AMQPDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString());
             }
 
             @Override
             public String toString() {
-                return "HighThroughputTest";
+                return "HighThroughput-AMQPDedicated";
             }
         };
     }
@@ -128,13 +128,13 @@ public class AMQPRegressionTests extends EventHubTestBase {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-50Kb-1Mbps.yaml");
-                arguments.output = "AMQPDedicated-LowThroughput";
+                arguments.output = "LowThroughput-AMQPDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString(), Latency.toString());
             }
 
             @Override
             public String toString() {
-                return "LowThroughputTest";
+                return "LowThroughput-AMQPDedicated";
             }
         };
     }
@@ -146,13 +146,13 @@ public class AMQPRegressionTests extends EventHubTestBase {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/20producer-20consumer-50Kb-100Mbps.yaml");
-                arguments.output = "AMQPDedicated-MediumThroughputTest";
+                arguments.output = "MediumThroughputTest-AMQPDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString(), Latency.toString());
             }
 
             @Override
             public String toString() {
-                return "MediumThroughputTest";
+                return "MediumThroughputTest-AMQPDedicated";
             }
         };
     }

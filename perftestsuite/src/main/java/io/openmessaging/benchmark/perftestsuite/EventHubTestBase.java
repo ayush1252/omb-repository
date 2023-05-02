@@ -29,6 +29,7 @@ public abstract class EventHubTestBase {
             log.info("Running Test: " + individualTest.toString());
             individualTest.run();
 
+
             //Specifying worker roles if configured
             arguments.workers = getWorkersIfConfigured(testSuiteName);
             arguments.producerWorkers = arguments.workers == null ? 0: arguments.workers.size() /2;
