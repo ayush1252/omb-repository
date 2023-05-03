@@ -71,7 +71,7 @@ public class KafkaRegressionTests  extends EventHubTestBase{
             public void run() {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-kafka/kafka-batch-dedicated-v2.yaml");
-                arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-4KB.yaml");
+                arguments.workloads = Collections.singletonList("workloads/10producer-10consumer-4KB.yaml");
                 arguments.output = "SmallPayload-KafkaDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Latency.toString(), Batch.toString());
             }
@@ -89,7 +89,7 @@ public class KafkaRegressionTests  extends EventHubTestBase{
             public void run() {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-kafka/kafka-dedicated-v2.yaml");
-                arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-4KB.yaml");
+                arguments.workloads = Collections.singletonList("workloads/10producer-10consumer-4KB.yaml");
                 arguments.output = "SmallPayloadNonBatch-KafkaDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Latency.toString());
             }

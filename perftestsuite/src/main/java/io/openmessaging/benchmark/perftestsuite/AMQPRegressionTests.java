@@ -54,7 +54,7 @@ public class AMQPRegressionTests extends EventHubTestBase {
             public void run() {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-batch-dedicated-v2.yaml");
-                arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-4KB.yaml");
+                arguments.workloads = Collections.singletonList("workloads/10producer-10consumer-4KB.yaml");
                 arguments.output = "SmallPayload-AMQPDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Latency.toString(), Batch.toString());
             }
@@ -73,7 +73,7 @@ public class AMQPRegressionTests extends EventHubTestBase {
             public void run() {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-dedicated-v2.yaml");
-                arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-4KB.yaml");
+                arguments.workloads = Collections.singletonList("workloads/10producer-10consumer-4KB.yaml");
                 arguments.output = "SmallPayloadNonBatch-AMQPDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Latency.toString());
             }
