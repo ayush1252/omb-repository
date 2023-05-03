@@ -18,9 +18,9 @@
 #
 
 
-name: 20 producer 20 consumer 10 topic 100MB/second
+name: 20 producer 20 consumer 5 topic 100MB/second
 
-topics: 10
+topics: 5
 partitionsPerTopic: 10
 messageSize: 51200
 payloadFile: "payload/payload-50Kb.data"
