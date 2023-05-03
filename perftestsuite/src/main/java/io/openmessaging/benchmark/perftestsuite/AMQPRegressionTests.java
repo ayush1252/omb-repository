@@ -91,7 +91,7 @@ public class AMQPRegressionTests extends EventHubTestBase {
             public void run() {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-dedicated-v2.yaml");
-                arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-4KB.yaml");
+                arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-1MBMessage.yaml");
                 arguments.output = "XLPayloadNonBatch-AMQPDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Latency.toString());
             }

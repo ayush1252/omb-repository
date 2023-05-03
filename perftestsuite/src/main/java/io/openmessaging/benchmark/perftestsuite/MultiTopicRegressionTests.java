@@ -27,7 +27,7 @@ public class MultiTopicRegressionTests extends EventHubTestBase{
             public void run() {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-kafka/kafka-batch-dedicated-v2.yaml");
-                arguments.workloads = Collections.singletonList("workloads/20producer-20consumer-50Kb-100Mbps.yaml");;
+                arguments.workloads = Collections.singletonList("workloads/20producer-20consumer-10tp-50Kb-100Mbps.yaml");;
                 arguments.output = "MultiTopicMediumThroughput-Kafka";
                 arguments.tags = Arrays.asList(Regression.toString(), Latency.toString(), MultiTopic.toString());
             }
@@ -45,7 +45,7 @@ public class MultiTopicRegressionTests extends EventHubTestBase{
             public void run() {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-batch-dedicated-v2.yaml");
-                arguments.workloads = Collections.singletonList("workloads/20producer-20consumer-50Kb-100Mbps.yaml");
+                arguments.workloads = Collections.singletonList("workloads/20producer-20consumer-10tp-50Kb-100Mbps.yaml");
                 arguments.output = "MultiTopicMediumThroughput-AMQP";
                 arguments.tags = Arrays.asList(Regression.toString(), Latency.toString(), MultiTopic.toString());
             }
