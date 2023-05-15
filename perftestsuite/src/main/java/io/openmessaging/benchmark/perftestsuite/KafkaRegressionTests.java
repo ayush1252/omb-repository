@@ -126,13 +126,13 @@ public class KafkaRegressionTests  extends EventHubTestBase{
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-kafka/kafka-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-50Kb-1Mbps.yaml");
-                arguments.output = "LowThroughput-AMQPDedicated";
+                arguments.output = "LowThroughput-KafkaDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString(), Latency.toString());
             }
 
             @Override
             public String toString() {
-                return "LowThroughput-AMQPDedicated";
+                return "LowThroughput-KafkaDedicated";
             }
         };
     }
@@ -150,7 +150,7 @@ public class KafkaRegressionTests  extends EventHubTestBase{
 
             @Override
             public String toString() {
-                return "MediumThroughputTest-AMQPDedicated";
+                return "MediumThroughputTest-KafkaDedicated";
             }
         };
     }
