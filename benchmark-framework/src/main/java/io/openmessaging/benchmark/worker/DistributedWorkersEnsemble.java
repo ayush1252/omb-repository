@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.zip.DataFormatException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -63,8 +62,8 @@ import static org.asynchttpclient.Dsl.*;
 
 public class DistributedWorkersEnsemble implements Worker {
 
-    private final static int REQUEST_TIMEOUT_MS = 300_000;
-    private final static int READ_TIMEOUT_MS = 300_000;
+    private final static int REQUEST_TIMEOUT_MS = 60000;
+    private final static int READ_TIMEOUT_MS = 60000;
     private final List<String> workers;
     private final List<String> producerWorkers;
     private final List<String> consumerWorkers;
@@ -74,7 +73,19 @@ public class DistributedWorkersEnsemble implements Worker {
     private int numberOfUsedProducerWorkers;
 
     public DistributedWorkersEnsemble(List<String> workers, int numberOfUsedProducerWorkers) {
-        Preconditions.checkArgument(workers.size() > 1);
+        httpClient = asyncHttpClient(config().setRequestTimeout(REQUEST_TIMEOUT_MS).setReadTimeout(READ_TIMEOUT_MS));
+
+        workers = workers.stream().filter(p ->{
+            try{
+                get(p, "/health-check", String.class).get();
+            } catch (Exception e){
+                log.error("Found error during health-check of worker role {} - {}", p, e.getMessage());
+                return false;
+            }
+            return true;
+        }).collect(toList());
+
+        Preconditions.checkArgument(workers.size() > 1, "Insufficient count of active workers for the test");
 
         this.workers = workers;
         this.producerWorkers = workers.stream().limit(numberOfUsedProducerWorkers).collect(toList());
@@ -83,7 +94,6 @@ public class DistributedWorkersEnsemble implements Worker {
         log.info("Workers list - producers: {}", producerWorkers);
         log.info("Workers list - consumers: {}", consumerWorkers);
 
-        httpClient = asyncHttpClient(config().setRequestTimeout(REQUEST_TIMEOUT_MS).setReadTimeout(READ_TIMEOUT_MS));
     }
 
     @Override

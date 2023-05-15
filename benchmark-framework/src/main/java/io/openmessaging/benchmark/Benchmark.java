@@ -81,8 +81,13 @@ public class Benchmark {
             System.exit(-1);
         }
 
-        executeBenchmarkingRun(arguments);
-        System.exit(0);
+        try{
+            executeBenchmarkingRun(arguments);
+        } catch(Exception e){
+           log.error(e.toString());
+        } finally{
+            System.exit(0);
+        }
     }
 
     public static void executeBenchmarkingRun(Arguments arguments) throws Exception {
