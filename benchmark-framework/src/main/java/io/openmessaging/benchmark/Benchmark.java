@@ -213,6 +213,7 @@ public class Benchmark {
                     generator.close();
                 } catch (Exception e) {
                     log.error("Failed to run the workload '{}' for driver '{}'", workload.name, driverConfig, e);
+                    throw new RuntimeException(e);
                 } finally {
                     try {
                         worker.stopAll();
