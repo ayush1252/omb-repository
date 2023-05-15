@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.microsoft.applicationinsights.attach.ApplicationInsights;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
 import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
@@ -64,6 +65,7 @@ public class Benchmark {
     }
 
     public static void main(String[] args) throws Exception {
+        ApplicationInsights.attach();
         final Arguments arguments = new Arguments();
         JCommander jc = new JCommander(arguments);
         jc.setProgramName("messaging-benchmark");

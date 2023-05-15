@@ -41,6 +41,11 @@
             <artifactId>storage-adapter</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>applicationinsights-runtime-attach</artifactId>
+            <version>3.4.12</version>
+        </dependency>
     </dependencies>
 
     <build>

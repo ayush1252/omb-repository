@@ -1,5 +1,6 @@
 package io.openmessaging.benchmark.perftestsuite;
 
+import com.microsoft.applicationinsights.attach.ApplicationInsights;
 import io.openmessaging.benchmark.Benchmark;
 import io.openmessaging.benchmark.Arguments;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
@@ -23,6 +24,7 @@ public abstract class EventHubTestBase {
 
     static ConfigProvider configProvider;
     public static void runPerformanceTests(){
+        ApplicationInsights.attach();
         log.info("Starting Execution of Test Suite: " + testSuiteName);
         configuredTestList.forEach(individualTest -> {
             configProvider = ConfigProvider.getInstance();
