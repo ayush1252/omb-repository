@@ -18,9 +18,9 @@ import static java.lang.System.exit;
 public abstract class EventHubTestBase {
     private static final Logger log = LoggerFactory.getLogger(EventHubTestBase.class);
 
-    static String testSuiteName = "EventHubTestBase";
-    static Arguments arguments = new Arguments();
-    static List<Runnable> configuredTestList = new ArrayList<>();
+    protected static String testSuiteName = "EventHubTestBase";
+    protected static Arguments arguments = new Arguments();
+    protected static List<Runnable> configuredTestList = new ArrayList<>();
 
     static ConfigProvider configProvider;
     public static void runPerformanceTests(){

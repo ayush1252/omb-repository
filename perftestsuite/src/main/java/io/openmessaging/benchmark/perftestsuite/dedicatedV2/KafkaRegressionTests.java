@@ -1,6 +1,7 @@
-package io.openmessaging.benchmark.perftestsuite;
+package io.openmessaging.benchmark.perftestsuite.dedicatedV2;
 
 import io.openmessaging.benchmark.Arguments;
+import io.openmessaging.benchmark.perftestsuite.EventHubTestBase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,18 +9,17 @@ import java.util.Collections;
 
 import static io.openmessaging.benchmark.perftestsuite.MetadataTags.*;
 
-//Each Test except high throughput test is trying to reach 10MB/s throughput
-public class AMQPRegressionTests extends EventHubTestBase {
+public class KafkaRegressionTests  extends EventHubTestBase {
 
     public static void main(String[] args) {
         configuredTestList = new ArrayList<>();
-        testSuiteName = "AMQPRegressionTests";
+        testSuiteName = "KafkaRegressionTest";
 
         //Add a list of tests here
         configuredTestList.add(XLPayloadTest());
-        configuredTestList.add(XLPayloadNonBatchTest());
+        configuredTestList.add(XLPayloadTestNonBatched());
         configuredTestList.add(SmallPayloadTest());
-        configuredTestList.add(SmallPayloadNonBatchTest());
+        configuredTestList.add(SmallPayloadTestNonBatched());
 
         //Throughput Tests
         configuredTestList.add(LowThroughputTest());
@@ -35,15 +35,33 @@ public class AMQPRegressionTests extends EventHubTestBase {
             @Override
             public void run() {
                 arguments = new Arguments();
-                arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-batch-dedicated-v2.yaml");
+                arguments.drivers = Collections.singletonList("driver-kafka/kafka-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-1MBMessage.yaml");
-                arguments.output = "XLPayload-AMQPDedicated";
+                arguments.output = "XLPayload-KafkaDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Latency.toString(), Batch.toString());
             }
 
             @Override
             public String toString() {
-                return "XLPayload-AMQPDedicated";
+                return "XLPayload-KafkaDedicated";
+            }
+        };
+    }
+
+    public static Runnable XLPayloadTestNonBatched() {
+        return new Runnable() {
+            @Override
+            public void run() {
+                arguments = new Arguments();
+                arguments.drivers = Collections.singletonList("driver-kafka/kafka-dedicated-v2.yaml");
+                arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-1MBMessage.yaml");
+                arguments.output = "XLPayloadNonBatch-KafkaDedicated";
+                arguments.tags = Arrays.asList(Regression.toString(), Latency.toString());
+            }
+
+            @Override
+            public String toString() {
+                return "XLPayloadNonBatch-KafkaDedicated";
             }
         };
     }
@@ -53,52 +71,33 @@ public class AMQPRegressionTests extends EventHubTestBase {
             @Override
             public void run() {
                 arguments = new Arguments();
-                arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-batch-dedicated-v2.yaml");
+                arguments.drivers = Collections.singletonList("driver-kafka/kafka-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/10producer-10consumer-4KB.yaml");
-                arguments.output = "SmallPayload-AMQPDedicated";
+                arguments.output = "SmallPayload-KafkaDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Latency.toString(), Batch.toString());
             }
 
             @Override
             public String toString() {
-                return "SmallPayload-AMQPDedicated";
+                return "SmallPayload-KafkaDedicated";
             }
         };
     }
 
-
-    public static Runnable SmallPayloadNonBatchTest() {
+    public static Runnable SmallPayloadTestNonBatched() {
         return new Runnable() {
             @Override
             public void run() {
                 arguments = new Arguments();
-                arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-dedicated-v2.yaml");
+                arguments.drivers = Collections.singletonList("driver-kafka/kafka-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/10producer-10consumer-4KB.yaml");
-                arguments.output = "SmallPayloadNonBatch-AMQPDedicated";
+                arguments.output = "SmallPayloadNonBatch-KafkaDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Latency.toString());
             }
 
             @Override
             public String toString() {
-                return "SmallPayloadNonBatch-AMQPDedicated";
-            }
-        };
-    }
-
-    public static Runnable XLPayloadNonBatchTest() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                arguments = new Arguments();
-                arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-dedicated-v2.yaml");
-                arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-1MBMessage.yaml");
-                arguments.output = "XLPayloadNonBatch-AMQPDedicated";
-                arguments.tags = Arrays.asList(Regression.toString(), Latency.toString());
-            }
-
-            @Override
-            public String toString() {
-                return "XLPayloadNonBatch-AMQPDedicated";
+                return "SmallPayloadNonBatch-KafkaDedicated";
             }
         };
     }
@@ -108,15 +107,15 @@ public class AMQPRegressionTests extends EventHubTestBase {
             @Override
             public void run() {
                 arguments = new Arguments();
-                arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-batch-dedicated-v2.yaml");
+                arguments.drivers = Collections.singletonList("driver-kafka/kafka-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/40producer-40consumer-1MBMessage-HighThroughput.yaml");
-                arguments.output = "HighThroughput-AMQPDedicated";
+                arguments.output = "HighThroughput-KafkaDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString());
             }
 
             @Override
             public String toString() {
-                return "HighThroughput-AMQPDedicated";
+                return "HighThroughput-KafkaDedicated";
             }
         };
     }
@@ -126,15 +125,15 @@ public class AMQPRegressionTests extends EventHubTestBase {
             @Override
             public void run() {
                 arguments = new Arguments();
-                arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-batch-dedicated-v2.yaml");
+                arguments.drivers = Collections.singletonList("driver-kafka/kafka-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-50Kb-1Mbps.yaml");
-                arguments.output = "LowThroughput-AMQPDedicated";
+                arguments.output = "LowThroughput-KafkaDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString(), Latency.toString());
             }
 
             @Override
             public String toString() {
-                return "LowThroughput-AMQPDedicated";
+                return "LowThroughput-KafkaDedicated";
             }
         };
     }
@@ -144,7 +143,7 @@ public class AMQPRegressionTests extends EventHubTestBase {
             @Override
             public void run() {
                 arguments = new Arguments();
-                arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-batch-dedicated-v2.yaml");
+                arguments.drivers = Collections.singletonList("driver-kafka/kafka-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/20producer-20consumer-50Kb-100Mbps.yaml");
                 arguments.output = "MediumThroughputTest-AMQPDedicated";
                 arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString(), Latency.toString());
@@ -152,7 +151,7 @@ public class AMQPRegressionTests extends EventHubTestBase {
 
             @Override
             public String toString() {
-                return "MediumThroughputTest-AMQPDedicated";
+                return "MediumThroughputTest-KafkaDedicated";
             }
         };
     }

@@ -33,7 +33,7 @@ commonConfig: |
   unused=0
 
 producerConfig: |
-  unused=0
+  batch.count=250
 
 consumerConfig: |
   unused=0
