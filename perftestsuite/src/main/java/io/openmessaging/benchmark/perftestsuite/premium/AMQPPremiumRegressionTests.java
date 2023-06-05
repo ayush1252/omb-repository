@@ -70,7 +70,7 @@ public class AMQPPremiumRegressionTests extends EventHubTestBase {
             public void run() {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-premium.yaml");
-                arguments.workloads = Collections.singletonList("workloads/40producer-40consumer-1MBMessage-HighThroughput.yaml");
+                arguments.workloads = Collections.singletonList("workloads/40producer-40consumer-100Partitions-1MBMessage-HighThroughput.yaml");
                 arguments.output = "HighThroughput-AmqpPremium";
                 arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString());
             }

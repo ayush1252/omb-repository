@@ -69,7 +69,7 @@ public class KafkaPremiumRegressionTests extends EventHubTestBase {
             public void run() {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-kafka/kafka-premium.yaml");
-                arguments.workloads = Collections.singletonList("workloads/40producer-40consumer-1MBMessage-HighThroughput.yaml");
+                arguments.workloads = Collections.singletonList("workloads/40producer-40consumer-100Partitions-1MBMessage-HighThroughput.yaml");
                 arguments.output = "HighThroughput-KafkaPremium";
                 arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString());
             }
