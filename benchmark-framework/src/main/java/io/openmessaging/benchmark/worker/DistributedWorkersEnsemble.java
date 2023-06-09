@@ -74,7 +74,7 @@ public class DistributedWorkersEnsemble implements Worker {
 
     public DistributedWorkersEnsemble(List<String> workers, int numberOfUsedProducerWorkers) {
         httpClient = asyncHttpClient(config().setRequestTimeout(REQUEST_TIMEOUT_MS).setReadTimeout(READ_TIMEOUT_MS));
-        int producerConsumerRatio = numberOfUsedProducerWorkers/workers.size();
+        double producerConsumerRatio = numberOfUsedProducerWorkers/workers.size();
         workers = workers.stream().filter(p ->{
             try{
                 get(p, "/health-check", String.class).get();
