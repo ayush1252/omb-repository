@@ -18,17 +18,17 @@
 #
 
 
-name: 40 producer 40 consumer 1 topic 100 partition 1MB payload 200MB/s
+name: 20 producer 20 consumer 1 topic 50MB/second
 
 topics: 1
-partitionsPerTopic: 100
-messageSize: 1024000
-payloadFile: "payload/payload-1Mb.data"
+partitionsPerTopic: 10
+messageSize: 51200
+payloadFile: "payload/payload-50Kb.data"
 subscriptionsPerTopic: 1
-producersPerTopic: 40
-consumerPerSubscription: 40
-producerRate: 150
+producersPerTopic: 20
+consumerPerSubscription: 20
+producerRate: 1000
 consumerBacklogSizeGB: 0
-testDurationMinutes: 20
+testDurationMinutes: 10
 
 

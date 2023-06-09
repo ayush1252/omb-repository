@@ -106,7 +106,7 @@ public class AMQPPremiumRegressionTests extends EventHubTestBase {
             public void run() {
                 arguments = new Arguments();
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-premium.yaml");
-                arguments.workloads = Collections.singletonList("workloads/20producer-20consumer-50Kb-100Mbps.yaml");
+                arguments.workloads = Collections.singletonList("workloads/20producer-20consumer-50Kb-50Mbps.yaml");
                 arguments.output = "MediumThroughputTest-AmqpPremium";
                 arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString(), Latency.toString());
             }

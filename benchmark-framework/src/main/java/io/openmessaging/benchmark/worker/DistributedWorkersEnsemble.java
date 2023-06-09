@@ -74,7 +74,7 @@ public class DistributedWorkersEnsemble implements Worker {
 
     public DistributedWorkersEnsemble(List<String> workers, int numberOfUsedProducerWorkers) {
         httpClient = asyncHttpClient(config().setRequestTimeout(REQUEST_TIMEOUT_MS).setReadTimeout(READ_TIMEOUT_MS));
-
+        int producerConsumerRatio = numberOfUsedProducerWorkers/workers.size();
         workers = workers.stream().filter(p ->{
             try{
                 get(p, "/health-check", String.class).get();
@@ -88,7 +88,7 @@ public class DistributedWorkersEnsemble implements Worker {
         Preconditions.checkArgument(workers.size() > 1, "Insufficient count of active workers for the test");
 
         this.workers = workers;
-        this.producerWorkers = workers.stream().limit(numberOfUsedProducerWorkers).collect(toList());
+        this.producerWorkers = workers.stream().limit(Math.round(workers.size()* producerConsumerRatio)).collect(toList());
         this.consumerWorkers = workers.stream().filter(p -> !producerWorkers.contains(p)).collect(toList());
 
         log.info("Workers list - producers: {}", producerWorkers);
