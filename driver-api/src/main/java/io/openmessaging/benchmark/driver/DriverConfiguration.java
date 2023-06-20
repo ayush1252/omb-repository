@@ -16,15 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.openmessaging.benchmark;
+package io.openmessaging.benchmark.driver;
 
-public class DriverConfiguration {
+import java.io.Serializable;
+
+public class DriverConfiguration implements Serializable {
+
+    public String identifier;
     public String name;
     public String driverClass;
     public String protocol;
     public String product;
     public String sku;
-    public String namespaceName;
 
+    //This can be fetched dynamically if not provided.
+    public NamespaceMetadata namespaceMetadata;
+
+    public String topicConfig;
+    public String commonConfig;
     public String producerConfig;
+    public String consumerConfig;
+
+    public boolean reset;
+    public short replicationFactor = 3;
 }

@@ -8,8 +8,8 @@ import com.azure.resourcemanager.eventhubs.EventHubsManager;
 import com.azure.resourcemanager.eventhubs.models.EventHub;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
-import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
 import io.openmessaging.benchmark.credential.adapter.CredentialProvider;
+import io.openmessaging.benchmark.driver.NamespaceMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

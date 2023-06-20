@@ -28,12 +28,8 @@ import com.azure.resourcemanager.eventhubs.models.EventHub;
 
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
-import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
 import io.openmessaging.benchmark.credential.adapter.CredentialProvider;
-import io.openmessaging.benchmark.driver.BenchmarkConsumer;
-import io.openmessaging.benchmark.driver.BenchmarkDriver;
-import io.openmessaging.benchmark.driver.BenchmarkProducer;
-import io.openmessaging.benchmark.driver.ConsumerCallback;
+import io.openmessaging.benchmark.driver.*;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,10 +66,9 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         configProvider = ConfigProvider.getInstance();
         CredentialProvider credentialProvider = CredentialProvider.getInstance();
 
-        Config config = mapper.readValue(configurationFile, Config.class);
-        log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  config.identifier);
-        NamespaceMetadata metadata = configProvider.getNamespaceMetaData(config.identifier);
-        log.info("Using Namespace for this test run- " + metadata.NamespaceName);
+        DriverConfiguration config = mapper.readValue(configurationFile, DriverConfiguration.class);
+        log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  config.name);
+        log.info("Using Namespace for this test run- " + config.namespaceMetadata.NamespaceName);
 
         Properties commonProperties = new Properties();
         commonProperties.load(new StringReader(config.commonConfig));
@@ -88,14 +83,14 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         topicProperties.load(new StringReader(config.topicConfig));
 
         topicPrefix = topicProperties.getProperty("topic.name.prefix");
-        namespace = metadata.NamespaceName;
+        namespace = config.namespaceMetadata.NamespaceName;
 
         blobContainerAsyncClient = StorageAdapter.GetAsyncStorageClient(configProvider.getConfigurationValue(ConfigurationKey.StorageAccountName),
                 configProvider.getConfigurationValue(ConfigurationKey.StorageContainerName));
-        eventHubAdministrator = new EventHubAdministrator(metadata);
+        eventHubAdministrator = new EventHubAdministrator(config.namespaceMetadata);
 
         if (config.reset) {
-            String resourceGroup = metadata.ResourceGroup;
+            String resourceGroup = config.namespaceMetadata.ResourceGroup;
             log.info("Deleting existing entities");
             for (EventHub eh : eventHubAdministrator.getManager().namespaces().eventHubs().listByNamespace(resourceGroup, namespace)) {
                 new Thread(new Runnable() {
@@ -109,7 +104,7 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         }
 
         credential =  new EventHubSharedKeyCredential("RootManageSharedAccessKey",
-                credentialProvider.getCredential(metadata.NamespaceName+"-SASKey"));
+                credentialProvider.getCredential(config.namespaceMetadata.NamespaceName+"-SASKey"));
     }
 
     @Override

@@ -28,6 +28,9 @@ public class Arguments {
     @Parameter(names = {"-o", "--output"}, description = "Output", required = false)
     public String output;
 
+    @Parameter(names = {"-nm", "--namespaceMetadata"}, description = "Metadata of Namespace", required = false)
+    public String namespaceMetadata;
+
     @Parameter(names = {"-t", "--tags"}, description = "Tags associated with the run")
     public List<String> tags;
 

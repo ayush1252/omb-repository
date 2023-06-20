@@ -3,13 +3,8 @@ package io.openmessaging.benchmark.appconfig.adapter;
 import com.azure.core.exception.ResourceNotFoundException;
 import com.azure.data.appconfiguration.ConfigurationClient;
 import com.azure.data.appconfiguration.ConfigurationClientBuilder;
-import com.azure.data.appconfiguration.models.ConfigurationSetting;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
 
 /**
  * Adapter class over Azure AppConfig to provide Configuration for running tests.
@@ -55,14 +50,12 @@ public class ConfigProvider {
         }
     }
 
-    public NamespaceMetadata getNamespaceMetaData(String configName) throws JsonProcessingException {
+    public String getNamespaceMetaData(String configName){
         try{
-            final ConfigurationSetting configurationSetting = configurationClient.getConfigurationSetting(configName, environmentStage);
-            return new ObjectMapper().readValue(configurationSetting.getValue(),
-                    NamespaceMetadata.class);
-        } catch(Exception e){
-            log.error(String.valueOf(e));
-            throw e;
+            return configurationClient.getConfigurationSetting(configName, environmentStage).getValue();
+        } catch (ResourceNotFoundException e){
+            log.error("Could not find namespaceMetadata with key "+ configName + " and label " + environmentStage);
+            return null;
         }
     }
 

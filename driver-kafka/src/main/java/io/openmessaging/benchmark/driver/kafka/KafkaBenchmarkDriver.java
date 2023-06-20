@@ -29,8 +29,8 @@ import java.util.stream.Collectors;
 import com.microsoft.azure.eventhubs.ConnectionStringBuilder;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
-import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
 import io.openmessaging.benchmark.credential.adapter.CredentialProvider;
+import io.openmessaging.benchmark.driver.*;
 import org.apache.bookkeeper.stats.StatsLogger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -50,17 +50,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-import io.openmessaging.benchmark.driver.BenchmarkConsumer;
-import io.openmessaging.benchmark.driver.BenchmarkDriver;
-import io.openmessaging.benchmark.driver.BenchmarkProducer;
-import io.openmessaging.benchmark.driver.ConsumerCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class KafkaBenchmarkDriver implements BenchmarkDriver {
     private static final Logger log = LoggerFactory.getLogger(KafkaBenchmarkDriver.class);
 
-    private Config config;
+    private DriverConfiguration config;
     private final List<BenchmarkProducer> producers = Collections.synchronizedList(new ArrayList<>());
     private final List<BenchmarkConsumer> consumers = Collections.synchronizedList(new ArrayList<>());
 
@@ -75,23 +71,23 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
         ConfigProvider configProvider = ConfigProvider.getInstance();
         CredentialProvider credentialProvider = CredentialProvider.getInstance();
 
-        config = mapper.readValue(configurationFile, Config.class);
-        NamespaceMetadata metadata = configProvider.getNamespaceMetaData(config.identifier);
-        log.info("Using Namespace for this test run- " + metadata.NamespaceName);
+        config = mapper.readValue(configurationFile, DriverConfiguration.class);
+        log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  config.name);
+        log.info("Using Namespace for this test run- " + config.namespaceMetadata.NamespaceName);
 
         Properties commonProperties = new Properties();
         commonProperties.load(new StringReader(config.commonConfig));
 
         //manually creating bootstrap server from namespace name for Kafka
         commonProperties.put("bootstrap.servers",
-                metadata.NamespaceName + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix) + ":9093");
+                config.namespaceMetadata.NamespaceName + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix) + ":9093");
 
         //creating sasl config string from connection string
         final String jaasConfig = commonProperties.getProperty("sasl.jaas.config");
         commonProperties.put("sasl.jaas.config", jaasConfig + "\""
-                + createEventHubConnectionString(metadata.NamespaceName,
+                + createEventHubConnectionString(config.namespaceMetadata.NamespaceName,
                     configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix),
-                    credentialProvider.getCredential(metadata.NamespaceName + "-SASKey"))
+                    credentialProvider.getCredential(config.namespaceMetadata.NamespaceName + "-SASKey"))
                 + "\";");
 
         producerProperties = new Properties();

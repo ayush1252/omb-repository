@@ -26,13 +26,15 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.google.common.io.Files;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
-import io.openmessaging.benchmark.appconfig.adapter.NamespaceMetadata;
+import io.openmessaging.benchmark.driver.DriverConfiguration;
+import io.openmessaging.benchmark.driver.NamespaceMetadata;
 import io.openmessaging.benchmark.kusto.adapter.KustoAdapter;
 import io.openmessaging.benchmark.output.Metadata;
 import io.openmessaging.benchmark.output.TestResult;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.text.CaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,17 +148,31 @@ public class Benchmark {
                     DriverConfiguration driverConfiguration = mapper.readValue(driverConfigFile,
                             DriverConfiguration.class);
 
-                    NamespaceMetadata metadata = provider
-                            .getNamespaceMetaData(StringUtils.substringBetween(driverConfig, "/", "."));
-                    driverConfiguration.namespaceName = metadata.NamespaceName;
+                    if (driverConfiguration.namespaceMetadata == null) {
+                        String metadataString = arguments.namespaceMetadata != null
+                                ? arguments.namespaceMetadata
+                                : provider.getNamespaceMetaData(driverConfiguration.identifier);
+
+                        if (metadataString != null) {
+                            try {
+                                driverConfiguration.namespaceMetadata = new ObjectMapper().readValue(metadataString, NamespaceMetadata.class);
+                            } catch (Exception e) {
+                                log.warn("Failed to parse NamespaceMetadata. Unable to deserialize metadata string.");
+                            }
+                        }
+                    }
+                    if (driverConfiguration.namespaceMetadata == null) {
+                        throw new RuntimeException("No Namespace Information Provided For the Test. Breaking");
+                    }
 
                     log.info("--------------- WORKLOAD : {} --- DRIVER : {}---------------", workload.name,
                             driverConfiguration.name);
                     UUID uniqueRunId = UUID.randomUUID();
                     // Stop any left over workload
                     worker.stopAll();
-
-                    worker.initializeDriver(new File(driverConfig));
+                    File tempFile = File.createTempFile("driver-configuration" + System.currentTimeMillis(), ".tmp");
+                    mapper.writeValue(tempFile, driverConfiguration);
+                    worker.initializeDriver(tempFile);
 
                     WorkloadGenerator generator = new WorkloadGenerator(driverConfiguration.name, workload, worker, uniqueRunId);
 
@@ -181,7 +197,7 @@ public class Benchmark {
                     result.testDetails.metadata = Metadata.builder()
                             .workload(arguments.output.split("-")[0]) //Replacing workload name with test name
                             .payload(workload.payloadFile)
-                            .namespaceName(driverConfiguration.namespaceName)
+                            .namespaceName(driverConfiguration.namespaceMetadata.NamespaceName)
                             .topics(workload.topics)
                             .partitions(workload.partitionsPerTopic)
                             .producerCount(workload.producersPerTopic)
