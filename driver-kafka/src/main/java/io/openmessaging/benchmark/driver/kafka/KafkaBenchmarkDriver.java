@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
 public class KafkaBenchmarkDriver implements BenchmarkDriver {
     private static final Logger log = LoggerFactory.getLogger(KafkaBenchmarkDriver.class);
 
-    private DriverConfiguration config;
+    private DriverConfiguration driverConfiguration;
     private final List<BenchmarkProducer> producers = Collections.synchronizedList(new ArrayList<>());
     private final List<BenchmarkConsumer> consumers = Collections.synchronizedList(new ArrayList<>());
 
@@ -71,39 +71,45 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
         ConfigProvider configProvider = ConfigProvider.getInstance();
         CredentialProvider credentialProvider = CredentialProvider.getInstance();
 
-        config = mapper.readValue(configurationFile, DriverConfiguration.class);
-        log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  config.name);
-        log.info("Using Namespace for this test run- " + config.namespaceMetadata.NamespaceName);
+        driverConfiguration = mapper.readValue(configurationFile, DriverConfiguration.class);
+
+        if(driverConfiguration.namespaceMetadata.SASKeyValue == null) {
+            driverConfiguration.namespaceMetadata.SASKeyValue = credentialProvider.getCredential(driverConfiguration.namespaceMetadata.NamespaceName+"-SASKeyValue");
+        }
+
+        log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  driverConfiguration.name);
+        log.info("Using Namespace for this test run- " + driverConfiguration.namespaceMetadata.NamespaceName);
 
         Properties commonProperties = new Properties();
-        commonProperties.load(new StringReader(config.commonConfig));
+        commonProperties.load(new StringReader(driverConfiguration.commonConfig));
 
         //manually creating bootstrap server from namespace name for Kafka
         commonProperties.put("bootstrap.servers",
-                config.namespaceMetadata.NamespaceName + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix) + ":9093");
+                driverConfiguration.namespaceMetadata.NamespaceName + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix) + ":9093");
 
-        //creating sasl config string from connection string
-        final String jaasConfig = commonProperties.getProperty("sasl.jaas.config");
-        commonProperties.put("sasl.jaas.config", jaasConfig + "\""
-                + createEventHubConnectionString(config.namespaceMetadata.NamespaceName,
+        //creating sasl driverConfiguration string from connection string
+        final String jaasConfig = commonProperties.getProperty("sasl.jaas.driverConfiguration");
+        commonProperties.put("sasl.jaas.driverConfiguration", jaasConfig + "\""
+                + createEventHubConnectionString(driverConfiguration.namespaceMetadata.NamespaceName,
                     configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix),
-                    credentialProvider.getCredential(config.namespaceMetadata.NamespaceName + "-SASKey"))
+                    driverConfiguration.namespaceMetadata.SASKeyName,
+                    driverConfiguration.namespaceMetadata.SASKeyValue)
                 + "\";");
 
         producerProperties = new Properties();
         producerProperties.putAll(commonProperties);
-        producerProperties.load(new StringReader(config.producerConfig));
+        producerProperties.load(new StringReader(driverConfiguration.producerConfig));
         producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
 
         consumerProperties = new Properties();
         consumerProperties.putAll(commonProperties);
-        consumerProperties.load(new StringReader(config.consumerConfig));
+        consumerProperties.load(new StringReader(driverConfiguration.consumerConfig));
         consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
 
         topicProperties = new Properties();
-        topicProperties.load(new StringReader(config.topicConfig));
+        topicProperties.load(new StringReader(driverConfiguration.topicConfig));
 
         try{
             admin = AdminClient.create(commonProperties);
@@ -112,7 +118,7 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
             throw e;
         }
 
-        if (config.reset) {
+        if (driverConfiguration.reset) {
             try { // List existing topics
                 ListTopicsResult result = admin.listTopics();
                 Set<String> topics = result.names().get();
@@ -139,7 +145,7 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
                 final List<String> existingTopics = admin.listTopics().names().get()
                         .stream().map(s -> s.toLowerCase(Locale.ROOT)).collect(Collectors.toList());
                 if (!existingTopics.contains(topic.toLowerCase(Locale.ROOT))) {
-                    NewTopic newTopic = new NewTopic(topic, partitions, config.replicationFactor);
+                    NewTopic newTopic = new NewTopic(topic, partitions, driverConfiguration.replicationFactor);
                     newTopic.configs(new HashMap<>((Map) topicProperties));
                     admin.createTopics(Arrays.asList(newTopic)).all().get();
                     log.info(" Creating Topic Name: " + topic);
@@ -214,11 +220,11 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
     private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    private String createEventHubConnectionString(String namespaceName, String domainName, String sasKey){
+    private String createEventHubConnectionString(String namespaceName, String domainName, String sasKeyName, String sasKeyValue){
         return new ConnectionStringBuilder()
                 .setEndpoint(namespaceName, StringUtils.stripStart(domainName, "."))
-                .setSasKeyName("RootManageSharedAccessKey")
-                .setSasKey(sasKey)
+                .setSasKeyName(sasKeyName)
+                .setSasKey(sasKeyValue)
                 .toString();
     }
 }
