@@ -35,12 +35,12 @@
         <dependency>
             <groupId>com.microsoft.azure.kusto</groupId>
             <artifactId>kusto-ingest</artifactId>
-            <version>3.2.0</version>
+            <version>4.0.3</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.kusto</groupId>
             <artifactId>kusto-data</artifactId>
-            <version>3.2.0</version>
+            <version>4.0.3</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
