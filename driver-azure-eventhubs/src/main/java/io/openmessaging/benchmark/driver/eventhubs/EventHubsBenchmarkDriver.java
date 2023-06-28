@@ -104,7 +104,7 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         }
 
         if(driverConfiguration.namespaceMetadata.SASKeyValue == null) {
-            driverConfiguration.namespaceMetadata.SASKeyValue = credentialProvider.getCredential(driverConfiguration.namespaceMetadata.NamespaceName+"-SASKeyValue");
+            driverConfiguration.namespaceMetadata.SASKeyValue = credentialProvider.getCredential(driverConfiguration.namespaceMetadata.NamespaceName+"-SASKey");
         }
 
         credential =  new EventHubSharedKeyCredential(driverConfiguration.namespaceMetadata.SASKeyName, driverConfiguration.namespaceMetadata.SASKeyValue);

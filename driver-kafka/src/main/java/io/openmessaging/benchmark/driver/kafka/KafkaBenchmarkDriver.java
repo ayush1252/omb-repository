@@ -74,7 +74,7 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
         driverConfiguration = mapper.readValue(configurationFile, DriverConfiguration.class);
 
         if(driverConfiguration.namespaceMetadata.SASKeyValue == null) {
-            driverConfiguration.namespaceMetadata.SASKeyValue = credentialProvider.getCredential(driverConfiguration.namespaceMetadata.NamespaceName+"-SASKeyValue");
+            driverConfiguration.namespaceMetadata.SASKeyValue = credentialProvider.getCredential(driverConfiguration.namespaceMetadata.NamespaceName+"-SASKey");
         }
 
         log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  driverConfiguration.name);
