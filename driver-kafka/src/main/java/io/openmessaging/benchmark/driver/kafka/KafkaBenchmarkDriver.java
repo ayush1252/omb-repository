@@ -88,8 +88,8 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
                 driverConfiguration.namespaceMetadata.NamespaceName + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix) + ":9093");
 
         //creating sasl driverConfiguration string from connection string
-        final String jaasConfig = commonProperties.getProperty("sasl.jaas.driverConfiguration");
-        commonProperties.put("sasl.jaas.driverConfiguration", jaasConfig + "\""
+        final String jaasConfig = commonProperties.getProperty("sasl.jaas.config");
+        commonProperties.put("sasl.jaas.config", jaasConfig + "\""
                 + createEventHubConnectionString(driverConfiguration.namespaceMetadata.NamespaceName,
                     configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix),
                     driverConfiguration.namespaceMetadata.SASKeyName,
