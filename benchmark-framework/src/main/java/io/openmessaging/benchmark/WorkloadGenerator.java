@@ -92,7 +92,7 @@ public class WorkloadGenerator implements AutoCloseable {
 
         if (workload.consumerPerSubscription > 0) {
             createConsumers(topics);
-            ensureTopicsAreReady();
+            // ensureTopicsAreReady();
         }
 
         if (workload.producerRate > 0) {
@@ -146,28 +146,23 @@ public class WorkloadGenerator implements AutoCloseable {
 
     private void ensureTopicsAreReady() throws IOException {
         log.info("Waiting for consumers to be ready");
-        /*
-         This is work around the fact that there's no way to have a consumer ready in Kafka without
-         first publishing some message on the topic, which will then trigger the partition assignment to the consumers
-        */
+        // This is work around the fact that there's no way to have a consumer ready in
+        // Kafka without first publishing
+        // some message on the topic, which will then trigger the partitions assignment
+        // to the consumers
 
         int expectedMessages = workload.topics * workload.subscriptionsPerTopic;
 
-        // In this case we just publish 1 message and then wait for consumers to receive the data
+        // In this case we just publish 1 message and then wait for consumers to receive
+        // the data
         worker.probeProducers();
 
-        long start = System.currentTimeMillis();
-        long end = start + 60 * 1000;
-        while (System.currentTimeMillis() < end) {
+        while (true) {
             CountersStats stats = worker.getCountersStats();
 
-            log.info(
-                    "Waiting for topics to be ready -- Sent: {}, Received: {}",
-                    stats.messagesSent,
-                    stats.messagesReceived);
             if (stats.messagesReceived < expectedMessages) {
                 try {
-                    Thread.sleep(2_000);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -176,11 +171,7 @@ public class WorkloadGenerator implements AutoCloseable {
             }
         }
 
-        if (System.currentTimeMillis() >= end) {
-            throw new RuntimeException("Timed out waiting for consumers to be ready");
-        } else {
-            log.info("All consumers are ready");
-        }
+        log.info("All consumers are ready");
     }
 
     /**
