@@ -35,6 +35,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.util.Precision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +93,7 @@ public class WorkloadGenerator implements AutoCloseable {
 
         if (workload.consumerPerSubscription > 0) {
             createConsumers(topics);
-            ensureTopicsAreReady();
+            //ensureTopicsAreReady();
         }
 
         if (workload.producerRate > 0) {
@@ -129,10 +130,12 @@ public class WorkloadGenerator implements AutoCloseable {
                 }
             });
         }
-
+        log.info("----- Starting warmup traffic ------");
+        printAndCollectStats(1, TimeUnit.MINUTES);
+        drainBacklog(120000);
         worker.resetStats();
-        log.info("----- Starting benchmark traffic ------");
 
+        log.info("----- Starting benchmark traffic ------");
         TestResult result = printAndCollectStats(workload.testDurationMinutes, TimeUnit.MINUTES);
         runCompleted = true;
 
@@ -360,22 +363,26 @@ public class WorkloadGenerator implements AutoCloseable {
             }
         }
 
-        log.info("--- Start draining backlog ---");
+        drainBacklog(1000000);
+    }
 
-        if (workload.consumerOnly) {
-            log.info("Consume only test. Pausing producers while backlog is drained");
-            worker.pauseProducers();
-        }
+    private void drainBacklog(long waitTimeInMs) throws IOException {
+        log.info("--- Start draining backlog ---");
+        worker.pauseProducers();
         worker.resumeConsumers();
 
-        final long minBacklog = 1000;
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
 
-        while (true) {
+        final long minBacklog = 100;
+        long currentBacklog = 0;
+        while (stopWatch.getTime(TimeUnit.MILLISECONDS) < waitTimeInMs) {
             CountersStats stats = worker.getCountersStats();
-            long currentBacklog = workload.subscriptionsPerTopic * stats.messagesSent - stats.messagesReceived;
+            currentBacklog= workload.subscriptionsPerTopic * stats.messagesSent - stats.messagesReceived;
             if (currentBacklog <= minBacklog) {
                 log.info("--- Completed backlog draining ---");
                 needToWaitForBacklogDraining = false;
+                worker.resumeProducers();
                 return;
             }
 
@@ -385,6 +392,9 @@ public class WorkloadGenerator implements AutoCloseable {
                 throw new RuntimeException(e);
             }
         }
+
+        log.info("Returning due to time spent during backlog draining. Current Backlog = " + currentBacklog);
+        worker.resumeProducers();
     }
 
     private TestResult printAndCollectStats(long testDurations, TimeUnit unit) throws IOException {
