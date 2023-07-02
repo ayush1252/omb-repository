@@ -351,10 +351,24 @@ public class LocalWorker implements Worker, ConsumerCallback {
 
     @Override
     public void resetStats() throws IOException {
+        //Clearing all recorders and counters.
         publishLatencyRecorder.reset();
         cumulativePublishLatencyRecorder.reset();
         endToEndLatencyRecorder.reset();
         endToEndCumulativeLatencyRecorder.reset();
+
+        messagesSent.reset();
+        requestsSent.reset();
+        bytesSent.reset();
+        messagesReceived.reset();
+        bytesReceived.reset();
+        totalMessagesSent.reset();
+        totalMessagesReceived.reset();
+
+        bytesReceivedCounter.clear();
+        bytesSentCounter.clear();
+        messagesReceivedCounter.clear();
+        messagesSentCounter.clear();
     }
 
     @Override

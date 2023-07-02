@@ -132,7 +132,6 @@ public class WorkloadGenerator implements AutoCloseable {
         }
         log.info("----- Starting warmup traffic ------");
         printAndCollectStats(1, TimeUnit.MINUTES);
-        drainBacklog(120000);
         worker.resetStats();
 
         log.info("----- Starting benchmark traffic ------");
