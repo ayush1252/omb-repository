@@ -33,7 +33,7 @@ commonConfig: |
 
 producerConfig: |
   acks=all
-  linger.ms=5
+  linger.ms=50
   batch.size=1024000
 
 consumerConfig: |
