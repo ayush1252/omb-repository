@@ -27,7 +27,7 @@ payloadFile: "payload/payload-1Mb.data"
 subscriptionsPerTopic: 1
 producersPerTopic: 40
 consumerPerSubscription: 40
-producerRate: 400
+producerRate: 350
 consumerBacklogSizeGB: 0
 testDurationMinutes: 20
 
