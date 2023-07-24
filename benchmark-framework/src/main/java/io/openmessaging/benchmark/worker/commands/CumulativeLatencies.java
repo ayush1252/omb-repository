@@ -18,13 +18,18 @@
  */
 package io.openmessaging.benchmark.worker.commands;
 
-import java.util.concurrent.TimeUnit;
-
-import org.HdrHistogram.Histogram;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
+import org.HdrHistogram.Histogram;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CumulativeLatencies {
+
+    private static final Logger log = LoggerFactory.getLogger(CumulativeLatencies.class);
+
+    public Boolean isSerializedObject = false;
 
     @JsonIgnore
     public Histogram publishLatency = new Histogram(TimeUnit.SECONDS.toMicros(600), 5);
@@ -33,4 +38,29 @@ public class CumulativeLatencies {
     @JsonIgnore
     public Histogram endToEndLatency = new Histogram(TimeUnit.HOURS.toMicros(12), 5);
     public byte[] endToEndLatencyBytes;
+
+    public CumulativeLatencies plus(CumulativeLatencies toAdd) {
+        CumulativeLatencies result = new CumulativeLatencies();
+
+        //Deep copying itself to the new object
+        result.publishLatency.add(this.publishLatency);
+        result.endToEndLatency.add(this.endToEndLatency);
+
+        if(toAdd.isSerializedObject){
+            try {
+                result.publishLatency.add(Histogram.decodeFromCompressedByteBuffer(
+                        ByteBuffer.wrap(toAdd.publishLatencyBytes), TimeUnit.SECONDS.toMicros(600)));
+
+                result.endToEndLatency.add(Histogram.decodeFromCompressedByteBuffer(
+                        ByteBuffer.wrap(toAdd.endToEndLatencyBytes), TimeUnit.HOURS.toMicros(12)));
+            } catch (Exception e) {
+                log.error("Failed to decode latency histograms for cumulative latencies.");
+                throw new RuntimeException(e);
+            }
+        } else{
+            result.publishLatency.add(toAdd.publishLatency);
+            result.endToEndLatency.add(toAdd.endToEndLatency);
+        }
+        return result;
+    }
 }

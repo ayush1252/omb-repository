@@ -18,6 +18,7 @@
  */
 package io.openmessaging.benchmark;
 
+import io.netty.util.concurrent.SingleThreadEventExecutor;
 import io.openmessaging.benchmark.output.LatencyResult;
 import io.openmessaging.benchmark.output.SnapshotResult;
 import io.openmessaging.benchmark.output.TestDetails;
@@ -31,12 +32,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.util.Precision;
+import org.eclipse.jetty.util.thread.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,11 +138,13 @@ public class WorkloadGenerator implements AutoCloseable {
         TestResult result = printAndCollectStats(workload.testDurationMinutes, TimeUnit.MINUTES);
         runCompleted = true;
 
-        try {
-            worker.stopAll();
-        } catch (Exception e) {
-            log.error("Unable to stop workload - {}", e.toString());
-        }
+        Executors.newCachedThreadPool().execute(() -> {
+            try {
+                worker.stopAll();
+            } catch (IOException e) {
+                log.error("Unable to stop workload - {}", e.toString());
+            }
+        });
         return result;
     }
 
@@ -425,6 +427,7 @@ public class WorkloadGenerator implements AutoCloseable {
             double publishRate = stats.messagesSent / elapsed;
             double publishThroughput = stats.bytesSent / elapsed / 1024 / 1024;
             double requestRate = stats.requestsSent / elapsed;
+            double errorRate = stats.messageSendErrors / elapsed;
 
             double consumeRate = stats.messagesReceived / elapsed;
             double consumeThroughput = stats.bytesReceived / elapsed / 1024 / 1024;
@@ -433,9 +436,11 @@ public class WorkloadGenerator implements AutoCloseable {
                     - stats.totalMessagesReceived;
 
             log.info(
-                    "Pub rate {} msg/s / {} Mb/s / {} Req/s | Cons rate {} msg/s / {} Mb/s | Backlog: {} K | Pub Latency (ms) avg: {} - 50%: {} - 99%: {} - 99.9%: {} - Max: {}",
-                    rateFormat.format(publishRate), throughputFormat.format(publishThroughput),
+                    "Pub rate {} msg/s / {} Mb/s / {} Req/s | Pub err {} err/s  | Cons rate {} msg/s / {} Mb/s | Backlog: {} K | Pub Latency (ms) avg: {} - 50%: {} - 99%: {} - 99.9%: {} - Max: {}",
+                    rateFormat.format(publishRate),
+                    throughputFormat.format(publishThroughput),
                     rateFormat.format(requestRate),
+                    rateFormat.format(errorRate),
                     rateFormat.format(consumeRate), throughputFormat.format(consumeThroughput),
                     dec.format(currentBacklog / 1000.0), //
                     dec.format(microsToMillis(stats.publishLatency.getMean())),
@@ -458,6 +463,7 @@ public class WorkloadGenerator implements AutoCloseable {
 
             snapshotResult.publishRate = Precision.round(publishRate,2);
             snapshotResult.consumeRate = Precision.round(consumeRate,2);
+            snapshotResult.publishErrorRate = Precision.round(errorRate, 2);
             snapshotResult.backlog = currentBacklog;
 
             snapshotResult.populatePublishLatency(stats.publishLatency);

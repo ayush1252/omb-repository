@@ -56,6 +56,8 @@ public interface Worker extends AutoCloseable {
 
     void resumeProducers() throws IOException;
 
+    void healthCheck() throws IOException;
+
     CountersStats getCountersStats() throws IOException;
 
     PeriodStats getPeriodStats() throws IOException;
