@@ -18,7 +18,6 @@
  */
 package io.openmessaging.benchmark;
 
-import io.netty.util.concurrent.SingleThreadEventExecutor;
 import io.openmessaging.benchmark.output.LatencyResult;
 import io.openmessaging.benchmark.output.SnapshotResult;
 import io.openmessaging.benchmark.output.TestDetails;
@@ -32,11 +31,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.util.Precision;
-import org.eclipse.jetty.util.thread.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +93,7 @@ public class WorkloadGenerator implements AutoCloseable {
 
         if (workload.consumerPerSubscription > 0) {
             createConsumers(topics);
-            //ensureTopicsAreReady();
+            // ensureTopicsAreReady();
         }
 
         if (workload.producerRate > 0) {

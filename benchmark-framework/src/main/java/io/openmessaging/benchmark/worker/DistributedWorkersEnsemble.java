@@ -298,7 +298,7 @@ public class DistributedWorkersEnsemble implements Worker {
         .map(
             w -> {
               try {
-                  return w.getPeriodStats();
+                return w.getPeriodStats();
               } catch (IOException e) {
                 throw new RuntimeException(e);
               }
