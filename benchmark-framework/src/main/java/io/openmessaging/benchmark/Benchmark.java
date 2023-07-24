@@ -34,6 +34,7 @@ import io.openmessaging.benchmark.driver.NamespaceMetadata;
 import io.openmessaging.benchmark.kusto.adapter.KustoAdapter;
 import io.openmessaging.benchmark.output.Metadata;
 import io.openmessaging.benchmark.output.TestResult;
+import io.openmessaging.benchmark.worker.HTTPWorkerClient;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.text.CaseUtils;
 import org.slf4j.Logger;
@@ -49,6 +50,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.openmessaging.benchmark.worker.DistributedWorkersEnsemble;
 import io.openmessaging.benchmark.worker.LocalWorker;
 import io.openmessaging.benchmark.worker.Worker;
+
+import static java.util.stream.Collectors.toList;
 
 public class Benchmark {
 
@@ -127,7 +130,9 @@ public class Benchmark {
         Worker worker;
 
         if (arguments.workers != null && !arguments.workers.isEmpty()) {
-            worker = new DistributedWorkersEnsemble(arguments.workers, arguments.producerWorkers);
+            List<Worker> workers =
+                    arguments.workers.stream().map(HTTPWorkerClient::new).collect(toList());
+            worker = new DistributedWorkersEnsemble(workers, arguments.producerWorkers);
         } else {
             // Use local worker implementation
             worker = new LocalWorker();
@@ -208,7 +213,7 @@ public class Benchmark {
                             .tags(Optional.ofNullable(arguments.tags).orElse(new ArrayList<>())
                                     .stream()
                                     .map(s-> CaseUtils.toCamelCase(s, true))
-                                    .collect(Collectors.toList()))
+                                    .collect(toList()))
                             .build();
 
                     String fileNamePrefix = arguments.output.length() > 0 ? arguments.output

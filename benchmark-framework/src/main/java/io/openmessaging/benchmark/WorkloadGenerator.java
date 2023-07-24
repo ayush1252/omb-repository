@@ -138,33 +138,40 @@ public class WorkloadGenerator implements AutoCloseable {
         TestResult result = printAndCollectStats(workload.testDurationMinutes, TimeUnit.MINUTES);
         runCompleted = true;
 
-        try {
-            worker.stopAll();
-        } catch (Exception e) {
-            log.error("Unable to stop workload - {}", e.toString());
-        }
+        Executors.newCachedThreadPool().execute(() -> {
+            try {
+                worker.stopAll();
+            } catch (IOException e) {
+                log.error("Unable to stop workload - {}", e.toString());
+            }
+        });
         return result;
     }
 
     private void ensureTopicsAreReady() throws IOException {
         log.info("Waiting for consumers to be ready");
-        // This is work around the fact that there's no way to have a consumer ready in
-        // Kafka without first publishing
-        // some message on the topic, which will then trigger the partitions assignment
-        // to the consumers
+        /*
+         This is work around the fact that there's no way to have a consumer ready in Kafka without
+         first publishing some message on the topic, which will then trigger the partition assignment to the consumers
+        */
 
         int expectedMessages = workload.topics * workload.subscriptionsPerTopic;
 
-        // In this case we just publish 1 message and then wait for consumers to receive
-        // the data
+        // In this case we just publish 1 message and then wait for consumers to receive the data
         worker.probeProducers();
 
-        while (true) {
+        long start = System.currentTimeMillis();
+        long end = start + 60 * 1000;
+        while (System.currentTimeMillis() < end) {
             CountersStats stats = worker.getCountersStats();
 
+            log.info(
+                    "Waiting for topics to be ready -- Sent: {}, Received: {}",
+                    stats.messagesSent,
+                    stats.messagesReceived);
             if (stats.messagesReceived < expectedMessages) {
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(2_000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -173,7 +180,11 @@ public class WorkloadGenerator implements AutoCloseable {
             }
         }
 
-        log.info("All consumers are ready");
+        if (System.currentTimeMillis() >= end) {
+            throw new RuntimeException("Timed out waiting for consumers to be ready");
+        } else {
+            log.info("All consumers are ready");
+        }
     }
 
     /**
@@ -416,6 +427,7 @@ public class WorkloadGenerator implements AutoCloseable {
             double publishRate = stats.messagesSent / elapsed;
             double publishThroughput = stats.bytesSent / elapsed / 1024 / 1024;
             double requestRate = stats.requestsSent / elapsed;
+            double errorRate = stats.messageSendErrors / elapsed;
 
             double consumeRate = stats.messagesReceived / elapsed;
             double consumeThroughput = stats.bytesReceived / elapsed / 1024 / 1024;
@@ -424,9 +436,11 @@ public class WorkloadGenerator implements AutoCloseable {
                     - stats.totalMessagesReceived;
 
             log.info(
-                    "Pub rate {} msg/s / {} Mb/s / {} Req/s | Cons rate {} msg/s / {} Mb/s | Backlog: {} K | Pub Latency (ms) avg: {} - 50%: {} - 99%: {} - 99.9%: {} - Max: {}",
-                    rateFormat.format(publishRate), throughputFormat.format(publishThroughput),
+                    "Pub rate {} msg/s / {} Mb/s / {} Req/s | Pub err {} err/s  | Cons rate {} msg/s / {} Mb/s | Backlog: {} K | Pub Latency (ms) avg: {} - 50%: {} - 99%: {} - 99.9%: {} - Max: {}",
+                    rateFormat.format(publishRate),
+                    throughputFormat.format(publishThroughput),
                     rateFormat.format(requestRate),
+                    rateFormat.format(errorRate),
                     rateFormat.format(consumeRate), throughputFormat.format(consumeThroughput),
                     dec.format(currentBacklog / 1000.0), //
                     dec.format(microsToMillis(stats.publishLatency.getMean())),
@@ -449,6 +463,7 @@ public class WorkloadGenerator implements AutoCloseable {
 
             snapshotResult.publishRate = Precision.round(publishRate,2);
             snapshotResult.consumeRate = Precision.round(consumeRate,2);
+            snapshotResult.publishErrorRate = Precision.round(errorRate, 2);
             snapshotResult.backlog = currentBacklog;
 
             snapshotResult.populatePublishLatency(stats.publishLatency);

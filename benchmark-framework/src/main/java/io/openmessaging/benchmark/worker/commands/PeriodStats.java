@@ -18,15 +18,26 @@
  */
 package io.openmessaging.benchmark.worker.commands;
 
+import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.DataFormatException;
 
 import lombok.ToString;
 import org.HdrHistogram.Histogram;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @ToString
 public class PeriodStats {
+
+    private static final Logger log = LoggerFactory.getLogger(PeriodStats.class);
+
+    public Boolean isSerializedObject = false;
+
     public long messagesSent = 0;
+    public long messageSendErrors = 0;
     public long bytesSent = 0;
     public long requestsSent = 0;
 
@@ -34,6 +45,7 @@ public class PeriodStats {
     public long bytesReceived = 0;
 
     public long totalMessagesSent = 0;
+    public long totalMessageSendErrors = 0;
     public long totalMessagesReceived = 0;
 
     @JsonIgnore
@@ -43,4 +55,47 @@ public class PeriodStats {
     @JsonIgnore
     public Histogram endToEndLatency = new Histogram(TimeUnit.HOURS.toMicros(12), 5);
     public byte[] endToEndLatencyBytes;
+
+    public PeriodStats plus(PeriodStats toAdd) {
+        PeriodStats result = new PeriodStats();
+        //Deep copying itself to the new object
+        result.messagesSent += this.messagesSent;
+        result.requestsSent += this.requestsSent;
+        result.messageSendErrors += this.messageSendErrors;
+        result.bytesSent += this.bytesSent;
+        result.messagesReceived += this.messagesReceived;
+        result.bytesReceived += this.bytesReceived;
+        result.totalMessagesSent += this.totalMessagesSent;
+        result.totalMessageSendErrors += this.totalMessageSendErrors;
+        result.totalMessagesReceived += this.totalMessagesReceived;
+        result.publishLatency.add(this.publishLatency);
+        result.endToEndLatency.add(this.endToEndLatency);
+
+        result.messagesSent += toAdd.messagesSent;
+        result.requestsSent += toAdd.requestsSent;
+        result.messageSendErrors += toAdd.messageSendErrors;
+        result.bytesSent += toAdd.bytesSent;
+        result.messagesReceived += toAdd.messagesReceived;
+        result.bytesReceived += toAdd.bytesReceived;
+        result.totalMessagesSent += toAdd.totalMessagesSent;
+        result.totalMessageSendErrors += toAdd.totalMessageSendErrors;
+        result.totalMessagesReceived += toAdd.totalMessagesReceived;
+
+        if(toAdd.isSerializedObject){
+            try {
+                result.publishLatency.add(Histogram.decodeFromCompressedByteBuffer(
+                        ByteBuffer.wrap(toAdd.publishLatencyBytes), TimeUnit.SECONDS.toMicros(600)));
+
+                result.endToEndLatency.add(Histogram.decodeFromCompressedByteBuffer(
+                        ByteBuffer.wrap(toAdd.endToEndLatencyBytes), TimeUnit.HOURS.toMicros(12)));
+            } catch (ArrayIndexOutOfBoundsException | DataFormatException e) {
+                log.error("Failed to decode latency histograms for period stats.");
+                throw new RuntimeException(e);
+            }
+        } else{
+            result.publishLatency.add(toAdd.publishLatency);
+            result.endToEndLatency.add(toAdd.endToEndLatency);
+        }
+        return result;
+    }
 }

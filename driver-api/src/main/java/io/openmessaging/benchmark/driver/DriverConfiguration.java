@@ -37,6 +37,6 @@ public class DriverConfiguration implements Serializable {
     public String producerConfig;
     public String consumerConfig;
 
-    public boolean reset;
+    public boolean reset = true;
     public short replicationFactor = 3;
 }

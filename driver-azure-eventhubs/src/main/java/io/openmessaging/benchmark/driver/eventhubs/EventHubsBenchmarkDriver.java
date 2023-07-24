@@ -66,31 +66,31 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         configProvider = ConfigProvider.getInstance();
         CredentialProvider credentialProvider = CredentialProvider.getInstance();
 
-        DriverConfiguration config = mapper.readValue(configurationFile, DriverConfiguration.class);
-        log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  config.name);
-        log.info("Using Namespace for this test run- " + config.namespaceMetadata.NamespaceName);
+        DriverConfiguration driverConfiguration = mapper.readValue(configurationFile, DriverConfiguration.class);
+        log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  driverConfiguration.name);
+        log.info("Using Namespace for this test run- " + driverConfiguration.namespaceMetadata.NamespaceName);
 
         Properties commonProperties = new Properties();
-        commonProperties.load(new StringReader(config.commonConfig));
+        commonProperties.load(new StringReader(driverConfiguration.commonConfig));
 
         producerProperties = new Properties();
         producerProperties.putAll(commonProperties);
-        producerProperties.load(new StringReader(config.producerConfig));
+        producerProperties.load(new StringReader(driverConfiguration.producerConfig));
         producerProperties.putIfAbsent("batch.size", "1048576");
         producerProperties.putIfAbsent("batch.count", "1");
 
         Properties topicProperties = new Properties();
-        topicProperties.load(new StringReader(config.topicConfig));
+        topicProperties.load(new StringReader(driverConfiguration.topicConfig));
 
         topicPrefix = topicProperties.getProperty("topic.name.prefix");
-        namespace = config.namespaceMetadata.NamespaceName;
+        namespace = driverConfiguration.namespaceMetadata.NamespaceName;
 
         blobContainerAsyncClient = StorageAdapter.GetAsyncStorageClient(configProvider.getConfigurationValue(ConfigurationKey.StorageAccountName),
                 configProvider.getConfigurationValue(ConfigurationKey.StorageContainerName));
-        eventHubAdministrator = new EventHubAdministrator(config.namespaceMetadata);
+        eventHubAdministrator = new EventHubAdministrator(driverConfiguration.namespaceMetadata);
 
-        if (config.reset) {
-            String resourceGroup = config.namespaceMetadata.ResourceGroup;
+        if (driverConfiguration.reset) {
+            String resourceGroup = driverConfiguration.namespaceMetadata.ResourceGroup;
             log.info("Deleting existing entities");
             for (EventHub eh : eventHubAdministrator.getManager().namespaces().eventHubs().listByNamespace(resourceGroup, namespace)) {
                 new Thread(new Runnable() {
@@ -103,8 +103,11 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
             }
         }
 
-        credential =  new EventHubSharedKeyCredential("RootManageSharedAccessKey",
-                credentialProvider.getCredential(config.namespaceMetadata.NamespaceName+"-SASKey"));
+        if(driverConfiguration.namespaceMetadata.SASKeyValue == null) {
+            driverConfiguration.namespaceMetadata.SASKeyValue = credentialProvider.getCredential(driverConfiguration.namespaceMetadata.NamespaceName+"-SASKey");
+        }
+
+        credential =  new EventHubSharedKeyCredential(driverConfiguration.namespaceMetadata.SASKeyName, driverConfiguration.namespaceMetadata.SASKeyValue);
     }
 
     @Override
