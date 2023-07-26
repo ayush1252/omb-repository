@@ -148,9 +148,11 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
                                                                Optional<Integer> partition,
                                                                ConsumerCallback consumerCallback) {
 
+        eventHubAdministrator.createConsumerGroupIfNotPresent(topic, subscriptionName);
+
         EventProcessorClient eventProcessorClient = new EventProcessorClientBuilder()
                 .credential(namespace + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix), topic, credential)
-                .consumerGroup(EventHubClientBuilder.DEFAULT_CONSUMER_GROUP_NAME)
+                .consumerGroup(subscriptionName)
                 .processEvent(eventContext -> EventHubsBenchmarkConsumer.processEvent(eventContext, consumerCallback))
                 .processError(errorContext -> log.error("exception occur while consuming message " +  errorContext.getThrowable().getMessage()))
                 .checkpointStore(new BlobCheckpointStore(blobContainerAsyncClient))
