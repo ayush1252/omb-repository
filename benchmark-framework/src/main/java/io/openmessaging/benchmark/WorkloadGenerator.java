@@ -138,13 +138,11 @@ public class WorkloadGenerator implements AutoCloseable {
         TestResult result = printAndCollectStats(workload.testDurationMinutes, TimeUnit.MINUTES);
         runCompleted = true;
 
-        Executors.newCachedThreadPool().execute(() -> {
-            try {
-                worker.stopAll();
-            } catch (IOException e) {
-                log.error("Unable to stop workload - {}", e.toString());
-            }
-        });
+        try {
+            worker.stopAll();
+        } catch (IOException e) {
+            log.error("Unable to stop workload - {}", e.toString());
+        }
         return result;
     }
 
