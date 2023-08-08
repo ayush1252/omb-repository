@@ -1,11 +1,14 @@
 package io.openmessaging.benchmark.pojo.output;
 
-public class SnapshotResult extends LatencyResult{
+import lombok.experimental.SuperBuilder;
 
-    public long timeSinceTestStartInSeconds;
+@SuperBuilder
+public class SnapshotResult extends LatencyResult {
 
-    public Double publishRate;
-    public Double consumeRate;
-    public Double publishErrorRate;
-    public long backlog;
+  public long timeSinceTestStartInSeconds;
+
+  public Double publishRate;
+  public Double consumeRate;
+  public Double publishErrorRate;
+  public long backlog;
 }
