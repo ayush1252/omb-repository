@@ -1,4 +1,4 @@
-package io.openmessaging.benchmark.output;
+package io.openmessaging.benchmark.pojo.output;
 
 public class SnapshotResult extends LatencyResult{
 

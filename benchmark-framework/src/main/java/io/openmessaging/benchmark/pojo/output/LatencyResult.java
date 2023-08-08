@@ -1,4 +1,4 @@
-package io.openmessaging.benchmark.output;
+package io.openmessaging.benchmark.pojo.output;
 
 import org.HdrHistogram.Histogram;
 import org.apache.commons.math3.util.Precision;

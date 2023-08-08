@@ -1,4 +1,4 @@
-package io.openmessaging.benchmark;
+package io.openmessaging.benchmark.pojo;
 
 import com.beust.jcommander.Parameter;
 
@@ -8,7 +8,7 @@ import java.util.List;
 public class Arguments {
 
     @Parameter(names = {"-h", "--help"}, description = "Help message", help = true)
-    boolean help;
+    public boolean help;
 
     @Parameter(names = {"-d",
             "--drivers"}, description = "Drivers list. eg.: pulsar/pulsar.yaml,kafka/kafka.yaml", required = true)

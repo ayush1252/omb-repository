@@ -18,10 +18,11 @@
  */
 package io.openmessaging.benchmark;
 
-import io.openmessaging.benchmark.output.LatencyResult;
-import io.openmessaging.benchmark.output.SnapshotResult;
-import io.openmessaging.benchmark.output.TestDetails;
-import io.openmessaging.benchmark.output.TestResult;
+import io.openmessaging.benchmark.pojo.Workload;
+import io.openmessaging.benchmark.pojo.output.LatencyResult;
+import io.openmessaging.benchmark.pojo.output.SnapshotResult;
+import io.openmessaging.benchmark.pojo.output.TestDetails;
+import io.openmessaging.benchmark.pojo.output.TestResult;
 import io.openmessaging.benchmark.utils.RandomGenerator;
 import java.io.IOException;
 import java.text.DecimalFormat;

@@ -2,7 +2,7 @@ package io.openmessaging.benchmark.perftestsuite.premium;
 
 import static io.openmessaging.benchmark.perftestsuite.MetadataTags.*;
 
-import io.openmessaging.benchmark.Arguments;
+import io.openmessaging.benchmark.pojo.Arguments;
 import io.openmessaging.benchmark.perftestsuite.EventHubTestBase;
 import java.util.ArrayList;
 import java.util.Arrays;
