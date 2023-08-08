@@ -54,8 +54,8 @@ public class LatencyMetric {
    * The first object should be the one compared to and the other should be the one compared against.
    * @return List which contains details about all the params that failed the comparison.
    */
-  public List<LatencyComparisonResult> compareAndEvaluateDiff(LatencyMetric other, double errorThreshold) {
-    List<LatencyComparisonResult> result = new ArrayList();
+  public List<ComparisonResult> compareAndEvaluateDiff(LatencyMetric other, double errorThreshold) {
+    List<ComparisonResult> result = new ArrayList();
 
     compareAndAppendReason(result, "PublishLatencyPAvg",
             publishLatencyAvg, other.publishLatencyAvg,errorThreshold);
@@ -86,10 +86,10 @@ public class LatencyMetric {
     return result;
   }
 
-  private void compareAndAppendReason(List<LatencyComparisonResult> result, String metricName, Double currentValue,
+  private void compareAndAppendReason(List<ComparisonResult> result, String metricName, Double currentValue,
                                       Double expectedValue, Double errorThreshold) {
     if (expectedValue != null && currentValue != null && currentValue > (1 + errorThreshold / 100) * expectedValue) {
-      result.add(LatencyComparisonResult.builder()
+      result.add(ComparisonResult.builder()
               .metricName(metricName)
               .currentValue(currentValue)
               .expectedValue(expectedValue)
