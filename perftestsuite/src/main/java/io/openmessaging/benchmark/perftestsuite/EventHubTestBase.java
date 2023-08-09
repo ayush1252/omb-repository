@@ -2,10 +2,9 @@ package io.openmessaging.benchmark.perftestsuite;
 
 import com.microsoft.applicationinsights.attach.ApplicationInsights;
 import io.openmessaging.benchmark.Benchmark;
-import io.openmessaging.benchmark.pojo.Arguments;
+import io.openmessaging.benchmark.Arguments;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
-import io.openmessaging.benchmark.pojo.output.TestResult;
 import io.openmessaging.benchmark.storage.adapter.StorageAdapter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -36,10 +35,9 @@ public abstract class EventHubTestBase {
             //Specifying worker roles if configured
             arguments.workers = getWorkersIfConfigured(testSuiteName);
             arguments.producerWorkers = arguments.workers == null ? 0: arguments.workers.size() /2;
+
             try {
-                //No Validation happening since the current validation is happening in Kusto.
-                final List<TestResult> testResults = Benchmark.executeBenchmarkingRun(arguments);
-                testResults.forEach(individualResult -> Benchmark.persistTestResults(arguments, individualResult));
+                Benchmark.executeBenchmarkingRun(arguments);
             } catch (Exception e) {
                 log.error("Failed Execution of Test: " + individualTest, e);
             }

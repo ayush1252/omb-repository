@@ -61,8 +61,8 @@ public class KustoAdapter {
         service = Executors.newFixedThreadPool(3);
 
         service.execute(ingestFile(database, fileNamePrefix + "-details.json", "PerformanceRunDetails", MAPPING_SUFFIX + V1_SUFFIX));
-        service.execute(ingestFile(database, fileNamePrefix + "-snapshot.json", "PerformanceRunIndividualSnapshots", MAPPING_SUFFIX + V1_SUFFIX));
-        service.execute(ingestFile(database, fileNamePrefix + "-aggregate.json", "PerformanceRunAggregates", MAPPING_SUFFIX +  V1_SUFFIX));
+        service.execute(ingestFile(database, fileNamePrefix + "-snapshot.json", "PerformanceRunIndividualSnapshots", MAPPING_SUFFIX));
+        service.execute(ingestFile(database, fileNamePrefix + "-aggregate.json", "PerformanceRunAggregates", MAPPING_SUFFIX));
 
         try{
             latch.await(5, TimeUnit.MINUTES);

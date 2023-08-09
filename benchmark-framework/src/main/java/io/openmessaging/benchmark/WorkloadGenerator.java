@@ -18,8 +18,10 @@
  */
 package io.openmessaging.benchmark;
 
-import io.openmessaging.benchmark.pojo.Workload;
-import io.openmessaging.benchmark.pojo.output.*;
+import io.openmessaging.benchmark.output.LatencyResult;
+import io.openmessaging.benchmark.output.SnapshotResult;
+import io.openmessaging.benchmark.output.TestDetails;
+import io.openmessaging.benchmark.output.TestResult;
 import io.openmessaging.benchmark.utils.RandomGenerator;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -452,20 +454,18 @@ public class WorkloadGenerator implements AutoCloseable {
                     dec.format(microsToMillis(stats.endToEndLatency.getValueAtPercentile(99.9))),
                     throughputFormat.format(microsToMillis(stats.endToEndLatency.getMaxValue())));
 
-      SnapshotResult snapshotResult =
-          SnapshotResult.builder()
-              .uuid(this.uniqueRunId.toString())
-              .timestamp(
-                  Instant.now().truncatedTo(ChronoUnit.SECONDS).toString().replaceAll("[TZ]", " "))
-              .timeSinceTestStartInSeconds(TimeUnit.NANOSECONDS.toSeconds(now - startTime))
-              .publishRate(Precision.round(publishRate, 2))
-              .consumeRate(Precision.round(consumeRate, 2))
-              .publishErrorRate(Precision.round(errorRate, 2))
-              .backlog(currentBacklog)
-              .build();
+            SnapshotResult snapshotResult = new SnapshotResult();
+            snapshotResult.uuid = this.uniqueRunId.toString();
+            snapshotResult.timestamp = Instant.now().truncatedTo(ChronoUnit.SECONDS).toString().replaceAll("[TZ]", " ");
+            snapshotResult.timeSinceTestStartInSeconds = TimeUnit.NANOSECONDS.toSeconds(now - startTime);
 
-            snapshotResult.latencyMetric.populatePublishLatency(stats.publishLatency);
-            snapshotResult.latencyMetric.populateE2ELatency(stats.endToEndLatency);
+            snapshotResult.publishRate = Precision.round(publishRate,2);
+            snapshotResult.consumeRate = Precision.round(consumeRate,2);
+            snapshotResult.publishErrorRate = Precision.round(errorRate, 2);
+            snapshotResult.backlog = currentBacklog;
+
+            snapshotResult.populatePublishLatency(stats.publishLatency);
+            snapshotResult.populateE2ELatency(stats.endToEndLatency);
             result.snapshotResultList.add(snapshotResult);
 
             if (now >= testEndTime && !needToWaitForBacklogDraining) {
@@ -497,12 +497,11 @@ public class WorkloadGenerator implements AutoCloseable {
                         dec.format(microsToMillis(agg.publishLatency.getValueAtPercentile(99.99))),
                         throughputFormat.format(microsToMillis(agg.publishLatency.getMaxValue())));
 
-                LatencyResult aggregateResult  = LatencyResult.builder()
-                        .uuid( this.uniqueRunId.toString())
-                        .timestamp( Instant.now().truncatedTo(ChronoUnit.SECONDS).toString().replaceAll("[TZ]", " "))
-                        .build();
-                aggregateResult.latencyMetric.populatePublishLatency(agg.publishLatency);
-                aggregateResult.latencyMetric.populateE2ELatency(agg.endToEndLatency);
+                LatencyResult aggregateResult  = new LatencyResult();
+                aggregateResult.uuid = this.uniqueRunId.toString();
+                aggregateResult.timestamp = Instant.now().truncatedTo(ChronoUnit.SECONDS).toString().replaceAll("[TZ]", " ");
+                aggregateResult.populatePublishLatency(agg.publishLatency);
+                aggregateResult.populateE2ELatency(agg.endToEndLatency);
                 result.aggregateResult = aggregateResult;
 
                 break;

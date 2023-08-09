@@ -1,4 +1,4 @@
-package io.openmessaging.benchmark.pojo.output;
+package io.openmessaging.benchmark.output;
 
 public class TestDetails {
     public String uuid;

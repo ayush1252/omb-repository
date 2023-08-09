@@ -16,14 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.openmessaging.benchmark.pojo.output;
+package io.openmessaging.benchmark;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestResult {
-
-    public TestDetails testDetails;
-    public List<SnapshotResult> snapshotResultList = new ArrayList<>();
-    public LatencyResult aggregateResult;
+public class Workers {
+    public List<String> workers = new ArrayList<>();
 }
