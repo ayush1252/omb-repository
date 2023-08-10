@@ -1,5 +1,6 @@
 package io.openmessaging.benchmark.pojo.output;
 
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.HdrHistogram.Histogram;
@@ -10,6 +11,7 @@ import java.util.List;
 
 @SuperBuilder
 @NoArgsConstructor
+@Data
 public class LatencyMetric {
 
   public Double publishLatencyAvg;

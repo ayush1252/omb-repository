@@ -1,9 +1,11 @@
 package io.openmessaging.benchmark.pojo.output;
 
 import lombok.Builder;
+import lombok.Data;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
+@Data
 public class LatencyResult {
   public String uuid;
   public String timestamp;

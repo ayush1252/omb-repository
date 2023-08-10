@@ -18,9 +18,12 @@
  */
 package io.openmessaging.benchmark.pojo.output;
 
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 public class TestResult {
 
     public TestDetails testDetails;
