@@ -1,4 +1,4 @@
-package io.openmessaging.benchmark.output;
+package io.openmessaging.benchmark.pojo.output;
 
 import lombok.Builder;
 import lombok.Data;
