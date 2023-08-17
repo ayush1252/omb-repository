@@ -1,5 +1,8 @@
-package io.openmessaging.benchmark.output;
+package io.openmessaging.benchmark.pojo.output;
 
+import lombok.Data;
+
+@Data
 public class TestDetails {
     public String uuid;
     public String testStartTime;
