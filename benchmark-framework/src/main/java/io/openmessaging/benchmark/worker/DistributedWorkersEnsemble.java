@@ -42,8 +42,9 @@ public class DistributedWorkersEnsemble implements Worker {
   private final List<Worker> consumerWorkers;
   private final Worker leader;
   private int numberOfUsedProducerWorkers;
+  private double requestedPublishRateForCurrentRun;
 
-  public DistributedWorkersEnsemble(List<Worker> workers, int numberOfUsedProducerWorkers) {
+  public DistributedWorkersEnsemble(List<Worker> workers, int producerWorkerCount) {
     workers =
         workers.stream()
             .filter(
@@ -67,7 +68,7 @@ public class DistributedWorkersEnsemble implements Worker {
     this.workers = workers;
 
     leader = this.workers.get(0);
-    this.producerWorkers = workers.stream().limit(numberOfUsedProducerWorkers).collect(toList());
+    this.producerWorkers = workers.stream().limit(producerWorkerCount).collect(toList());
     this.consumerWorkers =
         workers.stream().filter(p -> !producerWorkers.contains(p)).collect(toList());
 
@@ -146,10 +147,10 @@ public class DistributedWorkersEnsemble implements Worker {
   @Override
   public void startLoad(ProducerWorkAssignment producerWorkAssignment) throws IOException {
     // Reduce the publish rate across all the brokers
-    double newRate = producerWorkAssignment.publishRate / numberOfUsedProducerWorkers;
+    requestedPublishRateForCurrentRun = producerWorkAssignment.publishRate;
+    double newRate = requestedPublishRateForCurrentRun / numberOfUsedProducerWorkers;
     log.info("Setting worker assigned publish rate to {} msgs/sec", newRate);
     // Reduce the publish rate across all the brokers
-
     producerWorkers.parallelStream()
         .forEach(
             w -> {
@@ -294,16 +295,57 @@ public class DistributedWorkersEnsemble implements Worker {
 
   @Override
   public PeriodStats getPeriodStats() {
-    return workers.parallelStream()
-        .map(
-            w -> {
-              try {
-                return w.getPeriodStats();
-              } catch (IOException e) {
-                throw new RuntimeException(e);
-              }
-            })
-        .reduce(new PeriodStats(), PeriodStats::plus);
+    List<Worker> failedWorkerNodes = new ArrayList<>();
+    final PeriodStats combinedStat =
+        workers.parallelStream()
+            .map(
+                w -> {
+                  try {
+                    return w.getPeriodStats();
+                  } catch (Exception e) {
+                    // It can happen that a worker stopped responding midway through the test.
+                    // Remove the worker from the list of workers and adjust the publishing rate
+                    // accordingly.
+                    log.warn(
+                        "Found error while fetching periodic metrics from worker node {} - {}",
+                        w,
+                        e.getMessage());
+                    failedWorkerNodes.add(w);
+                  }
+                  return new PeriodStats();
+                })
+            .reduce(new PeriodStats(), PeriodStats::plus);
+
+    if (failedWorkerNodes.size() > 0) {
+      try {
+        removeFailedWorkerNodes(failedWorkerNodes);
+        adjustPublishRate(requestedPublishRateForCurrentRun);
+      } catch (Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    }
+
+    return combinedStat;
+  }
+
+  private void removeFailedWorkerNodes(List<Worker> failedWorkerList) {
+    failedWorkerList.forEach(
+        w -> {
+          this.workers.remove(w);
+          this.producerWorkers.remove(w);
+          this.consumerWorkers.remove(w);
+          numberOfUsedProducerWorkers = producerWorkers.size();
+        });
+
+    log.info(
+        "Reduced Worker Counts - Workers : {} Producers:{}, Consumers{}",
+        this.workers.size(),
+        numberOfUsedProducerWorkers,
+        this.consumerWorkers.size());
+
+    Preconditions.checkArgument(
+        numberOfUsedProducerWorkers <= 0 || producerWorkers.size() >= 1,
+        "Insufficient count of active producer for the test");
   }
 
   @Override
@@ -314,7 +356,9 @@ public class DistributedWorkersEnsemble implements Worker {
               try {
                 return w.getCumulativeLatencies();
               } catch (IOException e) {
-                throw new RuntimeException(e);
+                  // Again, this could very well happen that the code breaks at the absolute last check so ignoring and logging is the way to go.
+                log.error("Error while fetching Cumulative Latencies. This can lead to false metrics for the run", e);
+                return new CumulativeLatencies();
               }
             })
         .reduce(new CumulativeLatencies(), CumulativeLatencies::plus);

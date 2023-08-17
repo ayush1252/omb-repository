@@ -24,6 +24,7 @@ import java.io.StringReader;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.microsoft.azure.eventhubs.ConnectionStringBuilder;
@@ -126,7 +127,11 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
                 log.info("Deleting the following topics - {}", topics);
                 // Delete all existing topics
                 DeleteTopicsResult deletes = admin.deleteTopics(topics);
-                deletes.all().get();
+                try{
+                    deletes.all().get(10, TimeUnit.SECONDS);
+                } catch (Exception e){
+                    log.warn("Got error while deleting topic - {}", e.getMessage());
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new IOException(e);

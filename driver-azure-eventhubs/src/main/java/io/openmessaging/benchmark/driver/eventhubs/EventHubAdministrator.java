@@ -83,4 +83,12 @@ public class EventHubAdministrator {
                     .create();
         }
     }
+
+  public void createConsumerGroupIfNotPresent(String topicName, String subscriptionName) {
+    manager
+        .consumerGroups()
+        .define(subscriptionName)
+        .withExistingEventHub(metadata.ResourceGroup, metadata.NamespaceName, topicName)
+        .create();
+    }
 }
