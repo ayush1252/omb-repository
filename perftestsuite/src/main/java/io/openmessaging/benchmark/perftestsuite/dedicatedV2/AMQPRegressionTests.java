@@ -1,6 +1,6 @@
 package io.openmessaging.benchmark.perftestsuite.dedicatedV2;
 
-import io.openmessaging.benchmark.Arguments;
+import io.openmessaging.benchmark.pojo.Arguments;
 import io.openmessaging.benchmark.perftestsuite.EventHubTestBase;
 
 import java.util.ArrayList;
