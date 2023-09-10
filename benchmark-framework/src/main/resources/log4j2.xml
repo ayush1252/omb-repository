@@ -33,10 +33,10 @@
     </Appenders>
     <Loggers>
         <Logger name="com.azure" level="error" additivity="true">
-            <AppenderRef ref="rollingFile"/>
+            <AppenderRef ref="ConsoleAppender"/>
         </Logger>
         <Root level="info">
-            <AppenderRef ref="rollingFile"/>
+            <AppenderRef ref="ConsoleAppender"/>
         </Root>
     </Loggers>
 </Configuration>

@@ -25,7 +25,7 @@ public abstract class EventHubTestBase {
 
     static ConfigProvider configProvider;
     public static void runPerformanceTests(){
-        ApplicationInsights.attach();
+        //ApplicationInsights.attach();
         log.info("Starting Execution of Test Suite: " + testSuiteName);
         configuredTestList.forEach(individualTest -> {
             configProvider = ConfigProvider.getInstance();
@@ -34,7 +34,7 @@ public abstract class EventHubTestBase {
 
 
             //Specifying worker roles if configured
-            arguments.workers = getWorkersIfConfigured(testSuiteName);
+            //arguments.workers = getWorkersIfConfigured(testSuiteName);
             arguments.producerWorkers = arguments.workers == null ? 0: arguments.workers.size() /2;
             try {
                 //No Validation happening since the current validation is happening in Kusto.
