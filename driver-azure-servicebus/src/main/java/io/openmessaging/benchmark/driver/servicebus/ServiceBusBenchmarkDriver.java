@@ -154,20 +154,20 @@ public class ServiceBusBenchmarkDriver implements BenchmarkDriver {
 
         serviceBusAdministrator.createConsumerGroupIfNotPresent(topic, subscriptionName);
 
-        EventProcessorClient eventProcessorClient = new EventProcessorClientBuilder()
-                .credential(namespace + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix), topic, credential)
-                .consumerGroup(subscriptionName)
-                .processEvent(eventContext -> ServiceBusBenchmarkConsumer.processEvent(eventContext, consumerCallback))
-                .processError(errorContext -> log.error("exception occur while consuming message " +  errorContext.getThrowable().getMessage()))
-                .checkpointStore(new BlobCheckpointStore(blobContainerAsyncClient))
-                .buildEventProcessorClient();
-
+        ServiceBusProcessorClient sbProcessorClient = new ServiceBusClientBuilder()
+                .connectionString("My Connection String")
+                .processor()
+                .queueName("My Queue Name")
+                //..processMessage(eventContext -> ServiceBusBenchmarkConsumer.processEvent(eventContext, consumerCallback))
+                .processMessage(context -> ServiceBusBenchmarkConsumer.processEvent(context, consumerCallback))
+                .processError(errorContext -> log.error("exception occur while consuming message " +  errorContext.toString()))
+                .buildProcessorClient();
         try {
-            BenchmarkConsumer benchmarkConsumer = new ServiceBusBenchmarkConsumer(eventProcessorClient);
+            BenchmarkConsumer benchmarkConsumer = new ServiceBusBenchmarkConsumer(sbProcessorClient);
             consumers.add(benchmarkConsumer);
             return CompletableFuture.completedFuture(benchmarkConsumer);
         } catch (Throwable t) {
-            eventProcessorClient.stop();
+            sbProcessorClient.stop();
             CompletableFuture<BenchmarkConsumer> future = new CompletableFuture<>();
             future.completeExceptionally(t);
             return future;

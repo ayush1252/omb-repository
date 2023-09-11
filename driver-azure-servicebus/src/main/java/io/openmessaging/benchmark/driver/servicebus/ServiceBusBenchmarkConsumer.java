@@ -18,8 +18,8 @@
  */
 package io.openmessaging.benchmark.driver.servicebus;
 
-import com.azure.messaging.eventhubs.EventProcessorClient;
-import com.azure.messaging.eventhubs.models.EventContext;
+import com.azure.messaging.servicebus.ServiceBusProcessorClient;
+import com.azure.messaging.servicebus.ServiceBusReceivedMessageContext;
 import io.openmessaging.benchmark.driver.BenchmarkConsumer;
 import io.openmessaging.benchmark.driver.ConsumerCallback;
 import org.slf4j.Logger;
@@ -33,23 +33,20 @@ import java.util.concurrent.TimeUnit;
 public class ServiceBusBenchmarkConsumer implements BenchmarkConsumer {
     private static final Logger log = LoggerFactory.getLogger(ServiceBusBenchmarkConsumer.class);
 
-    private final EventProcessorClient eventProcessorClient;
+    private final ServiceBusProcessorClient eventProcessorClient;
     private final ExecutorService executor;
     private final Future<?> consumerTask;
 
-    public ServiceBusBenchmarkConsumer(EventProcessorClient eventProcessorClient) {
+    public ServiceBusBenchmarkConsumer(ServiceBusProcessorClient eventProcessorClient) {
         this.eventProcessorClient = eventProcessorClient;
         this.executor = Executors.newSingleThreadExecutor();
         this.consumerTask = this.executor.submit(eventProcessorClient::start);
     }
 
-    public static void processEvent(EventContext eventContext, ConsumerCallback consumerCallback) {
-        consumerCallback.messageReceived(eventContext.getEventData().getBody(),
-                TimeUnit.MILLISECONDS.toNanos(Long.parseLong(eventContext.getEventData().getProperties().get("producer_timestamp").toString())));
-        if (eventContext.getEventData().getSequenceNumber() % 100 == 0) {
-            eventContext.updateCheckpointAsync()
-                    .doOnError(throwable -> log.error("Got error while updating checkpoint.", throwable));
-        }
+    public static void processEvent(ServiceBusReceivedMessageContext eventContext, ConsumerCallback consumerCallback) {
+        consumerCallback.messageReceived(eventContext.getMessage().getBody().toBytes(),
+                TimeUnit.MILLISECONDS.toNanos(Long.parseLong(eventContext.getMessage().getEnqueuedTime().toString())));
+        eventContext.complete();
     }
 
     @Override
