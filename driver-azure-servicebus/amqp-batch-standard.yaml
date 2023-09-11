@@ -17,13 +17,19 @@
 # under the License.
 #
 
-identifier: amqp-dedicated-v2
-name: EventHubs AMQP DedicatedV2SKU
-driverClass: io.openmessaging.benchmark.driver.eventhubs.EventHubsBenchmarkDriver
-reset: true
+identifier: amqp-batch-standard-sb
+name: ServiceBus AMQP Standard BatchSend
+driverClass: io.openmessaging.benchmark.driver.servicebus.ServiceBusBenchmarkDriver
 protocol: AMQP
-product: EventHubs
-sku: DedicatedV2
+product: ServiceBus
+sku: Standard
+reset: false
+
+namespaceMetadata:
+  NamespaceName: sharmavijay-sbstd-glb-nm01
+  SubscriptionId: MySubscriptionId
+  ResourceGroup: MyResourceGroup
+  SASKeyName: RootManageSharedAccessKey
 
 topicConfig: |
   topic.name.prefix=test-topic-amqp
@@ -33,8 +39,11 @@ commonConfig: |
   unused=0
 
 producerConfig: |
-  unused=0
+  batch.count=100
+  batch.size=50000
 
 consumerConfig: |
   unused=0
+
+
 

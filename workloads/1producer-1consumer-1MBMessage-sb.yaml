@@ -25,10 +25,11 @@ partitionsPerTopic: 1
 messageSize: 4096
 payloadFile: "payload/payload-4Kb.data"
 subscriptionsPerTopic: 1
-producersPerTopic: 1
+producersPerTopic: 4
 consumerPerSubscription: 0
-producerRate: 2500
+producerRate: 5000
 consumerBacklogSizeGB: 0
 testDurationMinutes: 10
+topicName: "glbtest3"
 
 

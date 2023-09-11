@@ -116,6 +116,12 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+			<artifactId>driver-azure-servicebus</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>driver-kafka</artifactId>
 			<version>${project.version}</version>
 		</dependency>
