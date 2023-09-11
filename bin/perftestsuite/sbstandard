@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-echo "Azure Event Hubs - Performance Regression Suite"
+echo "Azure Service Bus- Performance Regression Suite"
 TIMESTAMP=`date +%Y-%m-%d_%H-%M-%S`
 echo $TIMESTAMP
 
@@ -30,11 +30,5 @@ fi
 
 JVM_MEM="${HEAP_OPTS} -XX:+UseG1GC"
 
-echo "Starting KAFKA Regression Tests"
-java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.eventhubs.premium.KafkaPremiumRegressionTests $*
-
 echo "Starting AMQP Regression Tests"
-java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.eventhubs.premium.AMQPPremiumRegressionTests $*
-
-echo "Starting Multi Topic Tests"
-java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.eventhubs.premium.MultiTopicPremiumRegressionTests $*
+java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.servicebus.AMQPRegressionTests $*

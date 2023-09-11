@@ -1,4 +1,4 @@
-package io.openmessaging.benchmark.perftestsuite.dedicatedV2;
+package io.openmessaging.benchmark.perftestsuite.eventhubs.dedicatedV2;
 
 import io.openmessaging.benchmark.pojo.Arguments;
 import io.openmessaging.benchmark.perftestsuite.EventHubTestBase;

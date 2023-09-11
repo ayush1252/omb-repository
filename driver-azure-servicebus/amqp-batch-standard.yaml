@@ -27,8 +27,8 @@ reset: false
 
 namespaceMetadata:
   NamespaceName: sharmavijay-sbstd-glb-nm01
-  SubscriptionId: MySubscriptionId
-  ResourceGroup: MyResourceGroup
+  SubscriptionId: 8f8d3e6b-1a2e-4689-abc5-fd024f8c1ef2
+  ResourceGroup: Default-ServiceBus-WestUS
   SASKeyName: RootManageSharedAccessKey
 
 topicConfig: |

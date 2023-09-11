@@ -18,40 +18,38 @@ import com.azure.messaging.servicebus.ServiceBusProcessorClient;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessageContext;
 import io.openmessaging.benchmark.driver.BenchmarkConsumer;
 import io.openmessaging.benchmark.driver.ConsumerCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ServiceBusBenchmarkConsumer implements BenchmarkConsumer {
-  private static final Logger log = LoggerFactory.getLogger(ServiceBusBenchmarkConsumer.class);
+    private static final Logger log = LoggerFactory.getLogger(ServiceBusBenchmarkConsumer.class);
 
-  private final ServiceBusProcessorClient eventProcessorClient;
-  private final ExecutorService executor;
-  private final Future<?> consumerTask;
+    private final ServiceBusProcessorClient eventProcessorClient;
+    private final ExecutorService executor;
+    private final Future<?> consumerTask;
 
-  public ServiceBusBenchmarkConsumer(ServiceBusProcessorClient eventProcessorClient) {
-    this.eventProcessorClient = eventProcessorClient;
-    this.executor = Executors.newSingleThreadExecutor();
-    this.consumerTask = this.executor.submit(eventProcessorClient::start);
-  }
+    public ServiceBusBenchmarkConsumer(ServiceBusProcessorClient eventProcessorClient) {
+        this.eventProcessorClient = eventProcessorClient;
+        this.executor = Executors.newSingleThreadExecutor();
+        this.consumerTask = this.executor.submit(eventProcessorClient::start);
+    }
 
-  public static void processEvent(
-      ServiceBusReceivedMessageContext eventContext, ConsumerCallback consumerCallback) {
-    consumerCallback.messageReceived(
-        eventContext.getMessage().getBody().toBytes(),
-        TimeUnit.MILLISECONDS.toNanos(
-            Long.parseLong(eventContext.getMessage().getEnqueuedTime().toString())));
-    eventContext.complete();
-  }
+    public static void processEvent(ServiceBusReceivedMessageContext eventContext, ConsumerCallback consumerCallback) {
+        consumerCallback.messageReceived(eventContext.getMessage().getBody().toBytes(),
+                TimeUnit.MILLISECONDS.toNanos(Long.parseLong(eventContext.getMessage().getEnqueuedTime().toString())));
+        eventContext.complete();
+    }
 
-  @Override
-  public void close() throws Exception {
-    log.warn("Shutting down EventHubConsumer gracefully");
-    executor.shutdown();
-    consumerTask.get();
-    eventProcessorClient.stop();
-  }
+    @Override
+    public void close() throws Exception {
+        log.warn("Shutting down SB Consumer gracefully");
+        executor.shutdown();
+        consumerTask.get();
+        eventProcessorClient.stop();
+    }
 }

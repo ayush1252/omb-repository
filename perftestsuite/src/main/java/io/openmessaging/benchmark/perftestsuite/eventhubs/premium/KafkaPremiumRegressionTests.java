@@ -1,4 +1,4 @@
-package io.openmessaging.benchmark.perftestsuite.premium;
+package io.openmessaging.benchmark.perftestsuite.eventhubs.premium;
 
 import static io.openmessaging.benchmark.perftestsuite.MetadataTags.*;
 

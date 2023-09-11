@@ -14,74 +14,73 @@
  */
 package io.openmessaging.benchmark.driver.servicebus;
 
-import com.azure.messaging.eventhubs.models.CreateBatchOptions;
-import com.azure.messaging.servicebus.*;
+import com.azure.messaging.servicebus.ServiceBusMessage;
+import com.azure.messaging.servicebus.ServiceBusSenderAsyncClient;
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ServiceBusBenchmarkProducer implements BenchmarkProducer {
-  private static final Logger log = LoggerFactory.getLogger(ServiceBusBenchmarkProducer.class);
+    private static final Logger log = LoggerFactory.getLogger(ServiceBusBenchmarkProducer.class);
 
-  private final ServiceBusSenderAsyncClient producerClient;
-  private final int batchCount;
-  private final int batchSize;
-  private ArrayList<ServiceBusMessage> eventDataBatch;
-  private boolean isProducerClosed = false;
-  private final CreateBatchOptions batchOptions;
+    private final ServiceBusSenderAsyncClient producerClient;
+    private final int batchCount;
+    private ArrayList<ServiceBusMessage> batchMessages;
+    private boolean isProducerClosed = false;
 
-  public ServiceBusBenchmarkProducer(
-      ServiceBusSenderAsyncClient producerClient, Properties producerProperties) {
-    this.producerClient = producerClient;
-    this.batchCount = Integer.parseInt(producerProperties.getProperty("batch.count"));
-    this.batchSize = Integer.parseInt(producerProperties.getProperty("batch.size"));
-    batchOptions = new CreateBatchOptions().setMaximumSizeInBytes(batchSize);
-    eventDataBatch = new ArrayList<ServiceBusMessage>();
-  }
-
-  @Override
-  public CompletableFuture<Integer> sendAsync(Optional<String> key, byte[] payload) {
-
-    CompletableFuture<Integer> future = new CompletableFuture<>();
-    if (isProducerClosed) {
-      future.completeExceptionally(
-          new RuntimeException("Producer Client is closed. Failing the send call"));
-      return future;
+    public ServiceBusBenchmarkProducer(ServiceBusSenderAsyncClient producerClient, Properties producerProperties) {
+        this.producerClient = producerClient;
+        this.batchCount = Integer.parseInt(producerProperties.getProperty("batch.count"));
+        batchMessages = new ArrayList<ServiceBusMessage>();
     }
 
-    String strPayload = new String(payload);
-    ServiceBusMessage event = new ServiceBusMessage(strPayload);
-    eventDataBatch.add(event);
-    boolean addSuccessful = eventDataBatch.size() < batchCount;
+    @Override
+    public CompletableFuture<Integer> sendAsync(Optional<String> key, byte[] payload) {
 
-    if (!addSuccessful) {
-      final int messagesToBeSent = eventDataBatch.size();
-      // EventDataBatch is full. Send the existing batch and then add the current data.
-      producerClient
-          .sendMessages(eventDataBatch)
-          .subscribe(
-              unused -> {}, future::completeExceptionally, () -> future.complete(messagesToBeSent));
-      // TODO: Check for mem leak
-      eventDataBatch = new ArrayList<ServiceBusMessage>();
-    }
-    return future;
-  }
+        CompletableFuture<Integer> future = new CompletableFuture<>();
+        if (isProducerClosed) {
+            future.completeExceptionally(new RuntimeException("Producer Client is closed. Failing the send call"));
+            return future;
+        }
 
-  @Override
-  public void close() throws Exception {
-    log.warn("Got command to close EventHubProducerClient");
-    if (!isProducerClosed) {
-      if (!eventDataBatch.isEmpty()) {
-        producerClient.sendMessages(eventDataBatch).block();
-        eventDataBatch = new ArrayList<ServiceBusMessage>();
-      }
-      producerClient.close();
-      isProducerClosed = true;
-      log.info("Successfully closed EH Producer");
+        String strPayload = new String(payload);
+        ServiceBusMessage event = new ServiceBusMessage(strPayload);
+        batchMessages.add(event);
+        boolean addSuccessful = batchMessages.size() < batchCount;
+
+        if (!addSuccessful) {
+            final int messagesToBeSent = batchMessages.size();
+            // EventDataBatch is full. Send the existing batch and then add the current data.
+            producerClient.sendMessages(batchMessages)
+                    .subscribe(unused -> {},
+                            (e) -> {
+                                log.error("Producer Error");
+                                log.error(String.valueOf(e));
+                                future.completeExceptionally(e);
+                            },
+                            () -> future.complete(messagesToBeSent));
+
+            batchMessages = new ArrayList<ServiceBusMessage>();
+        }
+        return future;
     }
-  }
+
+    @Override
+    public void close() throws Exception {
+        log.warn("Got command to close SB Producer");
+        if (!isProducerClosed) {
+            if (!batchMessages.isEmpty()) {
+                producerClient.sendMessages(batchMessages).block();
+                batchMessages = new ArrayList<>();
+            }
+            producerClient.close();
+            isProducerClosed = true;
+            log.info("Successfully closed SB Producer");
+        }
+    }
 }

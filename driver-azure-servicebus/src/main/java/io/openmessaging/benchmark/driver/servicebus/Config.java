@@ -15,15 +15,15 @@
 package io.openmessaging.benchmark.driver.servicebus;
 
 public class Config {
-  public String identifier;
+    public String identifier;
 
-  public boolean reset;
+    public boolean reset;
 
-  public String topicConfig;
+    public String topicConfig;
 
-  public String commonConfig;
+    public String commonConfig;
 
-  public String producerConfig;
+    public String producerConfig;
 
-  public String consumerConfig;
+    public String consumerConfig;
 }
