@@ -15,6 +15,7 @@ public class NamespaceMetadata implements Serializable {
     public String ResourceGroup;
     public String SASKeyName = "RootManageSharedAccessKey";
     public String SASKeyValue;
+    public String Region;
 
     @Override
     public String toString() {
@@ -23,6 +24,7 @@ public class NamespaceMetadata implements Serializable {
                 ", SubscriptionId='" + SubscriptionId + '\'' +
                 ", ResourceGroup='" + ResourceGroup + '\'' +
                 ", SASKeyName='" + SASKeyName + '\'' +
+                ", Region='" + Region + '\'' +
                 '}'; //Not display SASKeyValue secret in any logging statement.
     }
 }
