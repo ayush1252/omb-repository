@@ -18,11 +18,11 @@
  */
 package io.openmessaging.benchmark.worker;
 
-import java.io.File;
 import java.net.HttpURLConnection;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import io.openmessaging.benchmark.driver.DriverConfiguration;
 import org.apache.bookkeeper.stats.StatsLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.google.common.io.Files;
 
 import io.javalin.Context;
 import io.javalin.Javalin;
@@ -97,14 +96,8 @@ public class WorkerHandler {
     }
 
     private void handleInitializeDriver(Context ctx) throws Exception {
-        // Save config to temp file
-        File tempFile = File.createTempFile("driver-configuration" + System.currentTimeMillis(), "conf");
-        Files.write(ctx.bodyAsBytes(), tempFile);
-
-        localWorker.initializeDriver(tempFile);
+        localWorker.initializeDriver(mapper.readValue(ctx.body(), DriverConfiguration.class));
         log.info("Completed Init of LocalDriver");
-        if(tempFile.exists())
-            tempFile.delete();
     }
 
     private void handleCreateTopics(Context ctx) throws Exception {

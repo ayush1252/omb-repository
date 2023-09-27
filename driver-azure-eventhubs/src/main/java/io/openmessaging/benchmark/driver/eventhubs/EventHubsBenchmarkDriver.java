@@ -31,12 +31,6 @@ import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
 import io.openmessaging.benchmark.credential.adapter.CredentialProvider;
 import io.openmessaging.benchmark.driver.*;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
-
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
@@ -62,13 +56,12 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
     protected ConfigProvider configProvider;
 
     @Override
-    public void initialize(File configurationFile, org.apache.bookkeeper.stats.StatsLogger statsLogger) throws IOException {
+    public void initialize(DriverConfiguration driverConfiguration) throws IOException {
         configProvider = ConfigProvider.getInstance();
         CredentialProvider credentialProvider = CredentialProvider.getInstance();
 
-        DriverConfiguration driverConfiguration = mapper.readValue(configurationFile, DriverConfiguration.class);
         log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  driverConfiguration.name);
-        log.info("Using Namespace for this test run- " + driverConfiguration.namespaceMetadata.NamespaceName);
+        log.info("Using Namespace for this test run- " + driverConfiguration.namespaceMetadata.namespaceName);
 
         Properties commonProperties = new Properties();
         commonProperties.load(new StringReader(driverConfiguration.commonConfig));
@@ -83,14 +76,14 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
         topicProperties.load(new StringReader(driverConfiguration.topicConfig));
 
         topicPrefix = topicProperties.getProperty("topic.name.prefix");
-        namespace = driverConfiguration.namespaceMetadata.NamespaceName;
+        namespace = driverConfiguration.namespaceMetadata.namespaceName;
 
         blobContainerAsyncClient = StorageAdapter.GetAsyncStorageClient(configProvider.getConfigurationValue(ConfigurationKey.StorageAccountName),
                 configProvider.getConfigurationValue(ConfigurationKey.StorageContainerName));
         eventHubAdministrator = new EventHubAdministrator(driverConfiguration.namespaceMetadata);
 
         if (driverConfiguration.reset) {
-            String resourceGroup = driverConfiguration.namespaceMetadata.ResourceGroup;
+            String resourceGroup = driverConfiguration.namespaceMetadata.resourceGroup;
             log.info("Deleting existing entities");
             for (EventHub eh : eventHubAdministrator.getManager().namespaces().eventHubs().listByNamespace(resourceGroup, namespace)) {
                 new Thread(new Runnable() {
@@ -103,11 +96,11 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
             }
         }
 
-        if(driverConfiguration.namespaceMetadata.SASKeyValue == null) {
-            driverConfiguration.namespaceMetadata.SASKeyValue = credentialProvider.getCredential(driverConfiguration.namespaceMetadata.NamespaceName+"-SASKey");
+        if(driverConfiguration.namespaceMetadata.sasKeyValue == null) {
+            driverConfiguration.namespaceMetadata.sasKeyValue = credentialProvider.getCredential(driverConfiguration.namespaceMetadata.namespaceName+"-SASKey");
         }
 
-        credential =  new EventHubSharedKeyCredential(driverConfiguration.namespaceMetadata.SASKeyName, driverConfiguration.namespaceMetadata.SASKeyValue);
+        credential =  new EventHubSharedKeyCredential(driverConfiguration.namespaceMetadata.sasKeyName, driverConfiguration.namespaceMetadata.sasKeyValue);
     }
 
     @Override
@@ -181,7 +174,4 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
             consumer.close();
         }
     }
-
-    private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 }

@@ -22,18 +22,17 @@ import com.azure.messaging.eventhubs.EventHubClientBuilder;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
+import io.openmessaging.benchmark.driver.DriverConfiguration;
 import io.openmessaging.benchmark.driver.eventhubs.EventHubsBenchmarkDriver;
-import org.apache.bookkeeper.stats.StatsLogger;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 public class EventHubsBenchmarkSyncProducerDriver extends EventHubsBenchmarkDriver {
 
     @Override
-    public void initialize(File configurationFile, StatsLogger statsLogger) throws IOException {
-        super.initialize(configurationFile, statsLogger);
+    public void initialize(DriverConfiguration driverConfiguration) throws IOException {
+        super.initialize(driverConfiguration);
     }
 
     @Override

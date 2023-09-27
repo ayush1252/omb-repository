@@ -57,7 +57,7 @@ public class EventHubAdministrator {
 
     private static AzureProfile createAzureProfile(NamespaceMetadata metadata) {
         return new AzureProfile(configProvider.getConfigurationValue(ConfigurationKey.ApplicationTenantID),
-                metadata.SubscriptionId, azureEnvironment);
+                metadata.subscriptionId, azureEnvironment);
     }
 
     private static TokenCredential createClientSecretCredential() {
@@ -71,14 +71,14 @@ public class EventHubAdministrator {
 
     public void createTopic(String topic, int partitions) {
         try{
-            final EventHub eventHub = manager.namespaces().eventHubs().getByName(metadata.ResourceGroup, metadata.NamespaceName, topic);
+            final EventHub eventHub = manager.namespaces().eventHubs().getByName(metadata.resourceGroup, metadata.namespaceName, topic);
             log.info("Reusing the existing topic as it exists - " + eventHub.name() + " with partition counts " + (long) eventHub.partitionIds().size());
         } catch (Exception e){
             log.info(" Creating new topic with Topic Name: " + topic);
             manager.namespaces()
                     .eventHubs()
                     .define(topic)
-                    .withExistingNamespace(metadata.ResourceGroup, metadata.NamespaceName)
+                    .withExistingNamespace(metadata.resourceGroup, metadata.namespaceName)
                     .withPartitionCount(partitions)
                     .create();
         }
@@ -88,7 +88,7 @@ public class EventHubAdministrator {
     manager
         .consumerGroups()
         .define(subscriptionName)
-        .withExistingEventHub(metadata.ResourceGroup, metadata.NamespaceName, topicName)
+        .withExistingEventHub(metadata.resourceGroup, metadata.namespaceName, topicName)
         .create();
     }
 }

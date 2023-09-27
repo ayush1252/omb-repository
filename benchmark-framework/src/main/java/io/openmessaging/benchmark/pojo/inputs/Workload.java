@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.openmessaging.benchmark.pojo;
+package io.openmessaging.benchmark.pojo.inputs;
 
 import io.openmessaging.benchmark.utils.distributor.KeyDistributorType;
 

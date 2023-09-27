@@ -18,36 +18,23 @@
  */
 package io.openmessaging.benchmark.utils.payload;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.MessageFormat;
+import com.google.common.io.Resources;
 
-import static java.nio.file.Files.readAllBytes;
+import java.io.IOException;
 
 public class FilePayloadReader implements PayloadReader {
-
-    private final int expectedLength;
-
-    public FilePayloadReader(int expectedLength) {
-        this.expectedLength = expectedLength;
+    public FilePayloadReader() {
     }
 
     @Override
     public byte[] load(String resourceName) {
         byte[] payload;
         try {
-            payload = readAllBytes(new File(resourceName).toPath());
-            checkPayloadLength(payload);
+            payload = Resources.toByteArray(Resources.getResource(resourceName));
             return payload;
         } catch (IOException e) {
             throw new PayloadException(e.getMessage());
         }
     }
 
-    private void checkPayloadLength(byte[] payload) {
-        if (expectedLength != payload.length) {
-            throw new PayloadException(MessageFormat.format("Payload length mismatch. Actual is: {0}, but expected: {1} ",
-                    payload.length, expectedLength));
-        }
-    }
 }

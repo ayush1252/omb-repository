@@ -9,12 +9,12 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.base.Preconditions;
+import io.openmessaging.benchmark.driver.DriverConfiguration;
 import io.openmessaging.benchmark.worker.commands.*;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
+
+import org.apache.commons.lang.SerializationUtils;
 import org.asynchttpclient.AsyncHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +46,8 @@ public class HTTPWorkerClient implements Worker {
   }
 
   @Override
-  public void initializeDriver(File configurationFile) throws IOException {
-    byte[] confFileContent = Files.readAllBytes(Paths.get(configurationFile.toString()));
+  public void initializeDriver(DriverConfiguration driverConfiguration) throws IOException {
+    byte[] confFileContent = SerializationUtils.serialize(driverConfiguration);
     sendPost(INITIALIZE_DRIVER, confFileContent);
   }
 

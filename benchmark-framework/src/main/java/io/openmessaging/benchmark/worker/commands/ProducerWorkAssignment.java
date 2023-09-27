@@ -19,20 +19,19 @@
 package io.openmessaging.benchmark.worker.commands;
 
 import io.openmessaging.benchmark.utils.distributor.KeyDistributorType;
+import lombok.Builder;
 
+@Builder
 public class ProducerWorkAssignment {
-    
+
     public byte[] payloadData;
-    
+
     public double publishRate;
 
     public KeyDistributorType keyDistributorType;
 
     public ProducerWorkAssignment withPublishRate(double publishRate) {
-        ProducerWorkAssignment copy = new ProducerWorkAssignment();
-        copy.keyDistributorType = this.keyDistributorType;
-        copy.payloadData = this.payloadData;
-        copy.publishRate = publishRate;
+        ProducerWorkAssignment copy = new ProducerWorkAssignment(this.payloadData, publishRate, this.keyDistributorType);
         return copy;
     }
 }

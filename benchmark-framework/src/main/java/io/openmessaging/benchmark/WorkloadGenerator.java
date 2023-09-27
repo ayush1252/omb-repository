@@ -18,9 +18,18 @@
  */
 package io.openmessaging.benchmark;
 
-import io.openmessaging.benchmark.pojo.Workload;
+import io.openmessaging.benchmark.pojo.inputs.BenchmarkingRunArguments;
+import io.openmessaging.benchmark.pojo.inputs.Workload;
 import io.openmessaging.benchmark.pojo.output.*;
 import io.openmessaging.benchmark.utils.RandomGenerator;
+import io.openmessaging.benchmark.utils.Timer;
+import io.openmessaging.benchmark.worker.Topic;
+import io.openmessaging.benchmark.worker.Worker;
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.commons.math3.util.Precision;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.Instant;
@@ -28,23 +37,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.time.StopWatch;
-import org.apache.commons.math3.util.Precision;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.util.concurrent.DefaultThreadFactory;
 import io.openmessaging.benchmark.utils.PaddingDecimalFormat;
-import io.openmessaging.benchmark.utils.Timer;
-import io.openmessaging.benchmark.utils.payload.FilePayloadReader;
-import io.openmessaging.benchmark.utils.payload.PayloadReader;
-import io.openmessaging.benchmark.worker.Topic;
-import io.openmessaging.benchmark.worker.Worker;
 import io.openmessaging.benchmark.worker.commands.ConsumerAssignment;
 import io.openmessaging.benchmark.worker.commands.CountersStats;
 import io.openmessaging.benchmark.worker.commands.CumulativeLatencies;
@@ -55,10 +53,10 @@ import io.openmessaging.benchmark.worker.commands.TopicsInfo;
 
 public class WorkloadGenerator implements AutoCloseable {
 
-    private final String driverName;
     private final Workload workload;
     private final Worker worker;
-    private final UUID uniqueRunId;
+    private final String uniqueRunId;
+    private final ProducerWorkAssignment producerWorkAssignment;
 
     private final ExecutorService executor = Executors
             .newCachedThreadPool(new DefaultThreadFactory("messaging-benchmark"));
@@ -66,17 +64,20 @@ public class WorkloadGenerator implements AutoCloseable {
     private volatile boolean runCompleted = false;
     private volatile boolean needToWaitForBacklogDraining = false;
 
-    private volatile double targetPublishRate;
-
-    public WorkloadGenerator(String driverName, Workload workload, Worker worker, UUID uuid) {
-        this.driverName = driverName;
-        this.workload = workload;
-        this.worker = worker;
-        this.uniqueRunId = uuid;
+    public WorkloadGenerator(BenchmarkingRunArguments arguments, Worker benchmarkingWorker) {
+        this.workload = arguments.getWorkload();
+        this.worker = benchmarkingWorker;
+        this.uniqueRunId = arguments.getRunID();
 
         if (workload.consumerBacklogSizeGB > 0 && workload.producerRate == 0) {
             throw new IllegalArgumentException("Cannot probe producer sustainable rate when building backlog");
         }
+
+        this.producerWorkAssignment = ProducerWorkAssignment.builder()
+                .keyDistributorType(workload.keyDistributor)
+                .payloadData(arguments.getMessagePayload().getPayloadData())
+                .publishRate(workload.producerRate)
+                .build();
     }
 
     public TestResult run() throws Exception {
@@ -91,31 +92,7 @@ public class WorkloadGenerator implements AutoCloseable {
 
         if (workload.consumerPerSubscription > 0) {
             createConsumers(topics);
-            // ensureTopicsAreReady();
         }
-
-        if (workload.producerRate > 0) {
-            targetPublishRate = workload.producerRate;
-        } else {
-            // Producer rate is 0 and we need to discover the sustainable rate
-            targetPublishRate = 10000;
-
-            executor.execute(() -> {
-                // Run background controller to adjust rate
-                try {
-                    findMaximumSustainableRate(targetPublishRate);
-                } catch (IOException e) {
-                    log.warn("Failure in finding max sustainable rate", e);
-                }
-            });
-        }
-
-        final PayloadReader payloadReader = new FilePayloadReader(workload.messageSize);
-
-        ProducerWorkAssignment producerWorkAssignment = new ProducerWorkAssignment();
-        producerWorkAssignment.keyDistributorType = workload.keyDistributor;
-        producerWorkAssignment.publishRate = targetPublishRate;
-        producerWorkAssignment.payloadData = payloadReader.load(workload.payloadFile);
 
         worker.startLoad(producerWorkAssignment);
 
@@ -404,7 +381,8 @@ public class WorkloadGenerator implements AutoCloseable {
 
         TestResult result = new TestResult();
         result.testDetails = new TestDetails();
-        result.testDetails.uuid = this.uniqueRunId.toString();
+
+        result.testDetails.runID = this.uniqueRunId;
         result.testDetails.testStartTime = Instant.now().truncatedTo(ChronoUnit.SECONDS).toString().replaceAll("[TZ]", " ");
         result.testDetails.testRunDurationInMinutes =  TimeUnit.MINUTES.convert(testDurations, unit);
 
@@ -454,7 +432,7 @@ public class WorkloadGenerator implements AutoCloseable {
 
       SnapshotResult snapshotResult =
           SnapshotResult.builder()
-              .uuid(this.uniqueRunId.toString())
+              .uuid(this.uniqueRunId)
               .timestamp(
                   Instant.now().truncatedTo(ChronoUnit.SECONDS).toString().replaceAll("[TZ]", " "))
               .timeSinceTestStartInSeconds(TimeUnit.NANOSECONDS.toSeconds(now - startTime))
@@ -498,7 +476,7 @@ public class WorkloadGenerator implements AutoCloseable {
                         throughputFormat.format(microsToMillis(agg.publishLatency.getMaxValue())));
 
                 LatencyResult aggregateResult  = LatencyResult.builder()
-                        .uuid( this.uniqueRunId.toString())
+                        .uuid( this.uniqueRunId)
                         .timestamp( Instant.now().truncatedTo(ChronoUnit.SECONDS).toString().replaceAll("[TZ]", " "))
                         .build();
                 aggregateResult.latencyMetric.populatePublishLatency(agg.publishLatency);

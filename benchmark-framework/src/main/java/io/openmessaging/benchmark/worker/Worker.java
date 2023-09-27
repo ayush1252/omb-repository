@@ -18,10 +18,10 @@
  */
 package io.openmessaging.benchmark.worker;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import io.openmessaging.benchmark.driver.DriverConfiguration;
 import io.openmessaging.benchmark.worker.commands.ConsumerAssignment;
 import io.openmessaging.benchmark.worker.commands.CountersStats;
 import io.openmessaging.benchmark.worker.commands.CumulativeLatencies;
@@ -31,7 +31,7 @@ import io.openmessaging.benchmark.worker.commands.TopicsInfo;
 
 public interface Worker extends AutoCloseable {
 
-    void initializeDriver(File configurationFile) throws IOException;
+    void initializeDriver(DriverConfiguration driverConfiguration) throws IOException;
 
     List<Topic> createTopics(TopicsInfo topicsInfo) throws IOException;
 

@@ -20,10 +20,8 @@ package io.openmessaging.benchmark.worker;
 
 import static java.util.stream.Collectors.toList;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.RateLimiter;
 import io.netty.util.concurrent.DefaultThreadFactory;
@@ -37,9 +35,7 @@ import io.openmessaging.benchmark.worker.commands.CumulativeLatencies;
 import io.openmessaging.benchmark.worker.commands.PeriodStats;
 import io.openmessaging.benchmark.worker.commands.ProducerWorkAssignment;
 import io.openmessaging.benchmark.worker.commands.TopicsInfo;
-import java.io.File;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -73,17 +69,14 @@ public class LocalWorker implements Worker, ConsumerCallback {
     }
 
     @Override
-    public void initializeDriver(File driverConfigFile) throws IOException {
+    public void initializeDriver(DriverConfiguration driverConfiguration) throws IOException {
         Preconditions.checkArgument(benchmarkDriver == null);
         testCompleted = false;
-
-        DriverConfiguration driverConfiguration = mapper.readValue(driverConfigFile, DriverConfiguration.class);
-
         log.info("Driver: {}", writer.writeValueAsString(driverConfiguration));
 
         try {
             benchmarkDriver = (BenchmarkDriver) Class.forName(driverConfiguration.driverClass).newInstance();
-            benchmarkDriver.initialize(driverConfigFile, stats.getStatsLogger());
+            benchmarkDriver.initialize(driverConfiguration);
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -308,13 +301,5 @@ public class LocalWorker implements Worker, ConsumerCallback {
     }
 
     private static final ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
-
-    private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-    static {
-        mapper.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE);
-    }
-
     private static final Logger log = LoggerFactory.getLogger(LocalWorker.class);
 }

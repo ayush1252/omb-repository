@@ -18,6 +18,7 @@ import static java.util.stream.Collectors.toList;
 
 import com.beust.jcommander.internal.Maps;
 import com.google.common.base.Preconditions;
+import io.openmessaging.benchmark.driver.DriverConfiguration;
 import io.openmessaging.benchmark.utils.ListPartition;
 import io.openmessaging.benchmark.worker.commands.ConsumerAssignment;
 import io.openmessaging.benchmark.worker.commands.CountersStats;
@@ -26,7 +27,6 @@ import io.openmessaging.benchmark.worker.commands.PeriodStats;
 import io.openmessaging.benchmark.worker.commands.ProducerWorkAssignment;
 import io.openmessaging.benchmark.worker.commands.TopicSubscription;
 import io.openmessaging.benchmark.worker.commands.TopicsInfo;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,12 +77,12 @@ public class DistributedWorkersEnsemble implements Worker {
   }
 
   @Override
-  public void initializeDriver(File configurationFile) throws IOException {
+  public void initializeDriver(DriverConfiguration driverConfiguration) throws IOException {
     workers.parallelStream()
         .forEach(
             w -> {
               try {
-                w.initializeDriver(configurationFile);
+                w.initializeDriver(driverConfiguration);
               } catch (IOException e) {
                 throw new RuntimeException(e);
               }

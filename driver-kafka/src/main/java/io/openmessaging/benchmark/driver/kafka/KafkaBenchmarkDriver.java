@@ -47,10 +47,6 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,33 +64,31 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
     private AdminClient admin;
 
     @Override
-    public void initialize(File configurationFile, StatsLogger statsLogger) throws IOException {
+    public void initialize(DriverConfiguration driverConfiguration) throws IOException {
         ConfigProvider configProvider = ConfigProvider.getInstance();
         CredentialProvider credentialProvider = CredentialProvider.getInstance();
 
-        driverConfiguration = mapper.readValue(configurationFile, DriverConfiguration.class);
-
-        if(driverConfiguration.namespaceMetadata.SASKeyValue == null) {
-            driverConfiguration.namespaceMetadata.SASKeyValue = credentialProvider.getCredential(driverConfiguration.namespaceMetadata.NamespaceName+"-SASKey");
+        if(driverConfiguration.namespaceMetadata.sasKeyValue == null) {
+            driverConfiguration.namespaceMetadata.sasKeyValue = credentialProvider.getCredential(driverConfiguration.namespaceMetadata.namespaceName+"-SASKey");
         }
 
         log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  driverConfiguration.name);
-        log.info("Using Namespace for this test run- " + driverConfiguration.namespaceMetadata.NamespaceName);
+        log.info("Using Namespace for this test run- " + driverConfiguration.namespaceMetadata.namespaceName);
 
         Properties commonProperties = new Properties();
         commonProperties.load(new StringReader(driverConfiguration.commonConfig));
 
         //manually creating bootstrap server from namespace name for Kafka
         commonProperties.put("bootstrap.servers",
-                driverConfiguration.namespaceMetadata.NamespaceName + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix) + ":9093");
+                driverConfiguration.namespaceMetadata.namespaceName + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix) + ":9093");
 
         //creating sasl driverConfiguration string from connection string
         final String jaasConfig = commonProperties.getProperty("sasl.jaas.config");
         commonProperties.put("sasl.jaas.config", jaasConfig + "\""
-                + createEventHubConnectionString(driverConfiguration.namespaceMetadata.NamespaceName,
+                + createEventHubConnectionString(driverConfiguration.namespaceMetadata.namespaceName,
                     configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix),
-                    driverConfiguration.namespaceMetadata.SASKeyName,
-                    driverConfiguration.namespaceMetadata.SASKeyValue)
+                    driverConfiguration.namespaceMetadata.sasKeyName,
+                    driverConfiguration.namespaceMetadata.sasKeyValue)
                 + "\";");
 
         producerProperties = new Properties();
@@ -223,9 +217,6 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
         }
         admin.close();
     }
-
-    private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private String createEventHubConnectionString(String namespaceName, String domainName, String sasKeyName, String sasKeyValue){
         return new ConnectionStringBuilder()

@@ -35,11 +35,10 @@ public interface BenchmarkDriver extends AutoCloseable {
      * The format of the configuration file is specific to the driver
      * implementation.
      * 
-     * @param configurationFile
-     * @param statsLogger       stats logger to collect stats from benchmark driver
+     * @param driverConfiguration Driver Configuration object
      * @throws IOException
      */
-    void initialize(File configurationFile, StatsLogger statsLogger) throws IOException;
+    void initialize(DriverConfiguration driverConfiguration) throws IOException;
 
     /**
      * Get a driver specific prefix to be used in creating multiple topic names
