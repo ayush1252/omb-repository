@@ -25,8 +25,6 @@ import com.google.common.io.Resources;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.driver.DriverConfiguration;
 import io.openmessaging.benchmark.driver.NamespaceMetadata;
-import io.openmessaging.benchmark.pojo.Arguments;
-import io.openmessaging.benchmark.pojo.Workers;
 import io.openmessaging.benchmark.pojo.inputs.BenchmarkingRunArguments;
 import io.openmessaging.benchmark.pojo.inputs.Payload;
 import io.openmessaging.benchmark.pojo.inputs.Workload;
@@ -41,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class Benchmark {
+class Benchmark {
 
     private static final ObjectMapper mapper =
             new ObjectMapper(new YAMLFactory())

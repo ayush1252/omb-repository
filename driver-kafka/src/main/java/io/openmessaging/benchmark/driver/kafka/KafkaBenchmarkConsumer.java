@@ -37,7 +37,7 @@ import io.openmessaging.benchmark.driver.ConsumerCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KafkaBenchmarkConsumer implements BenchmarkConsumer {
+class KafkaBenchmarkConsumer implements BenchmarkConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(KafkaBenchmarkConsumer.class);
 

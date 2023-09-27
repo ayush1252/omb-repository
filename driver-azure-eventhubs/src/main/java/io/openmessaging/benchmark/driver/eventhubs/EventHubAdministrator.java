@@ -17,7 +17,7 @@ import java.util.HashMap;
 
 import static io.openmessaging.benchmark.appconfig.adapter.EnvironmentName.Production;
 
-public class EventHubAdministrator {
+class EventHubAdministrator {
     private static final Logger log = LoggerFactory.getLogger(EventHubAdministrator.class);
 
     TokenCredential sharedCSC;

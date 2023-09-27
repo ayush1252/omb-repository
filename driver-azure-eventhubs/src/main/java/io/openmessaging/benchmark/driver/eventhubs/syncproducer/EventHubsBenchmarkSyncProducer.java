@@ -23,7 +23,6 @@ import com.azure.messaging.eventhubs.EventDataBatch;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
 import com.azure.messaging.eventhubs.models.CreateBatchOptions;
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
-import io.openmessaging.benchmark.driver.eventhubs.EventHubsBenchmarkProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,7 @@ import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
 public class EventHubsBenchmarkSyncProducer implements BenchmarkProducer {
-    private static final Logger log = LoggerFactory.getLogger(EventHubsBenchmarkProducer.class);
+    private static final Logger log = LoggerFactory.getLogger(EventHubsBenchmarkSyncProducer.class);
 
     private final EventHubProducerClient producerClient;
     private final int batchCount;

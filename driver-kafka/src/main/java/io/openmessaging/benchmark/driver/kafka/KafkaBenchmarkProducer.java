@@ -26,7 +26,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 import io.openmessaging.benchmark.driver.BenchmarkProducer;
 
-public class KafkaBenchmarkProducer implements BenchmarkProducer {
+class KafkaBenchmarkProducer implements BenchmarkProducer {
 
     private final KafkaProducer<String, byte[]> producer;
     private final String topic;

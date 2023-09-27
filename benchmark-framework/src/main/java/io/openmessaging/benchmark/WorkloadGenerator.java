@@ -51,7 +51,7 @@ import io.openmessaging.benchmark.worker.commands.ProducerWorkAssignment;
 import io.openmessaging.benchmark.worker.commands.TopicSubscription;
 import io.openmessaging.benchmark.worker.commands.TopicsInfo;
 
-public class WorkloadGenerator implements AutoCloseable {
+class WorkloadGenerator implements AutoCloseable {
 
     private final Workload workload;
     private final Worker worker;

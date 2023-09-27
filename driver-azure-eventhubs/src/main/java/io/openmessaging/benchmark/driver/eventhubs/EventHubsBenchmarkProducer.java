@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
-public class EventHubsBenchmarkProducer implements BenchmarkProducer {
+class EventHubsBenchmarkProducer implements BenchmarkProducer {
     private static final Logger log = LoggerFactory.getLogger(EventHubsBenchmarkProducer.class);
 
     private final EventHubProducerAsyncClient producerClient;

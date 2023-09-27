@@ -1,11 +1,11 @@
-package io.openmessaging.benchmark.pojo;
+package io.openmessaging.benchmark;
 
 import com.beust.jcommander.Parameter;
 
 import java.io.File;
 import java.util.List;
 
-public class Arguments {
+class Arguments {
 
     @Parameter(names = {"-h", "--help"}, description = "Help message", help = true)
     public boolean help;

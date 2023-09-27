@@ -18,7 +18,6 @@
  */
 package io.openmessaging.benchmark.driver.kafka;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
@@ -32,7 +31,6 @@ import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
 import io.openmessaging.benchmark.credential.adapter.CredentialProvider;
 import io.openmessaging.benchmark.driver.*;
-import org.apache.bookkeeper.stats.StatsLogger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.DeleteTopicsResult;
