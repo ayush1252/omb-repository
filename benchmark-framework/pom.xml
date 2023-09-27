@@ -30,7 +30,6 @@
 	<artifactId>benchmark-framework</artifactId>
 
 	<properties>
-		<log4j.version>2.19.0</log4j.version>
 		<pulsar.version>2.10.1</pulsar.version>
 	</properties>
 
@@ -45,11 +44,6 @@
 			<groupId>org.hdrhistogram</groupId>
 			<artifactId>HdrHistogram</artifactId>
 			<version>2.1.10</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j2-impl</artifactId>
-			<version>${log4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

@@ -46,9 +46,9 @@ import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class KafkaBenchmarkDriver implements BenchmarkDriver {
     private static final Logger log = LoggerFactory.getLogger(KafkaBenchmarkDriver.class);

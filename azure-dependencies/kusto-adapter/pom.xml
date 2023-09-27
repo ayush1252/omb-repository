@@ -31,16 +31,27 @@
     <artifactId>kusto-adapter</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>com.microsoft.azure.kusto</groupId>
             <artifactId>kusto-ingest</artifactId>
             <version>5.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.kusto</groupId>
             <artifactId>kusto-data</artifactId>
             <version>5.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
