@@ -15,6 +15,7 @@ public class NamespaceMetadata implements Serializable {
     public String namespaceName;
     public String subscriptionId;
     public String resourceGroup;
+    @Builder.Default
     public String sasKeyName = "RootManageSharedAccessKey";
     @ToString.Exclude
     public String sasKeyValue;

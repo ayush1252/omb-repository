@@ -75,6 +75,7 @@ public class LocalWorker implements Worker, ConsumerCallback {
         log.info("Driver: {}", writer.writeValueAsString(driverConfiguration));
 
         try {
+            //TODO - Fix this deprecation warning by moving to Reflection.
             benchmarkDriver = (BenchmarkDriver) Class.forName(driverConfiguration.driverClass).newInstance();
             benchmarkDriver.initialize(driverConfiguration);
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {

@@ -19,7 +19,9 @@
 package io.openmessaging.benchmark.pojo.inputs;
 
 import io.openmessaging.benchmark.utils.distributor.KeyDistributorType;
+import lombok.ToString;
 
+@ToString
 public class Workload {
     public String name;
 
