@@ -26,16 +26,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.azure.resourcemanager.eventhubs.models.EventHubNamespaceAuthorizationRule;
 import com.microsoft.azure.eventhubs.ConnectionStringBuilder;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
-import io.openmessaging.benchmark.credential.adapter.CredentialProvider;
 import io.openmessaging.benchmark.driver.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.DeleteTopicsResult;
-import org.apache.kafka.clients.admin.ListTopicsResult;
-import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -51,7 +48,7 @@ import org.slf4j.LoggerFactory;
 public class KafkaBenchmarkDriver implements BenchmarkDriver {
     private static final Logger log = LoggerFactory.getLogger(KafkaBenchmarkDriver.class);
 
-    private DriverConfiguration driverConfiguration;
+    private DriverConfiguration kafkaDriverConfig;
     private final List<BenchmarkProducer> producers = Collections.synchronizedList(new ArrayList<>());
     private final List<BenchmarkConsumer> consumers = Collections.synchronizedList(new ArrayList<>());
 
@@ -63,46 +60,51 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
 
     @Override
     public void initialize(DriverConfiguration driverConfiguration) throws IOException {
+        this.kafkaDriverConfig = driverConfiguration;
         ConfigProvider configProvider = ConfigProvider.getInstance();
-        CredentialProvider credentialProvider = CredentialProvider.getInstance();
 
-        if(driverConfiguration.namespaceMetadata.sasKeyValue == null) {
-            driverConfiguration.namespaceMetadata.sasKeyValue = credentialProvider.getCredential(driverConfiguration.namespaceMetadata.namespaceName+"-SASKey");
+        EventHubAdministrator eventHubAdministrator  = new EventHubAdministrator(driverConfiguration.namespaceMetadata);
+
+        if(kafkaDriverConfig.namespaceMetadata.sasKeyValue == null) {
+            //Fetch details from EH Management APIs
+            final EventHubNamespaceAuthorizationRule authorizationRule = eventHubAdministrator.getAuthorizationRule();
+            kafkaDriverConfig.namespaceMetadata.sasKeyName = authorizationRule.name();
+            kafkaDriverConfig.namespaceMetadata.sasKeyValue = authorizationRule.getKeys().primaryKey();
         }
 
-        log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  driverConfiguration.name);
-        log.info("Using Namespace for this test run- " + driverConfiguration.namespaceMetadata.namespaceName);
+        log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  kafkaDriverConfig.name);
+        log.info("Using Namespace for this test run- " + kafkaDriverConfig.namespaceMetadata.namespaceName);
 
         Properties commonProperties = new Properties();
-        commonProperties.load(new StringReader(driverConfiguration.commonConfig));
+        commonProperties.load(new StringReader(kafkaDriverConfig.commonConfig));
 
         //manually creating bootstrap server from namespace name for Kafka
         commonProperties.put("bootstrap.servers",
-                driverConfiguration.namespaceMetadata.namespaceName + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix) + ":9093");
+                kafkaDriverConfig.namespaceMetadata.namespaceName + configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix) + ":9093");
 
         //creating sasl driverConfiguration string from connection string
         final String jaasConfig = commonProperties.getProperty("sasl.jaas.config");
         commonProperties.put("sasl.jaas.config", jaasConfig + "\""
-                + createEventHubConnectionString(driverConfiguration.namespaceMetadata.namespaceName,
+                + createEventHubConnectionString(kafkaDriverConfig.namespaceMetadata.namespaceName,
                     configProvider.getConfigurationValue(ConfigurationKey.FQDNSuffix),
-                    driverConfiguration.namespaceMetadata.sasKeyName,
-                    driverConfiguration.namespaceMetadata.sasKeyValue)
+                kafkaDriverConfig.namespaceMetadata.sasKeyName,
+                kafkaDriverConfig.namespaceMetadata.sasKeyValue)
                 + "\";");
 
         producerProperties = new Properties();
         producerProperties.putAll(commonProperties);
-        producerProperties.load(new StringReader(driverConfiguration.producerConfig));
+        producerProperties.load(new StringReader(kafkaDriverConfig.producerConfig));
         producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
 
         consumerProperties = new Properties();
         consumerProperties.putAll(commonProperties);
-        consumerProperties.load(new StringReader(driverConfiguration.consumerConfig));
+        consumerProperties.load(new StringReader(kafkaDriverConfig.consumerConfig));
         consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
 
         topicProperties = new Properties();
-        topicProperties.load(new StringReader(driverConfiguration.topicConfig));
+        topicProperties.load(new StringReader(kafkaDriverConfig.topicConfig));
 
         try{
             admin = AdminClient.create(commonProperties);
@@ -111,7 +113,7 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
             throw e;
         }
 
-        if (driverConfiguration.reset) {
+        if (kafkaDriverConfig.reset) {
             try {
                 // List existing topics
                 ListTopicsResult result = admin.listTopics();
@@ -142,9 +144,9 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
         return CompletableFuture.runAsync(() -> {
             try {
                 final List<String> existingTopics = admin.listTopics().names().get()
-                        .stream().map(s -> s.toLowerCase(Locale.ROOT)).collect(Collectors.toList());
+                        .stream().map(s -> s.toLowerCase(Locale.ROOT)).toList();
                 if (!existingTopics.contains(topic.toLowerCase(Locale.ROOT))) {
-                    NewTopic newTopic = new NewTopic(topic, partitions, driverConfiguration.replicationFactor);
+                    NewTopic newTopic = new NewTopic(topic, partitions, kafkaDriverConfig.replicationFactor);
                     newTopic.configs(new HashMap<>((Map) topicProperties));
                     admin.createTopics(Arrays.asList(newTopic)).all().get();
                     log.info(" Creating Topic Name: " + topic);

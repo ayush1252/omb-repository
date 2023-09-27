@@ -19,26 +19,26 @@
 package io.openmessaging.benchmark.driver.eventhubs;
 
 import com.azure.core.credential.TokenCredential;
-import com.azure.messaging.eventhubs.*;
+import com.azure.messaging.eventhubs.EventHubClientBuilder;
+import com.azure.messaging.eventhubs.EventHubProducerAsyncClient;
+import com.azure.messaging.eventhubs.EventProcessorClient;
+import com.azure.messaging.eventhubs.EventProcessorClientBuilder;
 import com.azure.messaging.eventhubs.checkpointstore.blob.BlobCheckpointStore;
 import com.azure.messaging.eventhubs.implementation.EventHubSharedKeyCredential;
-import com.azure.storage.blob.BlobContainerAsyncClient;
-
 import com.azure.resourcemanager.eventhubs.models.EventHub;
-
+import com.azure.resourcemanager.eventhubs.models.EventHubNamespaceAuthorizationRule;
+import com.azure.storage.blob.BlobContainerAsyncClient;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
-import io.openmessaging.benchmark.credential.adapter.CredentialProvider;
 import io.openmessaging.benchmark.driver.*;
+import io.openmessaging.benchmark.storage.adapter.StorageAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-
-import io.openmessaging.benchmark.storage.adapter.StorageAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class EventHubsBenchmarkDriver implements BenchmarkDriver {
 
@@ -58,7 +58,6 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
     @Override
     public void initialize(DriverConfiguration driverConfiguration) throws IOException {
         configProvider = ConfigProvider.getInstance();
-        CredentialProvider credentialProvider = CredentialProvider.getInstance();
 
         log.info("Initializing "+ this.getClass().getSimpleName() + " with configuration " +  driverConfiguration.name);
         log.info("Using Namespace for this test run- " + driverConfiguration.namespaceMetadata.namespaceName);
@@ -96,8 +95,11 @@ public class EventHubsBenchmarkDriver implements BenchmarkDriver {
             }
         }
 
-        if(driverConfiguration.namespaceMetadata.sasKeyValue == null) {
-            driverConfiguration.namespaceMetadata.sasKeyValue = credentialProvider.getCredential(driverConfiguration.namespaceMetadata.namespaceName+"-SASKey");
+        if (driverConfiguration.namespaceMetadata.sasKeyValue == null) {
+            //Fetch details from Management APIs
+            final EventHubNamespaceAuthorizationRule authorizationRule = eventHubAdministrator.getAuthorizationRule();
+            driverConfiguration.namespaceMetadata.sasKeyName = authorizationRule.name();
+            driverConfiguration.namespaceMetadata.sasKeyValue = authorizationRule.getKeys().primaryKey();
         }
 
         credential =  new EventHubSharedKeyCredential(driverConfiguration.namespaceMetadata.sasKeyName, driverConfiguration.namespaceMetadata.sasKeyValue);

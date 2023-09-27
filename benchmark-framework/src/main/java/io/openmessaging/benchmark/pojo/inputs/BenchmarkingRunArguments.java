@@ -13,7 +13,7 @@ import java.util.List;
 public class BenchmarkingRunArguments {
     //These parameters need to be set at the time of creation of the arguments
     @NonNull String testName;
-    @NonNull String testSuiteName;
+    String testSuiteName;
     @NonNull DriverConfiguration driver;
     @NonNull Workload workload;
     @NonNull Payload messagePayload;
