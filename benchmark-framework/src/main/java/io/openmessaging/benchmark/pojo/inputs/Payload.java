@@ -1,5 +1,6 @@
 package io.openmessaging.benchmark.pojo.inputs;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.openmessaging.benchmark.utils.payload.PayloadException;
 import io.openmessaging.benchmark.utils.payload.PayloadReader;
 import lombok.Getter;
@@ -13,7 +14,7 @@ public class Payload {
 
     public int payloadSize;
     public String payloadFile;
-    @ToString.Exclude
+    @ToString.Exclude @JsonIgnore
     byte[] payloadData;
 
     public Payload(int payloadSize, String payloadFileName, PayloadReader payloadReader) {
