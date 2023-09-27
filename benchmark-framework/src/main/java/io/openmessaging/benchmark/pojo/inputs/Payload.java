@@ -21,7 +21,6 @@ public class Payload {
         this.payloadFile = payloadFileName;
 
         payloadData = payloadReader.load(this.payloadFile);
-        validate();
     }
 
     public void validate() throws IllegalArgumentException {

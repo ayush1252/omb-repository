@@ -1,6 +1,5 @@
 package io.openmessaging.benchmark;
 
-import com.google.common.base.Preconditions;
 import io.openmessaging.benchmark.driver.DriverConfiguration;
 import io.openmessaging.benchmark.pojo.inputs.BenchmarkingRunArguments;
 import io.openmessaging.benchmark.pojo.inputs.Workload;
@@ -28,18 +27,9 @@ public class BenchmarkingRunOrchestrator {
 
     public static TestResult executeBenchmarkingRun(BenchmarkingRunArguments arguments) {
         log.info("--------------- WORKLOAD : {} --- DRIVER : {}---------------", arguments.getWorkload().name, arguments.getDriver().name);
-        validateArguments(arguments);
+        arguments.validate();
         final Worker benchmarkWorker = getWorker(arguments);
         return runTestAndReturnResult(arguments, benchmarkWorker);
-    }
-
-    private static void validateArguments(BenchmarkingRunArguments arguments) {
-        arguments.getWorkload().validate();
-        arguments.getMessagePayload().validate();
-
-        if (arguments.getWorkers() == null || arguments.getWorkers().isEmpty()) {
-            Preconditions.checkArgument(arguments.getProducerWorkers() == 0);
-        }
     }
 
     private static TestResult runTestAndReturnResult(BenchmarkingRunArguments runArguments, Worker benchmarkWorker) {

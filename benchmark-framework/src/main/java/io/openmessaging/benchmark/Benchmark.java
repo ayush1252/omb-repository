@@ -166,7 +166,6 @@ class Benchmark {
         for (String path : arguments.workloads) {
             try {
                 final Workload workload = mapper.readValue(Resources.getResource(path), Workload.class);
-                workload.validate();
                 workloadList.add(workload);
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
