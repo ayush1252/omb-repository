@@ -27,6 +27,6 @@ import java.util.List;
 public class TestResult {
 
     public TestDetails testDetails;
-    public List<SnapshotResult> snapshotResultList = new ArrayList<>();
-    public LatencyResult aggregateResult;
+    public List<SnapshotMetric> snapshotMetrics = new ArrayList<>();
+    public OMBMetrics aggregateResult;
 }

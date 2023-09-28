@@ -34,15 +34,14 @@ public class BenchmarkingResultManager {
 
     public static void persistTestResults(TestResult result, String outputFileName, boolean persistResultToKusto) {
         try {
-            String fileNamePrefix =
-                    outputFileName.length() > 0
-                            ? outputFileName
-                            : String.format(
-                            "%s-%s-%s-%s",
-                            result.testDetails.product,
-                            result.testDetails.protocol,
-                            result.testDetails.metadata.workload,
-                            dateFormat.format(new Date()));
+            String fileNamePrefix = outputFileName != null && outputFileName.length() > 0
+                    ? outputFileName
+                    : String.format(
+                    "%s-%s-%s-%s",
+                    result.testDetails.product,
+                    result.testDetails.protocol,
+                    result.testDetails.runID,
+                    dateFormat.format(new Date()));
 
             WriteTestResults(fileNamePrefix, result);
             if (persistResultToKusto) {
@@ -62,7 +61,7 @@ public class BenchmarkingResultManager {
     private static void WriteTestResults(String fileNamePrefix, TestResult result)
             throws IOException {
         writer.writeValue(new File(fileNamePrefix + "-details.json"), result.testDetails);
-        writer.writeValue(new File(fileNamePrefix + "-snapshot.json"), result.snapshotResultList);
+        writer.writeValue(new File(fileNamePrefix + "-snapshot.json"), result.snapshotMetrics);
         writer.writeValue(new File(fileNamePrefix + "-aggregate.json"), result.aggregateResult);
     }
 }

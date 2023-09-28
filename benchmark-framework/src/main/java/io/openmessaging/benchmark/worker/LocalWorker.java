@@ -20,8 +20,6 @@ package io.openmessaging.benchmark.worker;
 
 import static java.util.stream.Collectors.toList;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.RateLimiter;
 import io.netty.util.concurrent.DefaultThreadFactory;
@@ -72,7 +70,6 @@ public class LocalWorker implements Worker, ConsumerCallback {
     public void initializeDriver(DriverConfiguration driverConfiguration) throws IOException {
         Preconditions.checkArgument(benchmarkDriver == null);
         testCompleted = false;
-        log.info("Driver: {}", writer.writeValueAsString(driverConfiguration));
 
         try {
             //TODO - Fix this deprecation warning by moving to Reflection.
@@ -301,6 +298,5 @@ public class LocalWorker implements Worker, ConsumerCallback {
         executor.shutdown();
     }
 
-    private static final ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
     private static final Logger log = LoggerFactory.getLogger(LocalWorker.class);
 }

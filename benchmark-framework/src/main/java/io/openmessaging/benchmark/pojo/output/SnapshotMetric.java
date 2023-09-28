@@ -7,12 +7,8 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @Data
-public class SnapshotResult extends LatencyResult {
+public class SnapshotMetric extends OMBMetrics {
 
   public long timeSinceTestStartInSeconds;
-
-  public Double publishRate;
-  public Double consumeRate;
-  public Double publishErrorRate;
   public long backlog;
 }

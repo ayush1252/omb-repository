@@ -1,5 +1,7 @@
 package io.openmessaging.benchmark;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import io.openmessaging.benchmark.driver.DriverConfiguration;
 import io.openmessaging.benchmark.pojo.inputs.BenchmarkingRunArguments;
 import io.openmessaging.benchmark.pojo.inputs.Workload;
@@ -24,6 +26,7 @@ import static java.util.stream.Collectors.toList;
 
 public class BenchmarkingRunOrchestrator {
     private static final Logger log = LoggerFactory.getLogger(BenchmarkingRunOrchestrator.class);
+    private static final ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
 
     public static TestResult executeBenchmarkingRun(BenchmarkingRunArguments arguments) {
         log.info("--------------- WORKLOAD : {} --- DRIVER : {}---------------", arguments.getWorkload().name, arguments.getDriver().name);
@@ -41,6 +44,8 @@ public class BenchmarkingRunOrchestrator {
 
         final Workload workload = runArguments.getWorkload();
         try {
+            log.info("Workload: {}", writer.writeValueAsString(workload));
+            log.info("Driver: {}", writer.writeValueAsString(driverConfiguration));
             // Stop any leftover workload
             benchmarkWorker.stopAll();
             benchmarkWorker.initializeDriver(driverConfiguration);
