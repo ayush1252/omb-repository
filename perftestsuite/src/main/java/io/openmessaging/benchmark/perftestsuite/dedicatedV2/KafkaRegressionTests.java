@@ -38,7 +38,7 @@ public class KafkaRegressionTests  extends EventHubTestBase {
                 arguments.drivers = Collections.singletonList("driver-kafka/kafka-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-1MBMessage.yaml");
                 arguments.output = "XLPayload-KafkaDedicated";
-                arguments.tags = Arrays.asList(Regression.toString(), Latency.toString(), Batch.toString());
+                arguments.tags = Arrays.asList(Release.toString(), Latency.toString(), Batch.toString());
             }
 
             @Override
@@ -56,7 +56,7 @@ public class KafkaRegressionTests  extends EventHubTestBase {
                 arguments.drivers = Collections.singletonList("driver-kafka/kafka-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-1MBMessage.yaml");
                 arguments.output = "XLPayloadNonBatch-KafkaDedicated";
-                arguments.tags = Arrays.asList(Regression.toString(), Latency.toString());
+                arguments.tags = Arrays.asList(Release.toString(), Latency.toString());
             }
 
             @Override
@@ -74,7 +74,7 @@ public class KafkaRegressionTests  extends EventHubTestBase {
                 arguments.drivers = Collections.singletonList("driver-kafka/kafka-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/10producer-10consumer-4KB.yaml");
                 arguments.output = "SmallPayload-KafkaDedicated";
-                arguments.tags = Arrays.asList(Regression.toString(), Latency.toString(), Batch.toString());
+                arguments.tags = Arrays.asList(Release.toString(), Latency.toString(), Batch.toString());
             }
 
             @Override
@@ -92,7 +92,7 @@ public class KafkaRegressionTests  extends EventHubTestBase {
                 arguments.drivers = Collections.singletonList("driver-kafka/kafka-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/10producer-10consumer-4KB.yaml");
                 arguments.output = "SmallPayloadNonBatch-KafkaDedicated";
-                arguments.tags = Arrays.asList(Regression.toString(), Latency.toString());
+                arguments.tags = Arrays.asList(Release.toString(), Latency.toString());
             }
 
             @Override
@@ -110,7 +110,7 @@ public class KafkaRegressionTests  extends EventHubTestBase {
                 arguments.drivers = Collections.singletonList("driver-kafka/kafka-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/40producer-40consumer-1MBMessage-HighThroughput.yaml");
                 arguments.output = "HighThroughput-KafkaDedicated";
-                arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString());
+                arguments.tags = Arrays.asList(Release.toString(), Throughput.toString());
             }
 
             @Override
@@ -128,7 +128,7 @@ public class KafkaRegressionTests  extends EventHubTestBase {
                 arguments.drivers = Collections.singletonList("driver-kafka/kafka-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-50Kb-1Mbps.yaml");
                 arguments.output = "LowThroughput-KafkaDedicated";
-                arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString(), Latency.toString());
+                arguments.tags = Arrays.asList(Release.toString(), Throughput.toString(), Latency.toString());
             }
 
             @Override
@@ -146,7 +146,7 @@ public class KafkaRegressionTests  extends EventHubTestBase {
                 arguments.drivers = Collections.singletonList("driver-kafka/kafka-batch-dedicated-v2.yaml");
                 arguments.workloads = Collections.singletonList("workloads/20producer-20consumer-50Kb-100Mbps.yaml");
                 arguments.output = "MediumThroughputTest-AMQPDedicated";
-                arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString(), Latency.toString());
+                arguments.tags = Arrays.asList(Release.toString(), Throughput.toString(), Latency.toString());
             }
 
             @Override

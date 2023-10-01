@@ -36,7 +36,7 @@ public class AMQPPremiumRegressionTests extends EventHubTestBase {
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-premium.yaml");
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-1MBMessage.yaml");
                 arguments.output = "XLPayload-AmqpPremium";
-                arguments.tags = Arrays.asList(Regression.toString(), Latency.toString(), Batch.toString());
+                arguments.tags = Arrays.asList(Release.toString(), Latency.toString(), Batch.toString());
             }
 
             @Override
@@ -54,7 +54,7 @@ public class AMQPPremiumRegressionTests extends EventHubTestBase {
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-premium.yaml");
                 arguments.workloads = Collections.singletonList("workloads/10producer-10consumer-4KB.yaml");
                 arguments.output = "SmallPayload-AmqpPremium";
-                arguments.tags = Arrays.asList(Regression.toString(), Latency.toString(), Batch.toString());
+                arguments.tags = Arrays.asList(Release.toString(), Latency.toString(), Batch.toString());
             }
 
             @Override
@@ -72,7 +72,7 @@ public class AMQPPremiumRegressionTests extends EventHubTestBase {
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-premium.yaml");
                 arguments.workloads = Collections.singletonList("workloads/40producer-40consumer-100Partitions-1MBMessage-HighThroughput.yaml");
                 arguments.output = "HighThroughput-AmqpPremium";
-                arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString());
+                arguments.tags = Arrays.asList(Release.toString(), Throughput.toString());
             }
 
             @Override
@@ -90,7 +90,7 @@ public class AMQPPremiumRegressionTests extends EventHubTestBase {
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-premium.yaml");
                 arguments.workloads = Collections.singletonList("workloads/1producer-1consumer-50Kb-1Mbps.yaml");
                 arguments.output = "LowThroughput-AmqpPremium";
-                arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString(), Latency.toString());
+                arguments.tags = Arrays.asList(Release.toString(), Throughput.toString(), Latency.toString());
             }
 
             @Override
@@ -108,7 +108,7 @@ public class AMQPPremiumRegressionTests extends EventHubTestBase {
                 arguments.drivers = Collections.singletonList("driver-azure-eventhubs/amqp-premium.yaml");
                 arguments.workloads = Collections.singletonList("workloads/20producer-20consumer-50Kb-50Mbps.yaml");
                 arguments.output = "MediumThroughputTest-AmqpPremium";
-                arguments.tags = Arrays.asList(Regression.toString(), Throughput.toString(), Latency.toString());
+                arguments.tags = Arrays.asList(Release.toString(), Throughput.toString(), Latency.toString());
             }
 
             @Override
