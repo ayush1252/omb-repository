@@ -19,8 +19,12 @@
 package io.openmessaging.benchmark.worker.commands;
 
 import io.openmessaging.benchmark.utils.distributor.KeyDistributorType;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class ProducerWorkAssignment {
 

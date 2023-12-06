@@ -24,6 +24,7 @@ import java.util.List;
 
 import io.openmessaging.benchmark.driver.DriverConfiguration;
 import org.apache.bookkeeper.stats.StatsLogger;
+import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +97,7 @@ public class WorkerHandler {
     }
 
     private void handleInitializeDriver(Context ctx) throws Exception {
-        localWorker.initializeDriver(mapper.readValue(ctx.body(), DriverConfiguration.class));
+        localWorker.initializeDriver((DriverConfiguration)SerializationUtils.deserialize(ctx.bodyAsBytes()));
         log.info("Completed Init of LocalDriver");
     }
 
