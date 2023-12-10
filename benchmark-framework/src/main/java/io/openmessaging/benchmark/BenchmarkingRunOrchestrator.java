@@ -8,7 +8,6 @@ import io.openmessaging.benchmark.pojo.inputs.Workload;
 import io.openmessaging.benchmark.pojo.output.Metadata;
 import io.openmessaging.benchmark.pojo.output.TestResult;
 import io.openmessaging.benchmark.worker.DistributedWorkersEnsemble;
-import io.openmessaging.benchmark.worker.HTTPWorkerClient;
 import io.openmessaging.benchmark.worker.LocalWorker;
 import io.openmessaging.benchmark.worker.Worker;
 import org.apache.commons.text.CaseUtils;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -108,12 +106,9 @@ public class BenchmarkingRunOrchestrator {
 
     private static Worker getWorker(BenchmarkingRunArguments arguments) {
         Worker worker;
-        if (arguments.getWorkers() != null && !arguments.getWorkers().isEmpty()) {
-            List<Worker> workers =
-                    arguments.getWorkers().stream().map(HTTPWorkerClient::new).collect(toList());
-            worker = new DistributedWorkersEnsemble(workers, arguments.getProducerWorkers());
+        if (arguments.getWorkerAllocation().isRemoteWorkerRequired()) {
+            worker = new DistributedWorkersEnsemble(arguments.getWorkerAllocation());
         } else {
-            // Use local worker implementation
             worker = new LocalWorker();
         }
         return worker;

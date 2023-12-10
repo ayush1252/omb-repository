@@ -1,6 +1,7 @@
 package io.openmessaging.benchmark.pojo.inputs;
 
 import com.google.common.base.Preconditions;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import io.openmessaging.benchmark.driver.DriverConfiguration;
 import io.openmessaging.benchmark.driver.NamespaceMetadata;
 import lombok.*;
@@ -22,21 +23,17 @@ public class BenchmarkingRunArguments {
     @Setter NamespaceMetadata namespaceMetadata;
     @Setter String runID;
 
-    int producerWorkers;
-    List<String> workers;
+    WorkerAllocations workerAllocation;
 
     List<String> tags;
     String runUserId;
 
     public void validate() {
         //Other necessary parameters are already mentioned as non-null
+        workerAllocation.validateAndSetDefaults();
         Preconditions.checkNotNull(namespaceMetadata);
         Preconditions.checkNotNull(runID);
         workload.validate();
         messagePayload.validate();
-
-        if (workers == null || workers.isEmpty()) {
-            Preconditions.checkArgument(producerWorkers == 0);
-        }
     }
 }

@@ -14,25 +14,25 @@
  */
 package io.openmessaging.benchmark.worker;
 
-import static java.util.stream.Collectors.toList;
-
 import com.beust.jcommander.internal.Maps;
 import com.google.common.base.Preconditions;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import io.openmessaging.benchmark.driver.DriverConfiguration;
+import io.openmessaging.benchmark.pojo.inputs.WorkerAllocations;
 import io.openmessaging.benchmark.utils.ListPartition;
-import io.openmessaging.benchmark.worker.commands.ConsumerAssignment;
-import io.openmessaging.benchmark.worker.commands.CountersStats;
-import io.openmessaging.benchmark.worker.commands.CumulativeLatencies;
-import io.openmessaging.benchmark.worker.commands.PeriodStats;
-import io.openmessaging.benchmark.worker.commands.ProducerWorkAssignment;
-import io.openmessaging.benchmark.worker.commands.TopicSubscription;
-import io.openmessaging.benchmark.worker.commands.TopicsInfo;
+import io.openmessaging.benchmark.worker.commands.*;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 public class DistributedWorkersEnsemble implements Worker {
 
@@ -44,37 +44,42 @@ public class DistributedWorkersEnsemble implements Worker {
   private int numberOfUsedProducerWorkers;
   private double requestedPublishRateForCurrentRun;
 
-  public DistributedWorkersEnsemble(List<Worker> workers, int producerWorkerCount) {
-    workers =
-        workers.stream()
-            .filter(
-                p -> {
-                  try {
-                    p.healthCheck();
-                  } catch (Exception e) {
-                    log.error(
+    public DistributedWorkersEnsemble(WorkerAllocations workerAllocation) {
+        if (CollectionUtils.isNotEmpty(workerAllocation.getTotalWorkerNodes())) {
+            this.workers = workerAllocation.getTotalWorkerNodes().stream().map(HTTPWorkerClient::new)
+                    .filter(workerFilterPredicate()).collect(toList());
+            this.producerWorkers = workers.stream().limit(workerAllocation.getProducerWorkerNodeCount()).collect(toList());
+            this.consumerWorkers = workers.stream().filter(p -> !producerWorkers.contains(p)).collect(toList());
+        } else {
+            this.producerWorkers = workerAllocation.getProducerWorkerNodes().stream().map(HTTPWorkerClient::new)
+                    .filter(workerFilterPredicate()).collect(toList());
+            this.consumerWorkers = workerAllocation.getConsumerWorkerNodes().stream().map(HTTPWorkerClient::new)
+                    .filter(workerFilterPredicate()).collect(toList());
+            this.workers = Stream.concat(producerWorkers.stream(), consumerWorkers.stream()).collect(toList());
+        }
+
+        Preconditions.checkArgument(this.workers.size() > 1, "Insufficient count of active workers for the test");
+        leader = this.workers.get(0);
+
+        log.info("Workers list - producers: {}", producerWorkers);
+        log.info("Workers list - consumers: {}", consumerWorkers);
+    }
+
+    @NotNull
+    private Predicate<HTTPWorkerClient> workerFilterPredicate() {
+        return p -> {
+            try {
+                p.healthCheck();
+            } catch (Exception e) {
+                log.error(
                         "Found error during health-check of worker role {} - {}",
                         p,
                         e.getMessage());
-                    return false;
-                  }
-                  return true;
-                })
-            .collect(toList());
-
-    Preconditions.checkArgument(
-        workers.size() > 1, "Insufficient count of active workers for the test");
-
-    this.workers = workers;
-
-    leader = this.workers.get(0);
-    this.producerWorkers = workers.stream().limit(producerWorkerCount).collect(toList());
-    this.consumerWorkers =
-        workers.stream().filter(p -> !producerWorkers.contains(p)).collect(toList());
-
-    log.info("Workers list - producers: {}", producerWorkers);
-    log.info("Workers list - consumers: {}", consumerWorkers);
-  }
+                return false;
+            }
+            return true;
+        };
+    }
 
   @Override
   public void initializeDriver(DriverConfiguration driverConfiguration) throws IOException {

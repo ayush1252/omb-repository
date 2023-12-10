@@ -18,8 +18,6 @@
  */
 package io.openmessaging.benchmark.worker;
 
-import static java.util.stream.Collectors.toList;
-
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.RateLimiter;
 import io.netty.util.concurrent.DefaultThreadFactory;
@@ -27,25 +25,22 @@ import io.openmessaging.benchmark.driver.*;
 import io.openmessaging.benchmark.utils.RandomGenerator;
 import io.openmessaging.benchmark.utils.Timer;
 import io.openmessaging.benchmark.utils.distributor.KeyDistributor;
-import io.openmessaging.benchmark.worker.commands.ConsumerAssignment;
-import io.openmessaging.benchmark.worker.commands.CountersStats;
-import io.openmessaging.benchmark.worker.commands.CumulativeLatencies;
-import io.openmessaging.benchmark.worker.commands.PeriodStats;
-import io.openmessaging.benchmark.worker.commands.ProducerWorkAssignment;
-import io.openmessaging.benchmark.worker.commands.TopicsInfo;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
-import java.util.concurrent.*;
-
+import io.openmessaging.benchmark.worker.commands.*;
 import org.apache.bookkeeper.stats.NullStatsLogger;
 import org.apache.bookkeeper.stats.StatsLogger;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import static java.util.stream.Collectors.toList;
 
 public class LocalWorker implements Worker, ConsumerCallback {
     private final RateLimiter rateLimiter = RateLimiter.create(1.0);
@@ -72,10 +67,9 @@ public class LocalWorker implements Worker, ConsumerCallback {
         testCompleted = false;
 
         try {
-            //TODO - Fix this deprecation warning by moving to Reflection.
-            benchmarkDriver = (BenchmarkDriver) Class.forName(driverConfiguration.driverClass).newInstance();
+            benchmarkDriver = (BenchmarkDriver) Class.forName(driverConfiguration.driverClass).getDeclaredConstructor().newInstance();
             benchmarkDriver.initialize(driverConfiguration);
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }

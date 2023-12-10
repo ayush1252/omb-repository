@@ -57,7 +57,7 @@ public class LatencyMetric {
    * @return List which contains details about all the params that failed the comparison.
    */
   public List<ComparisonResult> compareAndEvaluateDiff(LatencyMetric other, double errorThreshold) {
-    List<ComparisonResult> result = new ArrayList();
+    List<ComparisonResult> result = new ArrayList<>();
 
     compareAndAppendReason(result, "PublishLatencyPAvg",
             publishLatencyAvg, other.publishLatencyAvg,errorThreshold);

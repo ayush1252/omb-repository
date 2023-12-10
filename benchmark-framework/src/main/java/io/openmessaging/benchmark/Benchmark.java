@@ -22,11 +22,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.io.Resources;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.driver.DriverConfiguration;
 import io.openmessaging.benchmark.driver.NamespaceMetadata;
 import io.openmessaging.benchmark.pojo.inputs.BenchmarkingRunArguments;
 import io.openmessaging.benchmark.pojo.inputs.Payload;
+import io.openmessaging.benchmark.pojo.inputs.WorkerAllocations;
 import io.openmessaging.benchmark.pojo.inputs.Workload;
 import io.openmessaging.benchmark.pojo.output.TestResult;
 import io.openmessaging.benchmark.utils.payload.FilePayloadReader;
@@ -100,7 +102,7 @@ class Benchmark {
                         final DriverConfiguration driverConfiguration = getDriverConfiguration(driverConfig);
                         final NamespaceMetadata namespaceMetadata = getNamespaceMetadata(commandLineArguments, driverConfiguration.identifier);
                         final String testName = commandLineArguments.output != null ? commandLineArguments.output.split("-")[0] : workload.name;
-                        final Payload messagePayload =  new Payload(workload.messageSize, workload.payloadFile, new FilePayloadReader());
+                        final Payload messagePayload = new Payload(workload.messageSize, workload.payloadFile, new FilePayloadReader());
                         result.add(BenchmarkingRunArguments.builder()
                                 .testName(testName)
                                 .runID(UUID.randomUUID().toString())
@@ -108,8 +110,11 @@ class Benchmark {
                                 .workload(workload)
                                 .namespaceMetadata(namespaceMetadata)
                                 .messagePayload(messagePayload)
-                                .workers(benchmarkingWorkers)
-                                .producerWorkers(commandLineArguments.producerWorkers)
+                                .workerAllocation(WorkerAllocations.builder()
+                                        .isRemoteWorkerRequired(CollectionUtils.isNotEmpty(benchmarkingWorkers))
+                                        .totalWorkerNodes(benchmarkingWorkers)
+                                        .producerWorkerNodeCount(commandLineArguments.producerWorkers)
+                                        .build())
                                 .tags(commandLineArguments.tags)
                                 .build());
                     } catch (Exception e) {
