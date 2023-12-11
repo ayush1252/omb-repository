@@ -35,7 +35,7 @@ class Arguments {
     public List<String> tags;
 
     @Parameter(names = {"-p"}, description = "Number of producer nodes out of the remote workers specified")
-    public int producerWorkers;
+    public int producerWorkers = -1;
 
     @Parameter(names = {"-v", "--visualize"}, arity = 1, description = "To control whether to use ADX DataSink or not")
     public boolean visualizeUsingKusto = true;

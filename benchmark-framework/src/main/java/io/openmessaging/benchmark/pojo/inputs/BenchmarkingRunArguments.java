@@ -1,7 +1,6 @@
 package io.openmessaging.benchmark.pojo.inputs;
 
 import com.google.common.base.Preconditions;
-import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import io.openmessaging.benchmark.driver.DriverConfiguration;
 import io.openmessaging.benchmark.driver.NamespaceMetadata;
 import lombok.*;
@@ -20,8 +19,10 @@ public class BenchmarkingRunArguments {
     @NonNull Payload messagePayload;
 
     //These can be set dynamically afterwards or by the benchmark framework.
-    @Setter NamespaceMetadata namespaceMetadata;
-    @Setter String runID;
+    @Setter
+    NamespaceMetadata namespaceMetadata;
+    @Setter
+    String runID;
 
     WorkerAllocations workerAllocation;
 

@@ -14,7 +14,8 @@ public class Payload {
 
     public int payloadSize;
     public String payloadFile;
-    @ToString.Exclude @JsonIgnore
+    @ToString.Exclude
+    @JsonIgnore
     byte[] payloadData;
 
     public Payload(int payloadSize, String payloadFileName, PayloadReader payloadReader) {

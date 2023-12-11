@@ -9,6 +9,6 @@ import lombok.experimental.SuperBuilder;
 @Data
 public class SnapshotMetric extends OMBMetrics {
 
-  public long timeSinceTestStartInSeconds;
-  public long backlog;
+    public long timeSinceTestStartInSeconds;
+    public long backlog;
 }
