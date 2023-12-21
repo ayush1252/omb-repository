@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import com.azure.core.amqp.implementation.ConnectionStringProperties;
 import com.azure.messaging.eventhubs.models.EventHubConnectionStringProperties;
@@ -146,7 +147,7 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
         return CompletableFuture.runAsync(() -> {
             try {
                 final List<String> existingTopics = admin.listTopics().names().get()
-                        .stream().map(s -> s.toLowerCase(Locale.ROOT)).toList();
+                        .stream().map(s -> s.toLowerCase(Locale.ROOT)).collect(Collectors.toList());
                 if (!existingTopics.contains(topic.toLowerCase(Locale.ROOT))) {
                     NewTopic newTopic = new NewTopic(topic, partitions, kafkaDriverConfig.replicationFactor);
                     newTopic.configs(new HashMap<>((Map) topicProperties));
