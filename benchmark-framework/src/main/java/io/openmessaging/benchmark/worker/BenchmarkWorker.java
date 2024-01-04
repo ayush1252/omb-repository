@@ -18,6 +18,7 @@
  */
 package io.openmessaging.benchmark.worker;
 
+import com.microsoft.applicationinsights.attach.ApplicationInsights;
 import org.apache.bookkeeper.stats.Stats;
 import org.apache.bookkeeper.stats.StatsProvider;
 import org.apache.bookkeeper.stats.prometheus.PrometheusMetricsProvider;
@@ -52,6 +53,7 @@ public class BenchmarkWorker {
     }
 
     public static void main(String[] args) throws Exception {
+        ApplicationInsights.attach();
         final Arguments arguments = new Arguments();
         JCommander jc = new JCommander(arguments);
         jc.setProgramName("benchmark-worker");
