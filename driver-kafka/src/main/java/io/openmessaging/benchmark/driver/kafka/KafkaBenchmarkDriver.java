@@ -20,17 +20,15 @@ package io.openmessaging.benchmark.driver.kafka;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.azure.core.amqp.implementation.ConnectionStringProperties;
-import com.azure.messaging.eventhubs.models.EventHubConnectionStringProperties;
 import com.azure.resourcemanager.eventhubs.models.EventHubNamespaceAuthorizationRule;
+import com.microsoft.azure.eventhubs.ConnectionStringBuilder;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigProvider;
 import io.openmessaging.benchmark.appconfig.adapter.ConfigurationKey;
 import io.openmessaging.benchmark.driver.*;
@@ -222,9 +220,10 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
     }
 
     private String createEventHubConnectionString(String namespaceName, String domainName, String sasKeyName, String sasKeyValue) {
-        String endpoint = String.format("sb://%s.%s/", namespaceName, StringUtils.stripStart(domainName, "."));
-        String sasKeyValueEncoded = URLEncoder.encode(sasKeyValue, StandardCharsets.UTF_8);
-
-        return String.format("Endpoint=%s;SharedAccessKeyName=%s;SharedAccessKey=%s", endpoint, sasKeyName, sasKeyValueEncoded);
+        return new ConnectionStringBuilder()
+                .setEndpoint(namespaceName, StringUtils.stripStart(domainName, "."))
+                .setSasKeyName(sasKeyName)
+                .setSasKey(sasKeyValue)
+                .toString();
     }
 }
