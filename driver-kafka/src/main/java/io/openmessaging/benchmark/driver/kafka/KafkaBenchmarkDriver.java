@@ -149,15 +149,18 @@ public class KafkaBenchmarkDriver implements BenchmarkDriver {
     public CompletableFuture<Void> createTopic(String topic, int partitions) {
         return CompletableFuture.runAsync(() -> {
             try {
-                final List<String> existingTopics = admin.listTopics().names().get()
-                        .stream().map(s -> s.toLowerCase(Locale.ROOT)).collect(Collectors.toList());
-                if (!existingTopics.contains(topic.toLowerCase(Locale.ROOT))) {
-                    NewTopic newTopic = new NewTopic(topic, partitions, driverConfiguration.replicationFactor);
-                    newTopic.configs(new HashMap<>((Map) topicProperties));
-                    admin.createTopics(Arrays.asList(newTopic)).all().get();
-                    log.info(" Creating Topic Name: " + topic);
-                } else {
-                    log.info("Reusing Topic " + topic + "as it already exists");
+                //Temp code to not call AdminClient when using GeoDR
+                if(!topic.equals("hub11")){
+                    final List<String> existingTopics = admin.listTopics().names().get()
+                            .stream().map(s -> s.toLowerCase(Locale.ROOT)).collect(Collectors.toList());
+                    if (!existingTopics.contains(topic.toLowerCase(Locale.ROOT))) {
+                        NewTopic newTopic = new NewTopic(topic, partitions, driverConfiguration.replicationFactor);
+                        newTopic.configs(new HashMap<>((Map) topicProperties));
+                        admin.createTopics(Arrays.asList(newTopic)).all().get();
+                        log.info(" Creating Topic Name: " + topic);
+                    } else {
+                        log.info("Reusing Topic " + topic + "as it already exists");
+                    }
                 }
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);

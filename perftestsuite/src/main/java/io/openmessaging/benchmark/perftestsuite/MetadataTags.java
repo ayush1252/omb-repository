@@ -6,5 +6,6 @@ public enum MetadataTags {
     Latency,
     Throughput,
     Batch,
-    MultiTopic
+    MultiTopic,
+    GeoDR
 }

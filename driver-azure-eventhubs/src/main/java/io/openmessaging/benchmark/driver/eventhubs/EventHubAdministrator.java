@@ -70,17 +70,20 @@ public class EventHubAdministrator {
     }
 
     public void createTopic(String topic, int partitions) {
-        try{
-            final EventHub eventHub = manager.namespaces().eventHubs().getByName(metadata.ResourceGroup, metadata.NamespaceName, topic);
-            log.info("Reusing the existing topic as it exists - " + eventHub.name() + " with partition counts " + (long) eventHub.partitionIds().size());
-        } catch (Exception e){
-            log.info(" Creating new topic with Topic Name: " + topic);
-            manager.namespaces()
-                    .eventHubs()
-                    .define(topic)
-                    .withExistingNamespace(metadata.ResourceGroup, metadata.NamespaceName)
-                    .withPartitionCount(partitions)
-                    .create();
+        //Hacky Code for ignoring all the ARM calls for GeoDR
+        if(!topic.equalsIgnoreCase("hub11")){
+            try{
+                final EventHub eventHub = manager.namespaces().eventHubs().getByName(metadata.ResourceGroup, metadata.NamespaceName, topic);
+                log.info("Reusing the existing topic as it exists - " + eventHub.name() + " with partition counts " + (long) eventHub.partitionIds().size());
+            } catch (Exception e){
+                log.info(" Creating new topic with Topic Name: " + topic);
+                manager.namespaces()
+                        .eventHubs()
+                        .define(topic)
+                        .withExistingNamespace(metadata.ResourceGroup, metadata.NamespaceName)
+                        .withPartitionCount(partitions)
+                        .create();
+            }
         }
     }
 
