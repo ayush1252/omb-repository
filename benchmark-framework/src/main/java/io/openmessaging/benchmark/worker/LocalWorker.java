@@ -70,6 +70,7 @@ public class LocalWorker implements Worker, ConsumerCallback {
             benchmarkDriver = (BenchmarkDriver) Class.forName(driverConfiguration.driverClass).getDeclaredConstructor().newInstance();
             benchmarkDriver.initialize(driverConfiguration);
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | InvocationTargetException | NoSuchMethodException e) {
+            log.error(String.valueOf(e));
             throw new RuntimeException(e);
         }
     }
@@ -283,6 +284,7 @@ public class LocalWorker implements Worker, ConsumerCallback {
                 benchmarkDriver = null;
             }
         } catch (Exception e) {
+            log.error(String.valueOf(e));
             throw new RuntimeException(e);
         }
     }
