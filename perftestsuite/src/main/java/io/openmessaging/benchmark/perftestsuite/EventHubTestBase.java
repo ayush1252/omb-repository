@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static java.lang.System.exit;
@@ -41,7 +42,7 @@ public abstract class EventHubTestBase {
                 final List<TestResult> testResults = Benchmark.executeBenchmarkingRun(arguments);
                 testResults.forEach(individualResult -> Benchmark.persistTestResults(arguments, individualResult));
             } catch (Exception e) {
-                log.error("Failed Execution of Test: " + individualTest, e);
+                log.info("Failed Execution of Test: " + individualTest, e);
             }
         });
         log.info("Completed Execution of Test - " + testSuiteName);
