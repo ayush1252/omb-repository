@@ -42,7 +42,8 @@ public abstract class EventHubTestBase {
                 final List<TestResult> testResults = Benchmark.executeBenchmarkingRun(arguments);
                 testResults.forEach(individualResult -> Benchmark.persistTestResults(arguments, individualResult));
             } catch (Exception e) {
-                log.info("Failed Execution of Test: " + individualTest, e);
+                log.info("Failed Execution of Test: " + individualTest);
+                log.error(String.valueOf(e));
             }
         });
         log.info("Completed Execution of Test - " + testSuiteName);
