@@ -53,7 +53,8 @@ public class BenchmarkingRunOrchestrator {
             log.info("Completed Execution of Run");
             generator.close();
         } catch (Exception e) {
-            log.error("Failed to run the workload '{}' for driver '{}'", workload.name, driverConfiguration.name, e);
+            log.error("Failed to run the workload '{}' for driver '{}'", workload.name, driverConfiguration.name);
+            log.error(String.valueOf(e));
             throw new RuntimeException(e);
         } finally {
             try {
