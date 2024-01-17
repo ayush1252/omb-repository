@@ -20,6 +20,7 @@ package io.openmessaging.benchmark.worker;
 
 import java.net.HttpURLConnection;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.List;
 
 import io.openmessaging.benchmark.driver.DriverConfiguration;
@@ -88,6 +89,7 @@ public class WorkerHandler {
 
         app.exception(RuntimeException.class, (e, ctx) -> {
             log.error("Request handler: {} - Exception: {}", ctx.path(), e.getMessage());
+            log.error("Caught Error" + Arrays.toString(e.getStackTrace()));
             ctx.status(HttpURLConnection.HTTP_INTERNAL_ERROR);
         });
     }
