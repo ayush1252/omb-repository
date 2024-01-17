@@ -349,7 +349,7 @@ public class DistributedWorkersEnsemble implements Worker {
         this.consumerWorkers.size());
 
     Preconditions.checkArgument(
-        numberOfUsedProducerWorkers <= 0 || producerWorkers.size() >= 1,
+        numberOfUsedProducerWorkers > 1 && this.workers.size() > 1,
         "Insufficient count of active producer for the test");
   }
 
