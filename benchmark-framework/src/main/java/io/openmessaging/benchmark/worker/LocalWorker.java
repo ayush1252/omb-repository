@@ -284,8 +284,8 @@ public class LocalWorker implements Worker, ConsumerCallback {
                 benchmarkDriver = null;
             }
         } catch (Exception e) {
-            log.error(String.valueOf(e));
-            throw new RuntimeException(e);
+            //Think about killing the program in-case the exception is non-recoverable.
+            log.error("Logging Exception while doing local worker stop-all" + Arrays.toString(e.getStackTrace()));
         }
     }
 
