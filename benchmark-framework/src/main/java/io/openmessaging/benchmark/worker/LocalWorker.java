@@ -268,7 +268,7 @@ public class LocalWorker implements Worker, ConsumerCallback {
         stats.reset();
 
         try {
-            Thread.sleep(100);
+            log.info("Trying to close out producers and consumers from previous iterations");
             for (BenchmarkProducer producer : producers) {
                 producer.close();
             }
