@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,18 +18,22 @@
  */
 package io.openmessaging.benchmark.driver.kafka;
 
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-
+import io.openmessaging.benchmark.driver.BenchmarkProducer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import io.openmessaging.benchmark.driver.BenchmarkProducer;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 class KafkaBenchmarkProducer implements BenchmarkProducer {
 
     private final KafkaProducer<String, byte[]> producer;
     private final String topic;
+    Logger log = LoggerFactory.getLogger(KafkaBenchmarkProducer.class);
+    private boolean isProducerClosed = false;
 
     public KafkaBenchmarkProducer(KafkaProducer<String, byte[]> producer, String topic) {
         this.producer = producer;
@@ -55,7 +59,16 @@ class KafkaBenchmarkProducer implements BenchmarkProducer {
 
     @Override
     public void close() throws Exception {
-        producer.close();
+        try {
+            log.info("Got command to close KafkaProducerClient");
+            if(!isProducerClosed){
+                producer.close();
+                isProducerClosed = true;
+                log.info("Successfully closed Kafka Producer");
+            }
+        } catch (Exception e) {
+            log.error("Caught exception while trying to close KafkaProducer {} - {}", producer, Arrays.toString(e.getStackTrace()));
+        }
     }
 
 }

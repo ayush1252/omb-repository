@@ -26,6 +26,7 @@ import io.openmessaging.benchmark.driver.BenchmarkProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
@@ -81,15 +82,16 @@ class EventHubsBenchmarkProducer implements BenchmarkProducer {
 
     @Override
     public void close() throws Exception {
-        log.warn("Got command to close EventHubProducerClient");
-        if (!isProducerClosed) {
-            if (eventDataBatch.getCount() > 0) {
-                producerClient.send(eventDataBatch).block();
-                eventDataBatch = producerClient.createBatch().block();
+        log.info("Got command to close EventHubProducerClient");
+        try{
+            if (!isProducerClosed) {
+                producerClient.close();
+                isProducerClosed = true;
+                log.info("Successfully closed EH Producer");
             }
-            producerClient.close();
-            isProducerClosed = true;
-            log.info("Successfully closed EH Producer");
+        } catch (Exception e){
+            //Anti-pattern maybe but required for system stability for now.
+            log.error("Caught exception while trying to close EventHubProducer {} - {}", producerClient, Arrays.toString(e.getStackTrace()));
         }
     }
 }
