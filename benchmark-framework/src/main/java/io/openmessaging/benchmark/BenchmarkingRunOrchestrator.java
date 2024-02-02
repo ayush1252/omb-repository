@@ -117,7 +117,8 @@ public class BenchmarkingRunOrchestrator {
 
     public static void stopDistributedWorkers() {
         try {
-            benchmarkWorker.stopAll();
+            if(benchmarkWorker != null)
+                benchmarkWorker.stopAll();
         } catch (IOException e) {
             log.error("Could not stop workers before termination due to {}", e.getMessage());
         }
