@@ -31,13 +31,13 @@ fi
 JVM_MEM="${HEAP_OPTS} -XX:+UseG1GC"
 
 echo "Starting KAFKA Regression Tests"
-java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.dedicatedV2.KafkaRegressionTests $*
+java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.eventhubs.dedicatedV2.KafkaRegressionTests $*
 
 echo "Starting AMQP Regression Tests"
-java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.dedicatedV2.AMQPRegressionTests $*
+java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.eventhubs.dedicatedV2.AMQPRegressionTests $*
 
 echo "Starting GeoDR Regression Tests"
 java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.dedicatedV2.GeoDRBenchmarkingTests $*
 
 echo "Starting Multi Topic Tests"
-java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.dedicatedV2.MultiTopicRegressionTests $*
+java -server -cp $CLASSPATH $JVM_MEM io.openmessaging.benchmark.perftestsuite.eventhubs.dedicatedV2.MultiTopicRegressionTests $*
