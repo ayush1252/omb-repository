@@ -60,6 +60,7 @@ public class BenchmarkingRunOrchestrator {
         } finally {
             try {
                 benchmarkWorker.stopAll();
+                benchmarkWorker = null;
             } catch (IOException ignored) {
             }
         }
