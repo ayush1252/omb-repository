@@ -25,15 +25,16 @@ import static java.util.stream.Collectors.toList;
 public class BenchmarkingRunOrchestrator {
     private static final Logger log = LoggerFactory.getLogger(BenchmarkingRunOrchestrator.class);
     private static final ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
+    private static Worker benchmarkWorker;
 
     public static TestResult executeBenchmarkingRun(BenchmarkingRunArguments arguments) {
         log.info("--------------- WORKLOAD : {} --- DRIVER : {}---------------", arguments.getWorkload().name, arguments.getDriver().name);
         arguments.validate();
-        final Worker benchmarkWorker = getWorker(arguments);
-        return runTestAndReturnResult(arguments, benchmarkWorker);
+        benchmarkWorker = getWorker(arguments);
+        return runTestAndReturnResult(arguments);
     }
 
-    private static TestResult runTestAndReturnResult(BenchmarkingRunArguments runArguments, Worker benchmarkWorker) {
+    private static TestResult runTestAndReturnResult(BenchmarkingRunArguments runArguments) {
         TestResult result = null;
         final DriverConfiguration driverConfiguration = runArguments.getDriver();
 
@@ -59,6 +60,7 @@ public class BenchmarkingRunOrchestrator {
         } finally {
             try {
                 benchmarkWorker.stopAll();
+                benchmarkWorker = null;
             } catch (IOException ignored) {
             }
         }
@@ -113,5 +115,18 @@ public class BenchmarkingRunOrchestrator {
             worker = new LocalWorker();
         }
         return worker;
+    }
+
+    public static void stopDistributedWorkers() {
+        try {
+            if(benchmarkWorker != null) {
+                benchmarkWorker.stopAll();
+                benchmarkWorker = null;
+            }
+
+            log.info("Stopped workers on thread shutdown");
+        } catch (IOException e) {
+            log.error("Could not stop workers before termination due to {}", e.getMessage());
+        }
     }
 }
