@@ -87,7 +87,8 @@ public class LocalWorker implements Worker, ConsumerCallback {
         List<Topic> topics = new ArrayList<>();
         for (int i = 0; i < topicsInfo.numberOfTopics; i++) {
             String topicName = Optional.ofNullable(topicsInfo.topicName)
-                    .orElse(String.format("%s-%s-%04d", benchmarkDriver.getTopicNamePrefix(), RandomGenerator.getRandomString(), i));
+                    .orElse(String.format("%s-%s-%04d", topicsInfo.topicPrefix != null ? topicsInfo.topicPrefix : benchmarkDriver.getTopicNamePrefix(),
+                            RandomGenerator.getRandomString(), i));
             Topic topic = new Topic(topicName,topicsInfo.numberOfPartitionsPerTopic);
             topics.add(topic);
             futures.add(benchmarkDriver.createTopic(topic.name, topic.partitions));
