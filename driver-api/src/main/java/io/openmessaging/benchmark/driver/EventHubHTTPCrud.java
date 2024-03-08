@@ -80,9 +80,7 @@ class EventHubHTTPCrud {
                 .build();
         try {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != HttpResponseStatus.OK.code()) {
-                throw new RuntimeException("HTTP Error Encountered - " + response.body());
-            }
+            log.info("CreateTopic HTTP ResponseCode {} an Response {}", response.statusCode(), response.body());
         } catch (Exception e) {
             log.error("Caught error {} while creating topic {} inside namespace {}", e.getMessage(), topic, metadata.namespaceName);
             throw new RuntimeException(e);
@@ -105,9 +103,7 @@ class EventHubHTTPCrud {
                 .build();
         try {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != HttpResponseStatus.OK.code()) {
-                throw new RuntimeException("HTTP Error Encountered - " + response.body());
-            }
+            log.info("CreateConsumerGroup HTTP ResponseCode {} an Response {}", response.statusCode(), response.body());
         } catch (Exception e) {
             log.error("Caught error {} while creating consumerGroup {} inside topic {} and namespace {}", e.getMessage(), subscriptionName, topicName, metadata.namespaceName);
             throw new RuntimeException(e);
